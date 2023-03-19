@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="134.22023mm"
+   height="111.56787mm"
+   viewBox="0 0 134.22023 111.56787"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="IOHIVE_Icons.html"
+   inkscape:dataloss="true"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.5946522"
+     inkscape:cx="-1007.3115"
+     inkscape:cy="1058.602"
+     inkscape:window-width="1207"
+     inkscape:window-height="749"
+     inkscape:window-x="735"
+     inkscape:window-y="64"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(165.36596,-9.1482599)">
+    <path
+       id="path1227"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.888536;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;paint-order:markers stroke fill"
+       d="m -152.4484,9.1482593 c -7.15611,0 -12.91755,5.7614247 -12.91755,12.9175577 v 85.732753 c 0,7.15612 5.76144,12.91756 12.91755,12.91756 h 108.385639 c 7.156133,0 12.917041,-5.76144 12.917041,-12.91756 V 22.065817 c 0,-7.156133 -5.760908,-12.9175577 -12.917041,-12.9175577 z m 34.50281,17.0092967 h 39.379509 v 2.755388 h -39.379509 z m 1.63814,4.029729 h 36.103226 v 22.313366 h -36.103226 z m 0,23.588224 h 36.103226 v 22.313368 h -36.103226 z m 0,23.588225 h 36.103226 V 99.6771 h -36.103226 z m 5.2126,23.587706 h 3.24115 v 4.61057 h -3.24115 z m 23.529318,0 h 3.241146 v 4.61057 h -3.241146 z" />
+  </g>
+</svg>
