@@ -14,7 +14,7 @@
         <div class="hives-content">
             <HiveItem />
             <HiveItem />
-
+            <HiveItem />
         </div>
     </div>
 </template>
@@ -37,8 +37,8 @@ export default {
     padding: 20px;
     padding-left: 40px;
     padding-right: 40px;
-    box-shadow: 15px 15px 30px #bebebe,
-        -15px -15px 30px #ffffff;
+    /* box-shadow: 15px 15px 30px #bebebe,
+        -15px -15px 30px #ffffff; */
 }
 
 .hives-container svg {

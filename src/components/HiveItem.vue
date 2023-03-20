@@ -17,7 +17,7 @@
             </div>
             <div class="hive-item-status">
                 <p>ON </p><img src="../assets/Hives/i_status.svg" />
-                <p> Device: Sensor 2</p>
+                <p>Device:<br>Sensor 2</p>
             </div>
         </div>
         <div class="hive-item-inspection"><img src="../assets/Hives/i_arrow_down.svg" /> Latest Inspection: Aug 20, 2022
@@ -39,18 +39,17 @@ export default {
     color: white;
     position: relative;
     display: flex;
-    gap: 1vw;
+    gap: 0.5vw;
     flex-direction: column;
 
 }
 
 .hive-item-edit {
     position: absolute;
-
     top: 8px;
     right: 20px;
     display: flex;
-    font-size: 10px;
+    font-size: 12px;
     align-items: center;
     gap: 8px;
 }
@@ -60,7 +59,6 @@ export default {
 }
 
 .hive-item-title {
-    /* background-color: blueviolet; */
     margin: 0.4vw 0px;
     font-size: 2.8vw;
     flex: 1;
@@ -112,8 +110,8 @@ export default {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    text-align: center;
     gap: 12px;
-    /* background-color: blueviolet; */
     height: 7vw;
 }
 
@@ -128,5 +126,12 @@ export default {
 .hive-item-inspection {
     font-size: 1.5vw;
     flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hive-item-inspection img {
+    height: 2.4vw;
 }
 </style>
