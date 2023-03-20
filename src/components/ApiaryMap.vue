@@ -1,5 +1,11 @@
 <template>
     <div class="map-container">
+        <l-map ref="map" class="map-box" v-model:zoom="zoom" :center="center">
+            <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap">
+                <l-marker :lat-lng="markerLatLng"></l-marker>
+            </l-tile-layer>
+        </l-map>
+
         <div class="map-title">
             <svg-icon type="mdi" :path="path" />
             <div>Apiary Map</div>
@@ -11,16 +17,36 @@
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiMapOutline } from '@mdi/js';
 
+import "leaflet/dist/leaflet.css";
+import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+
+
 export default {
     name: 'ApiaryMap',
     components: {
-        SvgIcon
+        SvgIcon, LMap,
+        LTileLayer,
+        LMarker
     },
+    // mounted() {
+    //     if (this.$refs.map && this.$refs.map.mapObject) {
+    //         const mapContainer = this.$refs.map.mapObject.getContainer();
+    //         const zoomButton = mapContainer.getElementsByClassName('leaflet-control-zoom')[0];
+    //         zoomButton.style.display = 'none';
+    //     }
+    // },
     data() {
         return {
             path: mdiMapOutline,
+            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attribution:
+                '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+            zoom: 11,
+            center: [37.4385, 24.9139],
+            markerLatLng: [37.4385, 24.9139],
+
         }
-    }
+    },
 }
 </script>
 
@@ -28,15 +54,28 @@ export default {
 .map-container {
     display: block;
     background-color: #F9FAFE;
-    border-radius: 30px;
+    border-radius: 20px;
     min-height: 40vw;
+    position: relative;
 }
-
 
 .map-title {
     display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
     gap: 1vw;
-    padding: 2vw;
+    padding: 5%;
     font-size: 1.5vw;
+    width: 90%;
+    background: linear-gradient(0deg, rgba(155, 155, 155, 0) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.map-box {
+    min-height: 400px;
+    min-width: 90%;
+    border-radius: 20px;
+    z-index: 0;
 }
 </style>

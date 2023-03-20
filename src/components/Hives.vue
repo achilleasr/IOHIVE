@@ -37,8 +37,10 @@ export default {
     padding: 20px;
     padding-left: 40px;
     padding-right: 40px;
+    margin-top: 1em;
     /* box-shadow: 15px 15px 30px #bebebe,
         -15px -15px 30px #ffffff; */
+    /* margin-bottom: 120px; */
 }
 
 .hives-container svg {
