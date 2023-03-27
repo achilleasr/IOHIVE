@@ -29,18 +29,18 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 8vw;
-    padding: 2vw;
+    /* height: 5vw; */
+    padding: 0.8vw;
     /* box-shadow: 15px 15px 30px #bebebe,
         -15px -15px 30px #ffffff; */
 }
 
 .add-button {
     background-color: #575EAE;
-    width: 6vw;
-    height: 6vw;
+    width: 4.6vw;
+    height: 4.6vw;
 
-    border-radius: 0.8vw;
+    border-radius: 0.6vw;
     justify-content: center;
     align-items: center;
     display: flex;
@@ -48,7 +48,7 @@ export default {
 
 .plus-icon {
     color: white;
-    width: 4.4vw;
-    height: 4.4vw;
+    width: 4vw;
+    height: 4vw;
 }
 </style>

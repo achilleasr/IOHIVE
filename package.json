@@ -10,7 +10,8 @@
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/js": "^7.2.96",
     "core-js": "^3.8.3",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-router": "^4.0.13"
   },
   "devDependencies": {
     "@vue-leaflet/vue-leaflet": "^0.9.0",

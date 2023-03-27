@@ -28,13 +28,6 @@ export default {
         LTileLayer,
         LMarker
     },
-    // mounted() {
-    //     if (this.$refs.map && this.$refs.map.mapObject) {
-    //         const mapContainer = this.$refs.map.mapObject.getContainer();
-    //         const zoomButton = mapContainer.getElementsByClassName('leaflet-control-zoom')[0];
-    //         zoomButton.style.display = 'none';
-    //     }
-    // },
     data() {
         return {
             path: mdiMapOutline,
@@ -62,7 +55,7 @@ export default {
 .map-title {
     display: flex;
     position: absolute;
-    top: 0;
+    top: -40px;
     left: 0;
     z-index: 1;
     gap: 1vw;
