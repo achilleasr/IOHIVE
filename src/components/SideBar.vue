@@ -34,14 +34,14 @@
 <style scoped>
 .sidebar {
     position: fixed;
-    top: 0px;
+    top: 20px;
     left: 0px;
     border-radius: 10px;
-    width: 13vw;
+    width: 12vw;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-    padding: 1.5vw 3.4vw;
+    padding: 0vw 3.4vw;
     /* background-color: brown; */
 }
 

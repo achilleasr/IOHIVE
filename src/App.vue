@@ -1,9 +1,9 @@
 <template>
   <SideBar />
+  <HeaderCustom />
   <div class="flex-container">
     <div class="empty"></div>
     <div class="main-content">
-      <HeaderCustom />
       <AddHive />
       <Apiaries />
       <SelectedApiary />
@@ -24,11 +24,6 @@ export default {
   components: {
     SelectedApiary, Apiaries, AddHive, HeaderCustom, SideBar
   },
-  data() {
-    return {
-      strokeColor: "#919296"
-    };
-  }
 }
 </script>
 
@@ -36,6 +31,28 @@ export default {
 :root {
   /* Main stroke color */
   --stroke-color: #919296;
+}
+
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #F9FAFE;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #575EAE;
+  border-radius: 20px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #2f3364;
 }
 
 @font-face {
@@ -74,9 +91,9 @@ body {
 }
 
 .main-content {
-  flex: 4;
+  width: 77vw;
   border-radius: 10px;
-  padding: 0px 1vw;
+  padding: 0px 2vw 0px 1vw;
   /* width: 90%; */
   /* background-color: blueviolet; */
   display: flex;

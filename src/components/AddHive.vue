@@ -30,6 +30,7 @@ export default {
     justify-content: center;
     align-items: center;
     /* height: 5vw; */
+    margin-top: 5.5vw;
     padding: 0.8vw;
     /* box-shadow: 15px 15px 30px #bebebe,
         -15px -15px 30px #ffffff; */

@@ -23,16 +23,20 @@
 
 <style scoped>
 .header {
-    width: 100%;
+    width: 77vw;
     height: 2.5vw;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: -webkit-sticky;
-    position: sticky;
+    /* position: -webkit-sticky; */
+    position: fixed;
     top: 0px;
-    background-color: #FFFFFF;
-    padding: 20px 0px;
+    right: 0px;
+    background-color: #ffffffa6;
+    backdrop-filter: blur(4px);
+    padding: 20px 2vw 20px 1vw;
+    border-bottom: #FFFFFF solid 1px;
+    z-index: 20;
 }
 
 .search-bar {
