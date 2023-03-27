@@ -16,7 +16,7 @@ export default {
         ApiaryItem,
     },
     props: {
-        selectedApiary: 0,
+        selectedApiary: String,
     },
     data() {
         return {

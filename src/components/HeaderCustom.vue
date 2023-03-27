@@ -1,10 +1,16 @@
 <template>
-    <div class="header">
-        <div class="search-bar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>magnify</title>
-                <path
-                    d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
-            </svg></div>
+    <header class="header">
+        <form action="/searchFor.php">
+
+            <input type="text" placeholder="Search.." name="search" class="search-bar">
+            <button type="submit">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <title>magnify</title>
+                    <path
+                        d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+                </svg>
+            </button>
+        </form>
         <div class="account">
             <div class="notifications"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <title>bell-outline</title>
@@ -17,22 +23,53 @@
                         d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.07,18.28C7.5,17.38 10.12,16.5 12,16.5C13.88,16.5 16.5,17.38 16.93,18.28C15.57,19.36 13.86,20 12,20C10.14,20 8.43,19.36 7.07,18.28M18.36,16.83C16.93,15.09 13.46,14.5 12,14.5C10.54,14.5 7.07,15.09 5.64,16.83C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M12,6C10.06,6 8.5,7.56 8.5,9.5C8.5,11.44 10.06,13 12,13C13.94,13 15.5,11.44 15.5,9.5C15.5,7.56 13.94,6 12,6M12,11A1.5,1.5 0 0,1 10.5,9.5A1.5,1.5 0 0,1 12,8A1.5,1.5 0 0,1 13.5,9.5A1.5,1.5 0 0,1 12,11Z" />
                 </svg>Katerina Malisova</div>
         </div>
-    </div>
+    </header>
 </template>
 
 
 <style scoped>
+form {
+    width: 28%;
+    /* background-color: coral; */
+
+    position: relative;
+}
+
+input {
+    border: 0px;
+    padding: 0 14px;
+    position: relative;
+    font-family: TwCen;
+    font-size: 1.1vw;
+}
+
+input::placeholder {
+    font-family: TwCen;
+    font-size: 1.1vw;
+}
+
+button {
+    border: 0px;
+    width: 2vw;
+    height: 2vw;
+    position: absolute;
+    right: 0%;
+    top: 50%;
+    transform: translate(0, -50%);
+    background: none;
+}
+
+
 .header {
     width: 77vw;
     height: 2.5vw;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* position: -webkit-sticky; */
     position: fixed;
     top: 0px;
     right: 0px;
-    background-color: #ffffffa6;
+    background-color: #ffffffbb;
     backdrop-filter: blur(4px);
     padding: 20px 2vw 20px 1vw;
     border-bottom: #FFFFFF solid 1px;
@@ -41,11 +78,13 @@
 
 .search-bar {
     background-color: #F9FAFE;
-    width: 36%;
+    width: 94%;
+    position: relative;
     border-radius: 3vw;
-    /* padding: 0.2vw; */
     height: 2.8vw;
     position: relative;
+    box-shadow: inset 2px 2px 4px #ebebeb,
+        inset -2px -2px 4px #f6f6f6;
 }
 
 .search-bar svg {

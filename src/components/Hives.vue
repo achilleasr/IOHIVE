@@ -1,5 +1,6 @@
 <template>
     <div class="hives-container">
+        <span id="hives"></span>
         <div class="hives-title">
             <svg class="hives-icon" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="0.5" y="0.5" width="15" height="7" />
@@ -11,11 +12,13 @@
                 Hives
             </h5>
         </div>
+
         <div class="hives-content">
             <HiveItem />
             <HiveItem />
             <HiveItem />
         </div>
+        <span id="devices"></span>
     </div>
 </template>
 

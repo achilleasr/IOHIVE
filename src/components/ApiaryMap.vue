@@ -46,9 +46,8 @@ export default {
 <style scoped>
 .map-container {
     display: block;
-    background-color: #F9FAFE;
-    border-radius: 20px;
-    min-height: 40vw;
+    border-radius: 16px;
+    min-height: 30vw;
     position: relative;
 }
 
@@ -66,9 +65,9 @@ export default {
 }
 
 .map-box {
-    min-height: 400px;
+    min-height: 30vw;
     min-width: 90%;
-    border-radius: 20px;
+    border-radius: 16px;
     z-index: 0;
 }
 </style>

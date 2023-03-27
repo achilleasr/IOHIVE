@@ -4,25 +4,19 @@
   <div class="flex-container">
     <div class="empty"></div>
     <div class="main-content">
-      <AddHive />
-      <Apiaries />
-      <SelectedApiary />
-
+      <router-view></router-view>
     </div>
   </div>
 </template>
 
 <script>
-import SelectedApiary from "./components/SelectedApiary.vue";
-import Apiaries from "./components/Apiaries.vue";
-import AddHive from "./components/AddHive.vue";
 import HeaderCustom from "./components/HeaderCustom.vue";
 import SideBar from "./components/SideBar.vue";
 
 export default {
   name: 'App',
   components: {
-    SelectedApiary, Apiaries, AddHive, HeaderCustom, SideBar
+    HeaderCustom, SideBar,
   },
 }
 </script>
@@ -77,6 +71,11 @@ body {
   border: 0px;
 }
 
+a {
+  text-decoration: none;
+  color: var(--stroke-color);
+}
+
 
 .flex-container {
   display: flex;
@@ -94,10 +93,11 @@ body {
   width: 77vw;
   border-radius: 10px;
   padding: 0px 2vw 0px 1vw;
-  /* width: 90%; */
-  /* background-color: blueviolet; */
+
+  margin-top: 5.5vw;
   display: flex;
   gap: 1vh;
   flex-direction: column;
+  /* overflow: auto; */
 }
 </style>

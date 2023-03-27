@@ -38,6 +38,8 @@ export default {
     margin-right: 2vw;
 }
 
+
+
 .block:last-child {
     margin-right: 0px;
 }
@@ -65,6 +67,17 @@ export default {
     height: 6vw;
     border-radius: 0.8vw;
     padding: 0.6vw;
+
+    transition: all 0.3s ease 0s;
+}
+
+.apiary-item:hover {
+    box-shadow: 0px 15px 20px #575eae29;
+    transform: translateY(-4px);
+}
+
+.apiary-item:active {
+    transform: translateY(-1px);
 }
 
 .selected {

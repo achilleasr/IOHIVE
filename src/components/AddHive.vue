@@ -1,7 +1,9 @@
 <template>
+    <span id="overview"></span>
     <div class="block">
         <div class="add-button">
             <svg-icon class="plus-icon" type="mdi" :path="path" />
+            <span class="add-button-hovertext">Add Apiary</span>
         </div>
     </div>
 </template>
@@ -29,8 +31,6 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* height: 5vw; */
-    margin-top: 5.5vw;
     padding: 0.8vw;
     /* box-shadow: 15px 15px 30px #bebebe,
         -15px -15px 30px #ffffff; */
@@ -40,11 +40,41 @@ export default {
     background-color: #575EAE;
     width: 4.6vw;
     height: 4.6vw;
-
+    border: #575EAE solid 2px;
     border-radius: 0.6vw;
     justify-content: center;
     align-items: center;
     display: flex;
+    position: relative;
+    transition: all 0.3s ease 0s;
+}
+
+.add-button:hover {
+    background-color: #262a4f;
+    border: black solid 2px;
+    cursor: pointer;
+}
+
+
+.add-button .add-button-hovertext {
+    visibility: hidden;
+
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 120%;
+    /* margin-top: 60px; */
+}
+
+.add-button:hover .add-button-hovertext {
+    visibility: visible;
 }
 
 .plus-icon {
