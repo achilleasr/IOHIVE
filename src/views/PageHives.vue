@@ -1,7 +1,6 @@
 <template>
     <AddHive />
     <Apiaries />
-    <SelectedApiary />
 </template>
 
 

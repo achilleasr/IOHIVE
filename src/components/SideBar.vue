@@ -1,6 +1,10 @@
 <template>
     <div class="sidebar">
-        <router-link to="/" class="main-logo"><img src="../assets/IOHIVE-logo-nobg.png" /></router-link>
+        <!-- <router-link to="/" class="main-logo"> -->
+        <div class="main-logo">
+            <img src="../assets/IOHIVE-logo-nobg.png" />
+        </div>
+        <!-- </router-link> -->
         <div class="pages">
             <router-link :to="{ path: '/', hash: '#overview' }" class="page"
                 :class="{ 'activePage': (($route.hash === '' || $route.hash === '#overview') && $route.path === '/') }">
@@ -77,7 +81,7 @@
     padding: 0.5vw 0.8vw 0.5vw 1vw;
     border-radius: 4vw;
 
-    transition: all 0.3s ease 0s;
+    transition: all 0.15s ease 0s;
     /* border: 1px solid white; */
 }
 

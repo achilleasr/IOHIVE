@@ -10,9 +10,9 @@
                         <rect x="0.5" y="7.5" width="15" height="7" />
                         <line x1="6" y1="3.5" x2="10" y2="3.5" />
                         <line x1="6" y1="10.5" x2="10" y2="10.5" />
-                    </svg>10
+                    </svg>{{ hives.length }}
                 </div>
-                <div class="apiary-notice">
+                <div v-if="alert" class="apiary-notice">
                     <img v-if="selected" src="../assets/Hives/i_alert_selected.svg" />
                     <img v-else src="../assets/Hives/i_alert.svg" />
                 </div>
@@ -29,6 +29,8 @@ export default {
     props: {
         selected: Boolean,
         name: String,
+        hives: Array,
+        alert: Boolean,
     }
 }
 </script>
@@ -60,7 +62,7 @@ export default {
     justify-content: space-between;
     text-align: center;
     background-color: #ffffff;
-    border: solid rgb(125, 125, 125) 3px;
+    border: solid rgb(125, 125, 125) 2px;
     color: black;
     font-size: 1.1vw;
     width: 6vw;
@@ -68,12 +70,13 @@ export default {
     border-radius: 0.8vw;
     padding: 0.6vw;
 
-    transition: all 0.3s ease 0s;
+    transition: all 0.2s ease 0s;
 }
 
 .apiary-item:hover {
     box-shadow: 0px 15px 20px #575eae29;
     transform: translateY(-4px);
+    cursor: pointer;
 }
 
 .apiary-item:active {
@@ -86,10 +89,35 @@ export default {
     border: solid #575EAE 3px;
 }
 
+
+
+/* .apiary-notice svg {
+    fill: black;
+} */
+
+.apiary-status {
+    display: flex;
+    justify-content: space-around;
+    position: relative;
+    height: 1.5vw;
+    width: 6vw;
+}
+
+.apiary-notice img {
+    height: 1.5vw;
+    width: 1.5vw;
+    stroke: white;
+    fill: white;
+    position: absolute;
+    right: 0.7vw;
+}
+
 .apiary-hives {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    left: 0.7vw;
     gap: 0.2vw;
 }
 
@@ -102,21 +130,5 @@ export default {
     height: 1.3vw;
     width: 1.3vw;
     stroke: black;
-}
-
-/* .apiary-notice svg {
-    fill: black;
-} */
-
-.apiary-status {
-    display: flex;
-    justify-content: space-around;
-}
-
-.apiary-notice img {
-    height: 1.5vw;
-    width: 1.5vw;
-    stroke: white;
-    fill: white;
 }
 </style>

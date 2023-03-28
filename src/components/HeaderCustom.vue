@@ -103,19 +103,25 @@ button {
 .notifications {
     height: 2vw;
     width: 2vw;
-    /* background-color: aquamarine; */
+    padding: 0.3vw;
+}
+
+.notifications:hover {
+    background-color: #f1f1f1;
+    border-radius: 200px;
+    cursor: pointer;
+
 }
 
 .profile {
     display: flex;
     font-size: 1.2vw;
-    /* background-color: aquamarine; */
+    padding: 0.3vw;
+    cursor: pointer;
     height: 2vw;
     gap: 0.4vw;
     color: black;
     align-items: center;
-    /* white-space: nowrap; */
-    /* width: 3vw; */
 }
 
 .profile svg {

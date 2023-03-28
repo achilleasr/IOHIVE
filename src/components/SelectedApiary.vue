@@ -1,6 +1,6 @@
 <template>
     <div class="selected-apiary-title">
-        ISD-lab-Syros-001</div>
+        {{ selectedApiary }}</div>
     <ApiaryMap />
     <Hives />
 </template>
@@ -14,6 +14,10 @@ export default {
     components: {
         Hives, ApiaryMap
     },
+    props: {
+        selectedApiary: String,
+
+    }
 
 }
 </script>
