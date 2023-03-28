@@ -90,9 +90,9 @@ a {
 }
 
 .main-content {
-  width: 77vw;
+  width: 74vw;
   border-radius: 10px;
-  padding: 0px 2vw 0px 1vw;
+  padding: 0px 5vw 0px 1vw;
 
   margin-top: 5.5vw;
   display: flex;

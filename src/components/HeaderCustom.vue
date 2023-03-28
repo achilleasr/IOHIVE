@@ -61,7 +61,7 @@ button {
 
 
 .header {
-    width: 77vw;
+    width: 74vw;
     height: 2.5vw;
     display: flex;
     align-items: center;
@@ -71,7 +71,7 @@ button {
     right: 0px;
     background-color: #ffffffbb;
     backdrop-filter: blur(4px);
-    padding: 20px 2vw 20px 1vw;
+    padding: 20px 5vw 20px 1vw;
     border-bottom: #FFFFFF solid 1px;
     z-index: 20;
 }
