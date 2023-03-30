@@ -4,11 +4,9 @@
     </div>
     <div class="apiaries-scroll">
         <ApiaryItem v-for="(apiary, index) in apiaries" :key="index" :name="apiary.name" :hives="apiary.hives"
-            :alert="apiary.alert" :value="apiary.name" v-model="selectedApiary" />
+            :alert="apiary.alert" :selectedApiaryName="this.selectedApiary.name" @click="this.selectedApiary = apiary" />
     </div>
-
-
-    <SelectedApiary :selectedApiary="selectedApiary" />
+    <SelectedApiary :selectedApiary="this.selectedApiary" />
 </template>
 <script>
 import ApiaryItem from './ApiaryItem.vue';
@@ -19,9 +17,10 @@ export default {
     components: {
         SelectedApiary, ApiaryItem,
     },
+
     data() {
         return {
-            selectedApiary: "ISD-lab-Syros-001",
+            selectedApiary: null,
             apiaries: [
                 {
                     name: 'ISD-lab-Syros-001',
@@ -51,7 +50,12 @@ export default {
                     alert: true
                 },
             ],
+
+
         }
+    },
+    created() {
+        this.selectedApiary = this.apiaries[0]; // set the first item as the initially selected item
     }
 }
 

@@ -1,11 +1,11 @@
 <template>
     <div class="block">
-        <div :class="[selected ? 'selected' : '', 'apiary-item']">
-            <div class="apiary-title">{{ name }}</div>
+        <div :class="[selectedApiaryName === name ? 'selected' : '', 'apiary-item']">
+            <div class="apiary-title">{{ name }} </div>
             <div class="apiary-status">
                 <div class="apiary-hives">
-                    <svg :class="selected ? 'hives-icon' : 'hives-icon-inverse'" viewBox="0 0 16 15" fill="none"
-                        stroke="white" xmlns="http://www.w3.org/2000/svg">
+                    <svg :class="selectedApiaryName === name ? 'hives-icon' : 'hives-icon-inverse'" viewBox="0 0 16 15"
+                        fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg">
                         <rect x="0.5" y="0.5" width="15" height="7" />
                         <rect x="0.5" y="7.5" width="15" height="7" />
                         <line x1="6" y1="3.5" x2="10" y2="3.5" />
@@ -13,12 +13,12 @@
                     </svg>{{ hives.length }}
                 </div>
                 <div v-if="alert" class="apiary-notice">
-                    <img v-if="selected" src="../assets/Hives/i_alert_selected.svg" />
+                    <img v-if="selectedApiaryName === name" src="../assets/Hives/i_alert_selected.svg" />
                     <img v-else src="../assets/Hives/i_alert.svg" />
                 </div>
             </div>
         </div>
-        <div v-if="selected" class="apiary-selected-line"></div>
+        <div v-if="selectedApiaryName === name" class="apiary-selected-line"></div>
     </div>
 </template>
 
@@ -27,10 +27,10 @@
 export default {
     name: 'ApiaryItem',
     props: {
-        selected: Boolean,
         name: String,
         hives: Array,
         alert: Boolean,
+        selectedApiaryName: String,
     }
 }
 </script>
@@ -69,7 +69,7 @@ export default {
     height: 6vw;
     border-radius: 0.8vw;
     padding: 0.6vw;
-
+    box-shadow: 1px 2px 2px #575eae29;
     transition: all 0.2s ease 0s;
 }
 
@@ -86,7 +86,7 @@ export default {
 .selected {
     background-color: #575EAE;
     color: white;
-    border: solid #575EAE 3px;
+    border: solid #3e4379 2px;
 }
 
 

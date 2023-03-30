@@ -4,7 +4,7 @@
             <div>EDIT</div> <img src="../assets/Hives/i_edit.svg" />
         </div>
 
-        <h2 class="hive-item-title">Apano Meria 01</h2>
+        <h2 class="hive-item-title">Apano Meria {{ hive.name }}</h2>
 
         <div class=" hive-item-info">
             <div class="hive-item-icon"><img src="../assets/Hives/i_hives3.svg" /></div>
@@ -29,6 +29,9 @@
 
 export default {
     name: 'HiveItem',
+    props: {
+        hive: Object,
+    }
 }
 </script>
 <style scoped>

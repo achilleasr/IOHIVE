@@ -14,9 +14,7 @@
         </div>
 
         <div class="hives-content">
-            <HiveItem />
-            <HiveItem />
-            <HiveItem />
+            <HiveItem v-for="(hive, index) in hives" :key="index" :hive="hive" />
         </div>
         <span id="devices"></span>
     </div>
@@ -29,7 +27,10 @@ export default {
     name: 'Hives',
     components: {
         HiveItem
-    }
+    },
+    props: {
+        hives: Array,
+    },
 }
 
 </script>

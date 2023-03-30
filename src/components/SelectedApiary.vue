@@ -1,8 +1,14 @@
 <template>
     <div class="selected-apiary-title">
-        {{ selectedApiary }}</div>
+        {{ selectedApiary.name }}
+        <span v-if="selectedApiary.alert">
+            <img src="../assets/Hives/i_alert.svg" />
+        </span>
+    </div>
+
+
     <ApiaryMap />
-    <Hives />
+    <Hives :hives="selectedApiary.hives" />
 </template>
 
 <script>
@@ -15,8 +21,7 @@ export default {
         Hives, ApiaryMap
     },
     props: {
-        selectedApiary: String,
-
+        selectedApiary: Object,
     }
 
 }
@@ -27,5 +32,9 @@ export default {
     font-size: 2vw;
     color: black;
     margin: 4vh 0;
+}
+
+.selected-apiary-title img {
+    height: 1.1rem;
 }
 </style>
