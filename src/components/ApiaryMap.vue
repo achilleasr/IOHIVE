@@ -1,15 +1,16 @@
 <template>
     <div class="map-container">
-        <l-map v-model="zoom" class="map-box" v-model:zoom="zoom" :center="center" :bounds="bounds">
+        <l-map class="map-box" v-model:zoom="zoom" zoomControl=false :center="center" :bounds="bounds"
+            :options="{ zoomControl: false }">
             <l-tile-layer :url="url"></l-tile-layer>
 
             <l-marker v-for="(hive, index) in hives" :key="index" :lat-lng="hive.coordinates">
                 <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
                 <l-popup>
-                    hive 1
+                    {{ hive.name }}
                 </l-popup>
             </l-marker>
-
+            <l-control-zoom position="bottomright"></l-control-zoom>
         </l-map>
         <div class="map-title">
             <svg-icon type="mdi" :path="path" />
@@ -32,6 +33,7 @@ import {
     LTooltip,
     LPopup,
     LPolyline,
+    LControlZoom,
     LPolygon,
     LRectangle,
 } from "@vue-leaflet/vue-leaflet";
@@ -50,6 +52,7 @@ export default {
         LMarker,
         LControlLayers,
         LTooltip,
+        LControlZoom,
         LPopup,
         LPolyline,
         LPolygon,
@@ -61,7 +64,6 @@ export default {
             default: () => []
         }
     },
-
     data() {
         return {
             path: mdiMapOutline,
@@ -73,26 +75,31 @@ export default {
             attribution:
                 '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
             zoom: 11,
-            center: [37.4385, 24.9139],
+            zoomControl: false,
+            center: [37.4385, 14.9139],
             icon: L.icon({
                 iconUrl: require('@/assets/Hives/i_hives1.svg'),
                 iconSize: [25, 41],
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34]
             }),
-            boundsPadding: 0.1,
-
         }
     }, computed: {
         bounds() {
             const lats = this.hives.map((hive) => hive.coordinates[0]);
             const lngs = this.hives.map((hive) => hive.coordinates[1]);
             return [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
-        }, paddedBounds() {
-            const southWest = L.latLng(this.bounds[0][0], this.bounds[0][1]);
-            const northEast = L.latLng(this.bounds[1][0], this.bounds[1][1]);
-            const padding = this.boundsPadding;
-            return L.latLngBounds(southWest, northEast).pad(padding);
+        }
+    },
+    created() {
+        if (this.hives.length > 0) {
+            const lats = this.hives.map((hive) => hive.coordinates[0]);
+            const lngs = this.hives.map((hive) => hive.coordinates[1]);
+            const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
+            const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
+            this.center = [latAvg, lngAvg];
+
+
         }
     },
     watch: {
@@ -104,6 +111,8 @@ export default {
                     const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
                     const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
                     this.center = [latAvg, lngAvg];
+
+
                 }
             },
             deep: true
@@ -123,14 +132,15 @@ export default {
 .map-title {
     display: flex;
     position: absolute;
-    top: -40px;
+    top: 0px;
     left: 0;
     z-index: 1;
     gap: 1vw;
-    padding: 5%;
-    font-size: 1.5vw;
-    width: 90%;
-    background: linear-gradient(0deg, rgba(155, 155, 155, 0) 0%, rgba(255, 255, 255, 1) 100%);
+    padding: 1%;
+    font-size: 1.3vw;
+    width: 14%;
+    /* background-color: aqua; */
+    /* background: linear-gradient(0deg, rgba(155, 155, 155, 0) 0%, rgba(255, 255, 255, 1) 100%); */
 }
 
 .map-box {
