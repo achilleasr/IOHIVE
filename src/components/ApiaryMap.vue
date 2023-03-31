@@ -1,11 +1,16 @@
 <template>
     <div class="map-container">
-        <l-map ref="map" class="map-box" v-model:zoom="zoom" :center="center">
-            <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap">
-                <l-marker :lat-lng="markerLatLng"></l-marker>
-            </l-tile-layer>
-        </l-map>
+        <l-map v-model="zoom" class="map-box" v-model:zoom="zoom" :center="center" :bounds="bounds">
+            <l-tile-layer :url="url"></l-tile-layer>
 
+            <l-marker v-for="(hive, index) in hives" :key="index" :lat-lng="hive.coordinates">
+                <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
+                <l-popup>
+                    hive 1
+                </l-popup>
+            </l-marker>
+
+        </l-map>
         <div class="map-title">
             <svg-icon type="mdi" :path="path" />
             <div>Apiary Map</div>
@@ -16,30 +21,94 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiMapOutline } from '@mdi/js';
+import L from 'leaflet';
 
+import {
+    LMap,
+    LIcon,
+    LTileLayer,
+    LMarker,
+    LControlLayers,
+    LTooltip,
+    LPopup,
+    LPolyline,
+    LPolygon,
+    LRectangle,
+} from "@vue-leaflet/vue-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+
+
 
 
 export default {
     name: 'ApiaryMap',
     components: {
-        SvgIcon, LMap,
+        SvgIcon,
+        LMap,
+        LIcon,
         LTileLayer,
-        LMarker
+        LMarker,
+        LControlLayers,
+        LTooltip,
+        LPopup,
+        LPolyline,
+        LPolygon,
+        LRectangle,
     },
+    props: {
+        hives: {
+            type: Array,
+            default: () => []
+        }
+    },
+
     data() {
         return {
             path: mdiMapOutline,
-            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            // url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            // url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+            url: 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png',
+            // url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+            // url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
             attribution:
                 '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
             zoom: 11,
             center: [37.4385, 24.9139],
-            markerLatLng: [37.4385, 24.9139],
+            icon: L.icon({
+                iconUrl: require('@/assets/Hives/i_hives1.svg'),
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            }),
+            boundsPadding: 0.1,
 
         }
+    }, computed: {
+        bounds() {
+            const lats = this.hives.map((hive) => hive.coordinates[0]);
+            const lngs = this.hives.map((hive) => hive.coordinates[1]);
+            return [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
+        }, paddedBounds() {
+            const southWest = L.latLng(this.bounds[0][0], this.bounds[0][1]);
+            const northEast = L.latLng(this.bounds[1][0], this.bounds[1][1]);
+            const padding = this.boundsPadding;
+            return L.latLngBounds(southWest, northEast).pad(padding);
+        }
     },
+    watch: {
+        hives: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    const lats = newVal.map((hive) => hive.coordinates[0]);
+                    const lngs = newVal.map((hive) => hive.coordinates[1]);
+                    const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
+                    const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
+                    this.center = [latAvg, lngAvg];
+                }
+            },
+            deep: true
+        }
+    }
 }
 </script>
 
@@ -70,4 +139,8 @@ export default {
     border-radius: 16px;
     z-index: 0;
 }
+
+/* .marker {
+    z-index: 40;
+} */
 </style>

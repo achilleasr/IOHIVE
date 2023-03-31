@@ -4,12 +4,13 @@
             <div>EDIT</div> <img src="../assets/Hives/i_edit.svg" />
         </div>
 
-        <h2 class="hive-item-title">Apano Meria {{ hive.name }}</h2>
+        <h2 class="hive-item-title"> {{ hive.name }} </h2>
 
         <div class=" hive-item-info">
             <div class="hive-item-icon"><img src="../assets/Hives/i_hives3.svg" /></div>
             <div class="hive-item-text">
-                <div class="hive-item-location"><img src="../assets/Hives/i_location_pin.svg" /> Apano Meria, Syros</div>
+                <div class="hive-item-location"><img src="../assets/Hives/i_location_pin.svg" /> Apano Meria, Syros {{
+                    hive.coordinates[0] + " " + hive.coordinates[1] }}</div>
                 <div class="hive-item-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit.
                     Veritatis, distinctio quia. Tenetur dicta inventore dignissimos rem necessitatibus architecto
                     vel corporis nostrum magnam aliquid. Dolor cupiditate, tenetur recusandae praesentium modi fuga?

@@ -5,9 +5,7 @@
             <img src="../assets/Hives/i_alert.svg" />
         </span>
     </div>
-
-
-    <ApiaryMap />
+    <ApiaryMap :hives="selectedApiary.hives" />
     <Hives :hives="selectedApiary.hives" />
 </template>
 
@@ -22,8 +20,7 @@ export default {
     },
     props: {
         selectedApiary: Object,
-    }
-
+    },
 }
 </script>
 

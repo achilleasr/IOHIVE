@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="23.538483mm"
+   height="19.238754mm"
+   viewBox="0 0 23.538483 19.238754"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="IOHIVE_Icons.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#737373"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.2973261"
+     inkscape:cx="112.6709"
+     inkscape:cy="546.53796"
+     inkscape:window-width="1207"
+     inkscape:window-height="749"
+     inkscape:window-x="666"
+     inkscape:window-y="102"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     showborder="true"
+     borderlayer="true" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-230.97222,-113.37953)">
+    <rect
+       style="fill:#e46268;stroke:none;"
+       id="rect343"
+       width="21.407694"
+       height="13.230961"
+       x="232.03761"
+       y="115.86297"
+       ry="0" />
+    <rect
+       style="fill:#e46268;stroke:none;"
+       id="rect345"
+       width="23.350389"
+       height="1.6336563"
+       x="231.06627"
+       y="113.47358"
+       ry="0" />
+    <rect
+       style="fill:#e46268;stroke:none;"
+       id="rect347"
+       width="1.9218684"
+       height="2.7337101"
+       x="248.81654"
+       y="129.84967"
+       ry="0" />
+    <rect
+       style="fill:#e46268;stroke:none;"
+       id="rect349"
+       width="1.9218684"
+       height="2.7337101"
+       x="234.86446"
+       y="129.84967"
+       ry="0" />
+  </g>
+</svg>

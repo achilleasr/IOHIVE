@@ -11,52 +11,23 @@
 <script>
 import ApiaryItem from './ApiaryItem.vue';
 import SelectedApiary from "./SelectedApiary.vue";
+import { apiariesHardcoded } from "./apiariesHardcoded.js"
 
 export default {
     name: 'Apiaries',
     components: {
-        SelectedApiary, ApiaryItem,
+        SelectedApiary, ApiaryItem, apiariesHardcoded
     },
 
     data() {
         return {
             selectedApiary: null,
-            apiaries: [
-                {
-                    name: 'ISD-lab-Syros-001',
-                    hives: [
-                        { name: 'hive001' },
-                        { name: 'hive002' },
-                        { name: 'hive003' }
-                    ],
-                    alert: true
-                },
-                {
-                    name: 'ISD-lab-Syros-002',
-                    hives: [
-                        { name: 'hive004' },
-                        { name: 'hive005' }
-                    ],
-                    alert: false
-                },
-                {
-                    name: 'ISD-lab-Syros-003',
-                    hives: [
-                        { name: 'hive006' },
-                        { name: 'hive007' },
-                        { name: 'hive008' },
-                        { name: 'hive009' }
-                    ],
-                    alert: true
-                },
-            ],
-
-
+            apiaries: apiariesHardcoded,
         }
     },
     created() {
         this.selectedApiary = this.apiaries[0]; // set the first item as the initially selected item
-    }
+    },
 }
 
 </script>
