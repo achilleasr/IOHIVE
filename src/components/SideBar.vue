@@ -1,10 +1,10 @@
 <template>
     <div class="sidebar">
-        <!-- <router-link to="/" class="main-logo"> -->
-        <div class="main-logo">
-            <img src="../assets/IOHIVE-logo-nobg.png" />
-        </div>
-        <!-- </router-link> -->
+        <router-link to="/">
+            <div class="main-logo">
+                <img src="../assets/IOHIVE-logo-nobg.png" />
+            </div>
+        </router-link>
         <div class="pages">
             <router-link :to="{ path: '/', hash: '#overview' }" class="page"
                 :class="{ 'activePage': (($route.hash === '' || $route.hash === '#overview') && $route.path === '/') }">

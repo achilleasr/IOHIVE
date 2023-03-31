@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import PageHives from "../views/PageHives.vue";
 import PageSettings from "../views/PageSettings.vue";
+import PageAccount from "../views/PageAccount.vue";
 
 const routes = [
   {
@@ -13,6 +14,12 @@ const routes = [
     path: "/settings",
     name: "/settings",
     component: PageSettings,
+  },
+
+  {
+    path: "/account",
+    name: "/account",
+    component: PageAccount,
   },
 ];
 

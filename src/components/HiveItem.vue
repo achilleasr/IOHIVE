@@ -21,17 +21,36 @@
                 <p>Device:<br>Sensor 2</p>
             </div>
         </div>
-        <div class="hive-item-inspection"><img src="../assets/Hives/i_arrow_down.svg" /> Latest Inspection: Aug 20, 2022
-            10:07AM</div>
+        <div class="hive-item-inspection">
+            <img src="../assets/Hives/i_arrow_down.svg" :class="{ rotated180: expanded }" @click="expandContentButton" />
+            Latest Inspection: Aug 20, 2022 10:07AM
+            <!-- {{ hive.inspections[0] }} -->
+        </div>
+        <ExpandedContent :expanded="expanded" />
     </div>
 </template>
 <script>
-
+import ExpandedContent from './ExpandedContent.vue';
 
 export default {
     name: 'HiveItem',
+    components: {
+        ExpandedContent
+    },
+
     props: {
         hive: Object,
+    },
+    data() {
+        return {
+            expanded: false,
+        }
+    },
+    methods: {
+        expandContentButton() {
+            this.expanded = !this.expanded;
+            console.log(this.expanded)
+        }
     }
 }
 </script>
@@ -137,5 +156,10 @@ export default {
 
 .hive-item-inspection img {
     height: 2.4vw;
+    transition: all 0.15s ease 0s;
+}
+
+.rotated180 {
+    transform: rotate(180deg);
 }
 </style>
