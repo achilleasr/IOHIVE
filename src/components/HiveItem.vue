@@ -1,5 +1,5 @@
 <template>
-    <div class="hive-item">
+    <div class="hive-item" :class="{ 'hive-item-expanded': expanded }">
         <div class="hive-item-edit">
             <div>EDIT</div> <img src="../assets/Hives/i_edit.svg" />
         </div>
@@ -22,8 +22,9 @@
             </div>
         </div>
         <div class="hive-item-inspection">
-            <img src="../assets/Hives/i_arrow_down.svg" :class="{ rotated180: expanded }" @click="expandContentButton" />
-            Latest Inspection: Aug 20, 2022 10:07AM
+            <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }"
+                @click="expandContentButton" />
+            <span @click="expandContentButton" class="clickable"> Latest Inspection: Aug 20, 2022 10:07AM </span>
             <!-- {{ hive.inspections[0] }} -->
         </div>
         <ExpandedContent :expanded="expanded" />
@@ -35,7 +36,7 @@ import ExpandedContent from './ExpandedContent.vue';
 export default {
     name: 'HiveItem',
     components: {
-        ExpandedContent
+        ExpandedContent,
     },
 
     props: {
@@ -49,7 +50,7 @@ export default {
     methods: {
         expandContentButton() {
             this.expanded = !this.expanded;
-            console.log(this.expanded)
+            // console.log(this.expanded)
         }
     }
 }
@@ -64,6 +65,12 @@ export default {
     display: flex;
     gap: 0.5vw;
     flex-direction: column;
+    /* transition: all 0.15s ease 0s; */
+    /* height: auto; */
+}
+
+.hive-item-expanded {
+    border-radius: 20px 20px 0px 0px;
 
 }
 
@@ -161,5 +168,9 @@ export default {
 
 .rotated180 {
     transform: rotate(180deg);
+}
+
+.clickable {
+    cursor: pointer;
 }
 </style>
