@@ -6,7 +6,6 @@
 
 <style scoped>
 .wrapper {
-    background-color: aliceblue;
-    width: 100%;
+    /* background-color: aliceblue; */
 }
 </style>
