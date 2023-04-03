@@ -5,7 +5,9 @@
             <l-tile-layer :url="url"></l-tile-layer>
 
             <l-marker v-for="(hive, index) in hives" :key="index" :lat-lng="hive.coordinates">
-                <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
+                <l-icon v-if="this.iconsType" :icon-url="require('@/assets/Hives/leaflet_hive1.svg')"
+                    :icon-size="[30, 30]" />
+                <l-icon v-else :icon-url="require('@/assets/Hives/i_beehive.png')" :icon-size="[30, 30]" />
                 <l-popup>
                     {{ hive.name }}
                 </l-popup>
@@ -13,7 +15,7 @@
             <l-control-zoom position="bottomright"></l-control-zoom>
         </l-map>
         <div class="map-title">
-            <svg-icon type="mdi" :path="path" />
+            <svg-icon type="mdi" :path="path" @click="toggleIcons" />
             <div>Apiary Map</div>
         </div>
     </div>
@@ -64,8 +66,10 @@ export default {
             default: () => []
         }
     },
+
     data() {
         return {
+            iconsType: true,
             path: mdiMapOutline,
             // url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             // url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
@@ -83,6 +87,10 @@ export default {
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34]
             }),
+        }
+    }, methods: {
+        toggleIcons() {
+            this.iconsType = !this.iconsType;
         }
     }, computed: {
         bounds() {
