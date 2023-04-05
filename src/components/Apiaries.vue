@@ -4,7 +4,7 @@
     </div>
     <div class="apiaries-scroll">
         <ApiaryItem v-for="(apiary, index) in apiaries" :key="index" :name="apiary.name" :hives="apiary.hives"
-            :alert="apiary.alert" :selectedApiaryName="this.selectedApiary.name" @click="this.selectedApiary = apiary" />
+            :selectedApiaryName="this.selectedApiary.name" @click="this.selectedApiary = apiary" />
     </div>
     <SelectedApiary :selectedApiary="this.selectedApiary" />
 </template>

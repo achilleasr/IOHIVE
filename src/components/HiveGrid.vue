@@ -68,6 +68,8 @@ export default {
     height: 20vw;
     gap: 6px;
     padding: 2vw 0px;
+    /* background-color: #379C5A;
+    color: white; */
 }
 
 .expanded-first-col {

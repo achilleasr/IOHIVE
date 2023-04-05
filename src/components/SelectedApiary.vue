@@ -1,7 +1,7 @@
 <template>
     <div class="selected-apiary-title">
         {{ selectedApiary.name }}
-        <span v-if="selectedApiary.alert">
+        <span v-if="alerted()">
             <img src="../assets/Hives/i_alert.svg" />
         </span>
     </div>
@@ -20,6 +20,16 @@ export default {
     },
     props: {
         selectedApiary: Object,
+    },
+
+    methods: {
+        alerted() {
+            if (this.selectedApiary.hives.filter(e => e.alert == true).length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     },
 }
 </script>

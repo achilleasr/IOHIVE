@@ -3,19 +3,22 @@
         <l-map class="map-box" v-model:zoom="zoom" zoomControl=false :center="center" :bounds="bounds"
             :options="{ zoomControl: false }">
             <l-tile-layer :url="url"></l-tile-layer>
+            <span v-for="(hive, index) in hives" :key="index">
+                <l-marker :lat-lng="hive.coordinates">
+                    <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
+                    <l-tooltip :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                        {{ hive.name }}
+                    </l-tooltip>
+                </l-marker>
 
-            <l-marker v-for="(hive, index) in hives" :key="index" :lat-lng="hive.coordinates">
-                <l-icon v-if="this.iconsType" :icon-url="require('@/assets/Hives/leaflet_hive1.svg')"
-                    :icon-size="[30, 30]" />
-                <l-icon v-else :icon-url="require('@/assets/Hives/i_beehive.png')" :icon-size="[30, 30]" />
-                <l-popup>
-                    {{ hive.name }}
-                </l-popup>
-            </l-marker>
+                <l-marker v-if="hive.alert" :lat-lng="hive.coordinates">
+                    <l-icon :icon-url="require('@/assets/Hives/i_alert.svg')" :icon-size="[20, 20]" :iconAnchor="[-2, 5]" />
+                </l-marker>
+            </span>
             <l-control-zoom position="bottomright"></l-control-zoom>
         </l-map>
         <div class="map-title">
-            <svg-icon type="mdi" :path="path" @click="toggleIcons" />
+            <svg-icon type="mdi" :path="path" />
             <div>Apiary Map</div>
         </div>
     </div>
@@ -69,7 +72,6 @@ export default {
 
     data() {
         return {
-            iconsType: true,
             path: mdiMapOutline,
             // url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             // url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
@@ -87,10 +89,6 @@ export default {
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34]
             }),
-        }
-    }, methods: {
-        toggleIcons() {
-            this.iconsType = !this.iconsType;
         }
     }, computed: {
         bounds() {
@@ -147,8 +145,6 @@ export default {
     padding: 1%;
     font-size: 1.3vw;
     width: 14%;
-    /* background-color: aqua; */
-    /* background: linear-gradient(0deg, rgba(155, 155, 155, 0) 0%, rgba(255, 255, 255, 1) 100%); */
 }
 
 .map-box {
@@ -157,8 +153,4 @@ export default {
     border-radius: 16px;
     z-index: 0;
 }
-
-/* .marker {
-    z-index: 40;
-} */
 </style>

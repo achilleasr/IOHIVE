@@ -100,4 +100,30 @@ a {
   flex-direction: column;
   /* overflow: auto; */
 }
+
+.rotated180 {
+  transform: rotate(180deg);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.popup,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: rgba(0, 0, 0, 0) !important;
+  border: none !important;
+  font-size: 12px;
+  box-shadow: none !important;
+  font-family: TwCen;
+}
+
+/* this removes tooltips' white triangle from geojson data (pink circle markers) */
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  border: none !important;
+}
 </style>

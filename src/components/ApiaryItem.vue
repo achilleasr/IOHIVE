@@ -12,7 +12,7 @@
                         <line x1="6" y1="10.5" x2="10" y2="10.5" />
                     </svg>{{ hives.length }}
                 </div>
-                <div v-if="alert" class="apiary-notice">
+                <div v-if="alerted()" class="apiary-notice">
                     <img v-if="selectedApiaryName === name" src="../assets/Hives/i_alert_selected.svg" />
                     <img v-else src="../assets/Hives/i_alert.svg" />
                 </div>
@@ -29,9 +29,17 @@ export default {
     props: {
         name: String,
         hives: Array,
-        alert: Boolean,
         selectedApiaryName: String,
-    }
+    },
+    methods: {
+        alerted() {
+            if (this.hives.filter(e => e.alert == true).length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    },
 }
 </script>
 <style scoped>
