@@ -5,12 +5,16 @@
         <div class="login-item" @click="login">
             Login
         </div>
+        <footer>
+            <a href="https://github.com/achilleasr/IOHIVE" target="_blank">
+                Last updated on {{ latestCommitDate }}
+            </a>
+        </footer>
     </span>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-
 export default {
     name: 'Login',
     computed: {
@@ -23,12 +27,37 @@ export default {
         logout() {
             this.$store.dispatch('logout')
         }
-    }
+    },
+    data() {
+        return {
+            latestCommitDate: null,
+        };
+    },
+    async mounted() {
+        const repoUrl = "https://api.github.com/repos/achilleasr/IOHIVE/commits";
+        const response = await fetch(repoUrl);
+        const commits = await response.json();
+        const commitDate = new Date(commits[0].commit.author.date);
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+        this.latestCommitDate = commitDate.toLocaleString('en-US', options);
+    },
 
 }
 </script>
 
 <style scoped >
+footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+
+    padding: 10px;
+}
+
+a {
+    color: black;
+}
+
 .login-container {
     display: flex;
     flex-direction: column;
