@@ -1,7 +1,9 @@
 <template>
     <span class="login-container">
+
+        <img src="../assets/IOHIVE-logo-nobg.png" class="logo">
         <div class="login-item" @click="login">
-            Need to login
+            Login
         </div>
     </span>
 </template>
@@ -29,6 +31,7 @@ export default {
 <style scoped >
 .login-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
     height: 100vh;
     justify-content: center;
@@ -36,6 +39,7 @@ export default {
     background: url('../assets/Hives/i_login_bg.jpg');
     background-position: center center;
     background-size: cover;
+    overflow: hidden;
 }
 
 .login-item {
@@ -52,11 +56,44 @@ export default {
     padding: 2vw;
     box-shadow: 0px 5px 5px #f9f9f97e;
     transition: all 0.2s ease 0s;
+    position: relative;
+    animation: animatebottom 1.2s ease-in-out;
 }
 
 .login-item:hover {
     box-shadow: 0px 15px 20px #ffffff86;
     transform: translateY(-4px);
     cursor: pointer;
+}
+
+.logo {
+    width: 30vw;
+    position: relative;
+    animation: animatetop 1.2s ease-in-out;
+    margin-bottom: 20px;
+}
+
+@keyframes animatetop {
+    from {
+        top: -300px;
+        opacity: 0
+    }
+
+    to {
+        top: 0;
+        opacity: 1
+    }
+}
+
+@keyframes animatebottom {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+
+    to {
+        bottom: 0;
+        opacity: 1
+    }
 }
 </style>
