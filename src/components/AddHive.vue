@@ -19,7 +19,6 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiPlus } from '@mdi/js';
-// import Overlay from 'vuejs-overlay';
 
 export default {
     components: {

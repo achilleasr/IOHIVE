@@ -10,11 +10,11 @@
     <div class=" hive-item-info">
         <div class="hive-item-icon"><img src="../assets/Hives/i_hives3.svg" /></div>
         <div class="hive-item-text">
-            <div class="hive-item-location"><img src="../assets/Hives/i_location_pin.svg" /> Apano Meria, Syros {{
-                hive.coordinates[0] + " " + hive.coordinates[1] }}</div>
-            <div class="hive-item-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Veritatis, distinctio quia. Tenetur dicta inventore dignissimos rem necessitatibus architecto
-                vel corporis nostrum magnam aliquid. Dolor cupiditate, tenetur recusandae praesentium modi fuga?
+            <div class="hive-item-location"><img src="../assets/Hives/i_location_pin.svg" /> Apano Meria, Syros
+                <!-- {{ hive.coordinates[0] + " " + hive.coordinates[1] }} -->
+            </div>
+            <div class="hive-item-description">
+                {{ hive.notes ? hive.notes : 'No notes' }}
             </div>
         </div>
         <div class="hive-item-status">
@@ -26,7 +26,6 @@
         <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }"
             @click="expandContentButton" />
         <span @click="expandContentButton" class="clickable"> Latest Inspection: Aug 20, 2022 10:07AM </span>
-        <!-- {{ hive.inspections[0] }} -->
     </div>
 </template>
 

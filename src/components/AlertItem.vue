@@ -15,7 +15,7 @@
 
         </span>
         <div v-if="expanded" class="details">
-            Note: {{ inspection.note }}
+            Alert: {{ alert.note }}
             <!-- Inspection expanded description details blah blah -->
         </div>
     </div>
@@ -23,7 +23,7 @@
 
 <script>
 export default {
-    name: 'InspectionItem',
+    name: 'AlertItem',
     data() {
         return {
             expanded: false,
@@ -38,11 +38,11 @@ export default {
         }
     },
     props: {
-        inspection: Object,
+        alert: Object,
     },
     computed: {
         formattedDate() {
-            const date = new Date(this.inspection.date);
+            const date = new Date(this.alert.date);
             const options = {
                 year: 'numeric',
                 month: 'long',

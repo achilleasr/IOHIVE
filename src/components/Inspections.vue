@@ -6,7 +6,7 @@
             <path fill-rule="evenodd"
                 d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
         </svg>
-        Previous Inspections
+        <svg-icon type="mdi" :path="path" /><span></span> <span>Previous Inspections </span>
     </h2>
 
     <div v-if="expanded" class="inspections-content">
@@ -17,18 +17,21 @@
 <script>
 import InspectionItem from './InspectionItem.vue';
 
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiArchiveEditOutline } from '@mdi/js';
+
 export default {
     name: 'Inspections',
     props: {
-        hive: Object,
         inspections: Array,
     },
     components: {
-        InspectionItem,
+        InspectionItem, SvgIcon,
     },
     data() {
         return {
             expanded: false,
+            path: mdiArchiveEditOutline,
         }
     },
     methods: {
@@ -41,7 +44,8 @@ export default {
 
 <style scoped>
 .title {
-    /* height: 2vw; */
+    display: flex;
+    gap: 10px;
 }
 
 .imgicon {
@@ -51,7 +55,6 @@ export default {
 }
 
 .inspections-content {
-    /* background-color: red; */
     display: flex;
     flex-direction: column;
     gap: 4px;

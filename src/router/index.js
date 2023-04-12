@@ -3,12 +3,18 @@ import { createRouter, createWebHistory } from "vue-router";
 import PageHives from "../views/PageHives.vue";
 import PageSettings from "../views/PageSettings.vue";
 import PageAccount from "../views/PageAccount.vue";
+import PageLogin from "../views/PageLogin.vue";
 
 const routes = [
   {
     path: "/",
     name: "/",
     component: PageHives,
+  },
+  {
+    path: "/login",
+    name: "/login",
+    component: PageLogin,
   },
   {
     path: "/settings",

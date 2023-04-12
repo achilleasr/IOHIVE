@@ -1,23 +1,41 @@
 <template>
-  <SideBar />
-  <HeaderCustom />
-  <div class="flex-container">
-    <div class="empty"></div>
-    <div class="main-content">
-      <router-view></router-view>
+  <span v-if="isAuthenticated">
+    <SideBar />
+    <HeaderCustom />
+    <div class="flex-container">
+      <div class="empty"></div>
+      <div class="main-content">
+        <router-view></router-view>
+      </div>
     </div>
-  </div>
+  </span>
+  <Login v-else />
+  <span id="overview"></span>
 </template>
 
 <script>
 import HeaderCustom from "./components/HeaderCustom.vue";
 import SideBar from "./components/SideBar.vue";
+import Login from "./components/Login.vue";
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'App',
   components: {
-    HeaderCustom, SideBar,
+    HeaderCustom, SideBar, Login,
   },
+  computed: {
+    ...mapGetters(['isAuthenticated'])
+  },
+  methods: {
+    login() {
+      this.$store.dispatch('login')
+    },
+    logout() {
+      this.$store.dispatch('logout')
+    }
+  }
+
 }
 </script>
 

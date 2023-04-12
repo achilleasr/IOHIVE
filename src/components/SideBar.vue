@@ -2,7 +2,7 @@
     <div class="sidebar">
         <router-link to="/">
             <div class="main-logo">
-                <img src="../assets/IOHIVE-logo-nobg.png" />
+                <img src="../assets/IOHIVE-logo-nobg.png" @click="logout" />
             </div>
         </router-link>
         <div class="pages">
@@ -42,9 +42,42 @@
                 </svg>
                 Settings
             </router-link>
+
+            <router-link to="/login" class="page" v-bind:class="{ 'activePage': $route.path === '/login' }">
+                <svg-icon type="mdi" :path="path"></svg-icon>
+                Login
+            </router-link>
         </div>
     </div>
 </template>
+
+<script>
+import { mapGetters } from 'vuex'
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiLogin } from '@mdi/js';
+export default {
+    name: "SideBar",
+    components: {
+        SvgIcon
+    },
+    data() {
+        return {
+            path: mdiLogin,
+        }
+    },
+    computed: {
+        ...mapGetters(['isAuthenticated'])
+    },
+    methods: {
+        login() {
+            this.$store.dispatch('login')
+        },
+        logout() {
+            this.$store.dispatch('logout')
+        }
+    }
+}
+</script>
 <style scoped>
 .sidebar {
     position: fixed;

@@ -4,7 +4,7 @@
             :options="{ zoomControl: false }">
             <l-tile-layer :url="url"></l-tile-layer>
             <span v-for="(hive, index) in hives" :key="index">
-                <l-marker :lat-lng="hive.coordinates">
+                <l-marker :lat-lng="hive.coordinates" v-if="hive.coordinates">
                     <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
                     <l-tooltip :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
                         {{ hive.name }}
@@ -92,19 +92,25 @@ export default {
         }
     }, computed: {
         bounds() {
-            const lats = this.hives.map((hive) => hive.coordinates[0]);
-            const lngs = this.hives.map((hive) => hive.coordinates[1]);
-            return [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
+            if (this.hives.coordinates) {
+                const lats = this.hives.map((hive) => hive.coordinates[0]);
+                const lngs = this.hives.map((hive) => hive.coordinates[1]);
+                return [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
+            }
+            else {
+                return [0, 0];
+            }
         }
     },
     created() {
         if (this.hives.length > 0) {
+            // if (this.hives.coordinates) {
             const lats = this.hives.map((hive) => hive.coordinates[0]);
             const lngs = this.hives.map((hive) => hive.coordinates[1]);
             const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
             const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
             this.center = [latAvg, lngAvg];
-
+            // }
 
         }
     },
@@ -112,12 +118,13 @@ export default {
         hives: {
             handler(newVal, oldVal) {
                 if (newVal !== oldVal) {
+                    // if (hives.coordinates) {
                     const lats = newVal.map((hive) => hive.coordinates[0]);
                     const lngs = newVal.map((hive) => hive.coordinates[1]);
                     const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
                     const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
                     this.center = [latAvg, lngAvg];
-
+                    // }
 
                 }
             },
