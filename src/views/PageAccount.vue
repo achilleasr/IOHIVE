@@ -5,29 +5,68 @@
         <form class="form">
             <div class="form-item">
                 <label>Username</label>
-                <input placeholder="Katemali25" />
+                <input :placeholder="getUsername()" />
             </div>
+
+            <div class="form-item">
+                <label>Email</label>
+                <input type="email" :placeholder="getEmail()" />
+            </div>
+
             <div class="form-item">
                 <label>Password</label>
                 <input type="password" placeholder="*******" />
             </div>
+
             <div class="form-item">
-                <label>Email</label>
-                <input type="email" placeholder="katemail.gmail.com" />
+                <label>New Password</label>
+                <input type="password" />
             </div>
             <div class="form-item">
+                <label> Confirm New Password</label>
+                <input type="password" />
+            </div>
+            <!-- <div class="form-item">
                 <label>First Name</label>
                 <input placeholder="Katerina" />
             </div>
             <div class="form-item">
                 <label>Last Name</label>
                 <input placeholder="Malisova" />
-            </div>
+            </div> -->
         </form>
 
         <div class="delete">Delete Account</div>
     </div>
 </template>
+
+<script>
+import { mapGetters } from 'vuex';
+
+
+export default {
+    name: 'PageAccount',
+    computed: {
+        ...mapGetters(['loginData'])
+    },
+    methods: {
+        getUsername() {
+            if (this.loginData) {
+                return this.loginData.name;
+            } else {
+                return 'Guest';
+            }
+        },
+        getEmail() {
+            if (this.loginData) {
+                return this.loginData.email;
+            } else {
+                return 'guest@gmail.com';
+            }
+        }
+    }
+}
+</script>
 
 <style scoped>
 h4 {

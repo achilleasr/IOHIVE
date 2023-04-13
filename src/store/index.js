@@ -1,11 +1,10 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-// Vue.use(Vuex);
-
 export default new Vuex.Store({
   state: {
     isAuthenticated: false,
+    loginData: null,
   },
   mutations: {
     login(state) {
@@ -16,18 +15,23 @@ export default new Vuex.Store({
       state.isAuthenticated = false;
       console.log("logged out");
     },
+    setLoginData(state, loginDataValue) {
+      state.loginData = loginDataValue;
+    },
   },
   actions: {
     login({ commit }) {
-      // Make an API call to authenticate the user and commit the "login" mutation
       commit("login");
     },
     logout({ commit }) {
-      // Make an API call to log out the user and commit the "logout" mutation
       commit("logout");
+    },
+    setLoginData({ commit }, loginDataVal) {
+      commit("setLoginData", loginDataVal);
     },
   },
   getters: {
     isAuthenticated: (state) => state.isAuthenticated,
+    loginData: (state) => state.loginData,
   },
 });
