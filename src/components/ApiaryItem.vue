@@ -1,7 +1,12 @@
 <template>
     <div class="block">
         <div :class="[selectedApiaryName === name ? 'selected' : '', 'apiary-item']">
-            <div class="apiary-title">{{ name }} </div>
+            <!-- <div class="apiary-circle-container">
+                <div class="apiary-circle" :style="{ 'background-color': getApiaryColor() }"></div>
+            </div> -->
+            <div class="apiary-title">
+                {{ name }}
+            </div>
             <div class="apiary-status">
                 <div class="apiary-hives">
                     <svg :class="selectedApiaryName === name ? 'hives-icon' : 'hives-icon-inverse'" viewBox="0 0 16 15"
@@ -30,6 +35,7 @@ export default {
         name: String,
         hives: Array,
         selectedApiaryName: String,
+        apiary: Object,
     },
     methods: {
         alerted() {
@@ -37,6 +43,14 @@ export default {
                 return true;
             } else {
                 return false;
+            }
+        },
+        getApiaryColor() {
+            if (this.apiary) {
+                return this.apiary.color;
+            }
+            else {
+                return '#379C5A';
             }
         }
     },
@@ -52,6 +66,22 @@ export default {
 
 .block:last-child {
     margin-right: 0px;
+}
+
+.apiary-circle-container {
+    position: absolute;
+
+}
+
+.apiary-circle {
+    position: relative;
+    top: -15px;
+    left: -15px;
+    width: 2vw;
+    height: 2vw;
+    border-radius: 20px;
+    background-color: tomato;
+    border: #3e4379;
 }
 
 .apiary-title {

@@ -35,7 +35,7 @@ export default {
         },
         customFormat(ms) {
             return (Date(ms))
-        }
+        },
     },
     props: {
         inspection: Object,

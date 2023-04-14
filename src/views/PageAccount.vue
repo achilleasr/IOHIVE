@@ -23,7 +23,7 @@
                 <input type="password" />
             </div>
             <div class="form-item">
-                <label> Confirm New Password</label>
+                <label> Confirm Password</label>
                 <input type="password" />
             </div>
             <!-- <div class="form-item">

@@ -63,28 +63,10 @@ export default {
                     // this.loginState = "Login Successful!!";
                     this.$store.dispatch('login');
                     this.$store.dispatch('setLoginData', this.loginData);
+                    this.$router.push('/#overview');
                 })
                 .catch(error => {
                     console.log(error);
-                    // this.loginState = "Login Failed";
-                });
-        },
-        async getSharedGroups(e) {
-            e.preventDefault();
-            await axios.get(sharedGroupsUrl, {
-                headers: {
-                    "Authorization": "Bearer " + this.apiToken,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Accept-language": "en",
-                }
-            }).then(response => {
-                this.groupsData = response.data;
-                // console.log(response.data);
-            })
-                .catch(error => {
-                    console.log(error);
-                    this.loginState = "Error " + error;
                 });
         },
     },
@@ -93,14 +75,8 @@ export default {
     data() {
         return {
             latestCommitDate: null,
-
-            loginData: null,
-            groupsData: null,
-            apiToken: null,
             email: null,
             password: null,
-            res: null,
-            loginState: null,
         };
     },
     async mounted() {

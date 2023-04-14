@@ -1,12 +1,14 @@
 <template>
     <div class="selected-apiary-title">
-        {{ selectedApiary.name }}
+        {{ selectedApiary && selectedApiary.name }}
         <span v-if="alerted()">
             <img src="../assets/Hives/i_alert.svg" />
         </span>
     </div>
-    <ApiaryMap :hives="selectedApiary.hives" />
+    <!-- <span v-if="selectedApiary"> -->
+    <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary" />
     <Hives :hives="selectedApiary.hives" />
+    <!-- </span> -->
 </template>
 
 <script>
@@ -20,15 +22,23 @@ export default {
     },
     props: {
         selectedApiary: Object,
+        locations: Object,
     },
 
     methods: {
         alerted() {
-            if (this.selectedApiary.hives.filter(e => e.alert == true).length > 0) {
+            if (this.selectedApiary && this.selectedApiary.hives.filter(e => e.alert == true).length > 0) {
                 return true;
             } else {
                 return false;
             }
+        }, checkForLocations() {
+            if (this.selectedApiary.hives[0].coordinates || this.selectedApiary.coordinate_lat) {
+                return true;
+            } else {
+                return false;
+            }
+
         }
     },
 }

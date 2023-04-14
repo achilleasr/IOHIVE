@@ -13,6 +13,7 @@ export default new Vuex.Store({
     },
     logout(state) {
       state.isAuthenticated = false;
+      state.loginData = null;
       console.log("logged out");
     },
     setLoginData(state, loginDataValue) {
