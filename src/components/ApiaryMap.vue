@@ -142,7 +142,7 @@ export default {
             } else if (this.apiary) {
                 const lats = this.apiary.coordinate_lat;
                 const lngs = this.apiary.coordinate_lon;
-                return [lats, lngs];
+                return [[lats, lngs - 0.001 * this.apiary.hives.length], [lats, lngs + 0.001 * this.apiary.hives.length]];
             }
             else {
                 return [37.4385, 24.9139];
@@ -156,6 +156,8 @@ export default {
             const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
             const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
             this.center = [latAvg, lngAvg];
+        } else if (this.apiary) {
+            this.center = [this.apiary.coordinate_lat, this.apiary.coordinate_lon];
         }
     },
     watch: {

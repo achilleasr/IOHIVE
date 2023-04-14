@@ -53,19 +53,7 @@ export default {
     },
     mounted() {
         if (this.loginData) {
-            axios.get(sharedGroupsUrl, {
-                headers: {
-                    "Authorization": "Bearer " + this.loginData.api_token,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Accept-language": "en",
-                }
-            }).then(response => {
-                this.sharedGroupsData = response.data;
-                // console.log(response.data);
-            }).catch(error => {
-                console.log(error);
-            });
+
 
             axios.get(locationsUrl, {
                 headers: {
@@ -76,11 +64,29 @@ export default {
                 }
             }).then(response => {
                 this.locationsData = response.data;
+                if (this.locationsData.locations.length > 0) {
+                    this.selectedApiary = this.locationsData.locations[0];
+                }
                 // console.log('locations: ', response.data.locations);
             }).catch(error => {
                 console.log(error);
             });
-
+            axios.get(sharedGroupsUrl, {
+                headers: {
+                    "Authorization": "Bearer " + this.loginData.api_token,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Accept-language": "en",
+                }
+            }).then(response => {
+                this.sharedGroupsData = response.data;
+                if (this.sharedGroupsData.groups.length > 0) {
+                    this.selectedApiary = this.sharedGroupsData.groups[0];
+                }
+                // console.log(response.data);
+            }).catch(error => {
+                console.log(error);
+            });
             // axios.get(locationUrl, {
             //     headers: {
             //         "Authorization": "Bearer " + this.loginData.api_token,
@@ -112,9 +118,6 @@ export default {
     },
     created() {
         this.selectedApiary = this.apiaries[0]; // set the first item as the initially selected item
-        if (this.sharedGroupsData) {
-            this.selectedApiary = this.sharedGroupsData.groups[0];
-        }
     },
 }
 
