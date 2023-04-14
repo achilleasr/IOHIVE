@@ -153,7 +153,7 @@ export default {
 .logo {
     width: 30vw;
     position: relative;
-    animation: animatetop 0.8s ease-in-out;
+    animation: animatetop 1.2s ease-in-out;
     margin-bottom: 20px;
 }
 
@@ -189,7 +189,7 @@ export default {
     box-shadow: 0px 5px 5px #f9f9f97e;
     transition: all 0.2s ease 0s;
     position: relative;
-    animation: animatebottom 0.8s ease-in-out;
+    animation: animatebottom 1.2s ease-in-out;
 }
 
 
