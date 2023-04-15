@@ -25,11 +25,16 @@ import { apiariesHardcoded } from "./apiariesHardcoded.js"
 import axios from 'axios';
 import { mapGetters } from 'vuex';
 
-const sharedGroupsUrl = 'https://api.beep.nl/api/groups';
-const dashboardGroupsUrl = 'https://api.beep.nl/api/dashboardgroups';
+const sharedGroupsUrl = "https://api.beep.nl/api/groups";
 const devicesUrl = "https://api.beep.nl/api/devices";
 const locationsUrl = "https://api.beep.nl/api/locations";
-const locationUrl = "https://api.beep.nl/api/locations/7125"
+const inspectionsUrl = "https://api.beep.nl/api/inspections";
+const measurementTypesUrl = "https://api.beep.nl/api/sensors/measurement_types_available";
+const inspectionsListsUrl = "https://api.beep.nl/api/inspections/lists";
+const lastvaluesUrl = "https://api.beep.nl/api/sensors/lastvalues";
+const measurementsUrl = "https://api.beep.nl/api/sensors/measurements";
+
+
 
 export default {
     name: 'Apiaries',
@@ -45,7 +50,7 @@ export default {
             sharedGroupsData: null,
             devicesData: null,
             locationsData: null,
-            dashboardGroupsData: null,
+            inspectionsData: null,
         }
     },
     computed: {
@@ -53,67 +58,68 @@ export default {
     },
     mounted() {
         if (this.loginData) {
+            const headers = {
+                "Authorization": "Bearer " + this.loginData.api_token,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Accept-language": "en",
+            };
 
-
-            axios.get(locationsUrl, {
-                headers: {
-                    "Authorization": "Bearer " + this.loginData.api_token,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Accept-language": "en",
-                }
-            }).then(response => {
+            // LOCATIONS FETCH
+            axios.get(locationsUrl, { headers }).then(response => {
                 this.locationsData = response.data;
                 if (this.locationsData.locations.length > 0) {
                     this.selectedApiary = this.locationsData.locations[0];
                 }
-                // console.log('locations: ', response.data.locations);
-            }).catch(error => {
-                console.log(error);
-            });
-            axios.get(sharedGroupsUrl, {
-                headers: {
-                    "Authorization": "Bearer " + this.loginData.api_token,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Accept-language": "en",
-                }
-            }).then(response => {
+            }).catch(error => { console.log(error); });
+
+            // SHARED GROUPS FETCH
+            axios.get(sharedGroupsUrl, { headers }).then(response => {
                 this.sharedGroupsData = response.data;
                 if (this.sharedGroupsData.groups.length > 0) {
                     this.selectedApiary = this.sharedGroupsData.groups[0];
                 }
-                // console.log(response.data);
-            }).catch(error => {
-                console.log(error);
-            });
-            // axios.get(locationUrl, {
-            //     headers: {
-            //         "Authorization": "Bearer " + this.loginData.api_token,
-            //         "Content-Type": "application/json",
-            //         "Accept": "application/json",
-            //         "Accept-language": "en",
-            //     }
-            // }).then(response => {
-            //     // this.dashboardGroupsData = response.data;
-            //     console.log("location 7125: ", response.data);
-            // }).catch(error => {
-            //     console.log(error);
-            // });
+            }).catch(error => { console.log(error); });
 
-            axios.get(devicesUrl, {
-                headers: {
-                    "Authorization": "Bearer " + this.loginData.api_token,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Accept-language": "en",
-                }
-            }).then(response => {
+            // DEVICES FETCH
+            axios.get(devicesUrl, { headers }).then(response => {
                 this.devicesData = response.data;
-                // console.log("devices: ", response.data);
-            }).catch(error => {
-                console.log(error);
-            });
+                console.log("devices: ", response.data);
+            }).catch(error => { console.log(error); });
+
+
+            // INSPECTIONS
+            let options = {
+                headers: headers,
+                params: {
+                    // "id": 3476,
+                    "index": 0,
+                }
+            };
+            axios.get(inspectionsUrl, options).then(response => {
+                this.inspectionsData = response.data;
+                console.log('inspections: ', response.data);
+            }).catch(error => { console.log(error); });
+
+            // // INSPECTIONS LIST
+            // axios.get(inspectionsListsUrl, {headers}).then(response => {
+            //     console.log('inspections list: ', response.data);
+            // }).catch(error => { console.log(error); });
+
+            // LAST VALUES
+            axios.get(lastvaluesUrl, options).then(response => {
+                console.log('last values: ', response.data);
+            }).catch(error => { console.log(error); });
+
+            // // MEASUREMENT TYPES
+            // axios.get(measurementTypesUrl, {headers}).then(response => {
+            //     console.log('measurement types: ', response.data);
+            // }).catch(error => { console.log(error); });
+
+            // MEASUREMENTS
+            axios.get(measurementsUrl, options).then(response => {
+                console.log('measurements: ', response.data);
+            }).catch(error => { console.log(error); });
         }
     },
     created() {

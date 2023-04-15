@@ -17,6 +17,8 @@
             elit. Ea corporis
             voluptatem explicabo aliquid rerum, eligendi placeat voluptate reprehenderit magni eos recusandae, facilis rem
             ipsam fugiat animi nihil dolor unde corrupti?
+
+            Battery: {{ battery }}
         </span>
         <div class="mongo-data-flex">
             <iframe style="background: rgb(12, 12, 22); border: none; border-radius: 20px;" class="mongo-box"
@@ -40,6 +42,9 @@ export default {
     name: 'Measurements',
     components: {
         SvgIcon,
+    },
+    props: {
+        battery: Number,
     },
     data() {
         return {

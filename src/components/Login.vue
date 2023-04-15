@@ -11,7 +11,7 @@
                 </div>
                 <div class="form-item">
                     <label>Password</label>
-                    <input type="password" v-model="password" placeholder="*******" required />
+                    <input type="password" v-model="password" placeholder="********" required />
                 </div>
                 <div class="form-item">
                     <button type="submit" @click="postLogin"> Login </button>
