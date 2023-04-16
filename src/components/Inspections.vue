@@ -10,6 +10,13 @@
     </h2>
 
     <div v-if="expanded" class="inspections-content">
+        <!-- {{ hive.id }} -->
+        <span v-if="inspectionsData">
+            <div v-for="(inspection, index) in inspectionsData.inspections.data" :key="index"> {{ 'Created at: ' +
+                inspection.created_at + " impression : " + inspection.impression
+            }}
+            </div>
+        </span>
         <InspectionItem v-for="(inspection, index) in inspections" :key="index" :inspection="inspection" />
     </div>
 </template>
@@ -20,10 +27,16 @@ import InspectionItem from './InspectionItem.vue';
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiArchiveEditOutline } from '@mdi/js';
 
+import axios from 'axios';
+import { mapGetters } from 'vuex';
+const inspectionsUrl = "https://api.beep.nl/api/inspections";
+
+
 export default {
     name: 'Inspections',
     props: {
         inspections: Array,
+        hive: Object,
     },
     components: {
         InspectionItem, SvgIcon,
@@ -32,11 +45,35 @@ export default {
         return {
             expanded: false,
             path: mdiArchiveEditOutline,
+            inspectionsData: null,
         }
+    },
+    computed: {
+        ...mapGetters(['loginData'])
     },
     methods: {
         expandContentButton() {
             this.expanded = !this.expanded;
+        }
+    }, mounted() {
+        if (this.loginData) {
+            const headers = {
+                "Authorization": "Bearer " + this.loginData.api_token,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Accept-language": "en",
+            };
+            let options = {
+                headers: headers,
+                params: {
+                    // "id": this.hive.id,
+                    // "index": 0,s
+                }
+            };
+            axios.get("https://api.beep.nl/api/inspections/hive/" + this.hive.id, options).then(response => {
+                this.inspectionsData = response.data;
+                console.log('inspections ' + this.hive.id + ' : ', this.inspectionsData.inspections.data);
+            }).catch(error => { console.log(error); });
         }
     }
 }

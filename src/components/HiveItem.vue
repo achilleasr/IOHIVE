@@ -5,7 +5,7 @@
             <HiveGrid v-if="expanded" />
         </span>
         <span class="white" v-if="expanded">
-            <Inspections :inspections="hive.inspections" />
+            <Inspections :inspections="hive.inspections" :hive="hive" />
             <hr class="line" />
             <Measurements />
             <hr class="line" />
