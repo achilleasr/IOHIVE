@@ -7,7 +7,8 @@
                 <span v-if="hive.coordinates">
                     <l-marker :lat-lng="hive.coordinates">
                         <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
-                        <l-tooltip :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                        <l-tooltip
+                            :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
                             {{ hive.name }}
                         </l-tooltip>
                     </l-marker>
@@ -21,12 +22,14 @@
                 <span v-else-if="apiary.coordinate_lat">
                     <l-marker :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
                         <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
-                        <l-tooltip :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                        <l-tooltip
+                            :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
                             {{ hive.name }}
                         </l-tooltip>
                     </l-marker>
 
-                    <l-marker v-if="hive.alert" :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
+                    <l-marker v-if="hive.alert"
+                        :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
                         <l-icon :icon-url="require('@/assets/Hives/i_alert.svg')" :icon-size="[20, 20]"
                             :iconAnchor="[-2, 5]" />
                     </l-marker>
@@ -96,9 +99,9 @@ export default {
     data() {
         return {
             path: mdiMapOutline,
-            // url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             // url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-            url: 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png',
+            //url: 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png',
             // url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
             // url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
             attribution:
