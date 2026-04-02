@@ -1,7 +1,7 @@
 import Vue from "vue";
-import Vuex from "vuex";
+import { createStore } from "vuex";
 
-export default new Vuex.Store({
+export default createStore({
   state: {
     isAuthenticated: false,
     loginData: null,
@@ -10,10 +10,12 @@ export default new Vuex.Store({
     login(state) {
       state.isAuthenticated = true;
       console.log("logged in");
+      localStorage.setItem("api_token", state.loginData?.api_token);
     },
     logout(state) {
       state.isAuthenticated = false;
       state.loginData = null;
+      localStorage.removeItem("api_token");
       console.log("logged out");
     },
     setLoginData(state, loginDataValue) {
