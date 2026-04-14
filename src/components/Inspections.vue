@@ -14,7 +14,7 @@
         <span v-if="inspectionsData">
             <div v-for="(inspection, index) in inspectionsData.inspections.data" :key="index"> {{ 'Created at: ' +
                 inspection.created_at + " impression : " + inspection.impression
-                }}
+            }}
             </div>
         </span>
         <InspectionItem v-for="(inspection, index) in inspections" :key="index" :inspection="inspection" />
@@ -28,7 +28,7 @@ import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiArchiveEditOutline } from '@mdi/js';
 
 import axios from 'axios';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 const inspectionsUrl = "https://api.beep.nl/api/inspections";
 
 
@@ -49,7 +49,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['loginData'])
+        ...mapState(['loginData'])
     },
     methods: {
         expandContentButton() {

@@ -49,7 +49,7 @@ import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiMapOutline } from '@mdi/js';
 import L from 'leaflet';
 import axios from 'axios';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 import {
     LMap,
@@ -136,7 +136,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['loginData']),
+        ...mapState(['loginData']),
         bounds() {
             if (this.hives.length > 0 && this.hives[0].coordinates) {
                 const lats = this.hives.map((hive) => hive.coordinates[0]);

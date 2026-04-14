@@ -41,13 +41,13 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 
 export default {
     name: 'PageAccount',
     computed: {
-        ...mapGetters(['loginData'])
+        ...mapState(['loginData'])
     },
     methods: {
         getUsername() {

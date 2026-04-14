@@ -3,20 +3,17 @@
         Apiaries
     </div>
     <div class="apiaries-scroll">
-
-
         <ApiaryItem v-if="locationsData" v-for="(location, index) in locationsData.locations" :key="index"
-            :name="location.name" :hives="location.hives" :selectedApiaryName="this.selectedApiary.name"
-            @click="this.selectedApiary = location" />
+            :name="location.name" :hives="location.hives" :selectedApiaryName="selectedApiary.name"
+            @click="selectedApiary = location" />
         <ApiaryItem v-if="sharedGroupsData" v-for="(group, index) in sharedGroupsData.groups" :key="index"
-            :name="group.name" :hives="group.hives" :selectedApiaryName="this.selectedApiary.name"
-            @click="this.selectedApiary = group" />
+            :name="group.name" :hives="group.hives" :selectedApiaryName="selectedApiary.name"
+            @click="selectedApiary = group" />
 
         <ApiaryItem v-if="loginData == null" v-for="(apiary, index) in apiaries" :key="index" :name="apiary.name"
-            :hives="apiary.hives" :selectedApiaryName="this.selectedApiary.name"
-            @click="this.selectedApiary = apiary" />
+            :hives="apiary.hives" :selectedApiaryName="selectedApiary.name" @click="selectedApiary = apiary" />
     </div>
-    <SelectedApiary :selectedApiary="this.selectedApiary" :locations="locationsData" />
+    <SelectedApiary :selectedApiary="selectedApiary" :locations="locationsData" />
 </template>
 
 <script>
@@ -44,9 +41,7 @@ export default {
     },
     data() {
         return {
-            selectedApiary: {
-                name: 'none',
-            },
+            selectedApiary: null,
             apiaries: apiariesHardcoded,
             sharedGroupsData: null,
             devicesData: null,
@@ -69,17 +64,17 @@ export default {
             // LOCATIONS FETCH
             axios.get(locationsUrl, { headers }).then(response => {
                 this.locationsData = response.data;
-                if (this.locationsData.locations.length > 0) {
-                    this.selectedApiary = this.locationsData.locations[0];
-                }
+                // if (this.locationsData.locations.length > 0) {
+                //     this.selectedApiary = this.locationsData.locations[0];
+                // }
             }).catch(error => { console.log(error); });
 
             // SHARED GROUPS FETCH
             axios.get(sharedGroupsUrl, { headers }).then(response => {
                 this.sharedGroupsData = response.data;
-                if (this.sharedGroupsData.groups.length > 0) {
-                    this.selectedApiary = this.sharedGroupsData.groups[0];
-                }
+                // if (this.sharedGroupsData.groups.length > 0) {
+                //     this.selectedApiary = this.sharedGroupsData.groups[0];
+                // }
             }).catch(error => { console.log(error); });
 
             // DEVICES FETCH
