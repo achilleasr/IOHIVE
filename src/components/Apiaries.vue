@@ -13,7 +13,8 @@
             @click="this.selectedApiary = group" />
 
         <ApiaryItem v-if="loginData == null" v-for="(apiary, index) in apiaries" :key="index" :name="apiary.name"
-            :hives="apiary.hives" :selectedApiaryName="this.selectedApiary.name" @click="this.selectedApiary = apiary" />
+            :hives="apiary.hives" :selectedApiaryName="this.selectedApiary.name"
+            @click="this.selectedApiary = apiary" />
     </div>
     <SelectedApiary :selectedApiary="this.selectedApiary" :locations="locationsData" />
 </template>
@@ -23,7 +24,7 @@ import ApiaryItem from './ApiaryItem.vue';
 import SelectedApiary from "./SelectedApiary.vue";
 import { apiariesHardcoded } from "./apiariesHardcoded.js"
 import axios from 'axios';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 const sharedGroupsUrl = "https://api.beep.nl/api/groups";
 const devicesUrl = "https://api.beep.nl/api/devices";
@@ -39,7 +40,7 @@ const measurementsUrl = "https://api.beep.nl/api/sensors/measurements";
 export default {
     name: 'Apiaries',
     components: {
-        SelectedApiary, ApiaryItem, apiariesHardcoded
+        SelectedApiary, ApiaryItem
     },
     data() {
         return {
@@ -54,7 +55,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['loginData'])
+        ...mapState(['loginData'])
     },
     mounted() {
         if (this.loginData) {

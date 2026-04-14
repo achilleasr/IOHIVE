@@ -1,6 +1,5 @@
 <template>
     <span class="login-container">
-        <span id="p5-Canvas" class="p5"></span>
         <img src="../assets/IOHIVE-logo-nobg.png" class="logo">
         <div class="login-item">
             Login
@@ -19,22 +18,12 @@
             </form>
             <div class="noAccountBox" @click="login">Continue without account</div>
         </div>
-        <footer>
-            <a href="https://github.com/achilleasr/IOHIVE" target="_blank" class="footer">
-                Last updated on {{ latestCommitDate }}
-            </a>
-        </footer>
     </span>
 </template>
 
 <script>
-// import { mapGetters } from 'vuex';
 import axios from 'axios';
 
-//import p5 from 'p5';
-//import beeImage from '@/assets/Hives/i_bee.png';
-
-const sharedGroupsUrl = 'https://api.beep.nl/api/groups';
 const loginUrl = 'https://api.beep.nl/api/login';
 const config = {
     headers: {
@@ -48,7 +37,7 @@ export default {
     name: 'Login',
     methods: {
         login() {
-            this.$store.dispatch('login')
+            this.$store.commit('login')
         },
         async postLogin(e) {
             e.preventDefault();
@@ -57,12 +46,9 @@ export default {
                 "password": this.password
             }, config)
                 .then(response => {
-                    this.loginData = response.data;
-                    // console.log(response.data);
-                    this.apiToken = this.loginData.api_token;
-                    // this.loginState = "Login Successful!!";
-                    this.$store.dispatch('login');
-                    this.$store.dispatch('setLoginData', this.loginData);
+                    console.log(response.data);
+                    this.$store.commit('login');
+                    this.$store.commit('setLoginData', response.data);
                     this.$router.push('/#overview');
                 })
                 .catch(error => {
@@ -71,85 +57,16 @@ export default {
         },
     },
 
-
     data() {
         return {
-            latestCommitDate: null,
             email: null,
             password: null,
         };
-    },
-    async mounted() {
-        const repoUrl = "https://api.github.com/repos/achilleasr/IOHIVE/commits";
-        const response = await fetch(repoUrl);
-        const commits = await response.json();
-        const commitDate = new Date(commits[0].commit.author.date);
-        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-        this.latestCommitDate = commitDate.toLocaleString('en-US', options);
-
-
-
-
-        // const script = function (p5) {
-        //     var speed = 2;
-        //     var posX = 0;
-        //     let img;
-
-        //     p5.preload = _ => {
-        //         img = p5.loadImage(beeImage);
-        //     }
-
-        //     p5.setup = _ => {
-        //         const canvas = p5.createCanvas(window.innerWidth * 0.993, window.innerHeight * 0.993);
-        //         canvas.parent('p5-Canvas');
-        //     }
-        //     p5.draw = _ => {
-        //         p5.clear();
-        //         const degree = p5.frameCount * 3;
-        //         // const y = p5.sin(p5.radians(degree)) * 50;
-
-        //         // p5.push();
-        //         // p5.translate(0, p5.height * 0.7);
-        //         // p5.translate(posX + 20, y);
-        //         // p5.rotate(p5.radians(y + 90));
-        //         // p5.image(img, 0, 0, 30, 30);
-        //         // p5.pop();
-
-        //         p5.image(img,
-        //             p5.width * p5.noise(degree * 0.002),
-        //             p5.height * p5.noise(degree * 0.002 - 80),
-        //             30, 30);
-
-        //         p5.image(img,
-        //             p5.width * p5.noise(degree * 0.002 + 80),
-        //             p5.height * p5.noise(degree * 0.002 - 180),
-        //             30, 30);
-        //         // posX += speed;
-
-        //         // if (posX > p5.width || posX < 0) {
-        //         //     speed *= -1;
-        //         // }
-        //     }
-        // }
-        // const P5 = require('p5');
-        // new P5(script);
-
     }
 }
 </script>
 
 <style scoped>
-.p5 {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    border: 0px;
-}
-
-
-
 .logo {
     width: 30vw;
     position: relative;
@@ -163,7 +80,6 @@ export default {
     align-items: center;
     height: 100vh;
     justify-content: center;
-    /* background-color: rgb(245, 180, 76); */
     background: url('../assets/Hives/i_login_bg.jpg');
     background-position: center center;
     background-size: cover;
@@ -191,8 +107,6 @@ export default {
     position: relative;
     animation: animatebottom 1.2s ease-in-out;
 }
-
-
 
 
 button {
@@ -279,29 +193,5 @@ footer {
 
 .footer {
     color: white;
-}
-
-@keyframes animatetop {
-    from {
-        top: -300px;
-        opacity: 0
-    }
-
-    to {
-        top: 0;
-        opacity: 1
-    }
-}
-
-@keyframes animatebottom {
-    from {
-        bottom: -300px;
-        opacity: 0
-    }
-
-    to {
-        bottom: 0;
-        opacity: 1
-    }
 }
 </style>

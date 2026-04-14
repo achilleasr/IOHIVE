@@ -14,7 +14,7 @@
         <span v-if="inspectionsData">
             <div v-for="(inspection, index) in inspectionsData.inspections.data" :key="index"> {{ 'Created at: ' +
                 inspection.created_at + " impression : " + inspection.impression
-            }}
+                }}
             </div>
         </span>
         <InspectionItem v-for="(inspection, index) in inspections" :key="index" :inspection="inspection" />
@@ -56,7 +56,7 @@ export default {
             this.expanded = !this.expanded;
         }
     }, mounted() {
-        if (this.loginData) {
+        if (this.loginData && this.hive && this.hive.id != null) {
             const headers = {
                 "Authorization": "Bearer " + this.loginData.api_token,
                 "Content-Type": "application/json",
@@ -73,7 +73,9 @@ export default {
             axios.get("https://api.beep.nl/api/inspections/hive/" + this.hive.id, options).then(response => {
                 this.inspectionsData = response.data;
                 console.log('inspections ' + this.hive.id + ' : ', this.inspectionsData.inspections.data);
-            }).catch(error => { console.log(error); });
+            }).catch(error => {
+                console.warn(`[Inspections] Failed to fetch inspections for hive ${this.hive.id}:`, error.message); this.inspectionsData = null;
+            });
         }
     }
 }

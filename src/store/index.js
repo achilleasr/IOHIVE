@@ -1,40 +1,36 @@
-import Vue from "vue";
 import { createStore } from "vuex";
 
-export default createStore({
+const savedLoginData = (() => {
+  try {
+    const raw = localStorage.getItem("iohive_login");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+})();
+
+const myStore = createStore({
   state: {
-    isAuthenticated: false,
-    loginData: null,
+    isAuthenticated: !!savedLoginData,
+    loginData: savedLoginData,
   },
+
   mutations: {
     login(state) {
       state.isAuthenticated = true;
-      console.log("logged in");
-      localStorage.setItem("api_token", state.loginData?.api_token);
     },
     logout(state) {
       state.isAuthenticated = false;
       state.loginData = null;
-      localStorage.removeItem("api_token");
-      console.log("logged out");
+      localStorage.removeItem("iohive_login");
     },
     setLoginData(state, loginDataValue) {
       state.loginData = loginDataValue;
+      if (loginDataValue) {
+        localStorage.setItem("iohive_login", JSON.stringify(loginDataValue));
+      }
     },
-  },
-  actions: {
-    login({ commit }) {
-      commit("login");
-    },
-    logout({ commit }) {
-      commit("logout");
-    },
-    setLoginData({ commit }, loginDataVal) {
-      commit("setLoginData", loginDataVal);
-    },
-  },
-  getters: {
-    isAuthenticated: (state) => state.isAuthenticated,
-    loginData: (state) => state.loginData,
   },
 });
+
+export default myStore;

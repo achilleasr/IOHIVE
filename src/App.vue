@@ -17,7 +17,7 @@
 import HeaderCustom from "./components/HeaderCustom.vue";
 import SideBar from "./components/SideBar.vue";
 import Login from "./components/Login.vue";
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 
 export default {
   name: 'App',
@@ -25,14 +25,11 @@ export default {
     HeaderCustom, SideBar, Login,
   },
   computed: {
-    ...mapGetters(['isAuthenticated'])
+    ...mapState(['isAuthenticated'])
   },
   methods: {
-    login() {
-      this.$store.dispatch('login')
-    },
     logout() {
-      this.$store.dispatch('logout')
+      this.$store.commit('logout')
     }
   }
 

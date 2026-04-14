@@ -1,7 +1,7 @@
 <template>
     <span id="overview"></span>
     <div class="block">
-        <div v-if="overlayShown" class="overlay" @click.self="overlayShown = flase">
+        <div v-if="overlayShown" class="overlay" @click.self="overlayShown = false">
             <div class="overlay-card">
                 Add Apiary
                 <br />
