@@ -1,6 +1,6 @@
 <template>
     <header class="header">
-        <form action="/searchFor.php">
+        <!-- <form action="/searchFor.php">
 
             <input type="text" placeholder="Search.." name="search" class="search-bar">
             <button type="submit">
@@ -12,7 +12,7 @@
             </button>
 
 
-        </form>
+        </form> -->
         <div class="account">
             <div class="notifications"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <!-- <title>Notifications</title> -->

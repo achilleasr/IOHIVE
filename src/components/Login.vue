@@ -16,53 +16,37 @@
                     <button type="submit" @click="postLogin"> Login </button>
                 </div>
             </form>
-            <div class="noAccountBox" @click="login">Continue without account</div>
+            <div class="noAccountBox" @click="loginAsGuest">Continue without account</div>
         </div>
     </span>
 </template>
 
 <script>
-import axios from 'axios';
-
-const loginUrl = 'https://api.beep.nl/api/login';
-const config = {
-    headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Accept-language": "en",
-    }
-};
-
 export default {
     name: 'Login',
-    methods: {
-        login() {
-            this.$store.commit('login')
-        },
-        async postLogin(e) {
-            e.preventDefault();
-            await axios.post(loginUrl, {
-                "email": this.email,
-                "password": this.password
-            }, config)
-                .then(response => {
-                    console.log(response.data);
-                    this.$store.commit('login');
-                    this.$store.commit('setLoginData', response.data);
-                    this.$router.push('/#overview');
-                })
-                .catch(error => {
-                    console.log(error);
-                });
-        },
-    },
-
     data() {
         return {
             email: null,
             password: null,
         };
-    }
+    },
+    methods: {
+        loginAsGuest() {
+            this.$router.push('/#overview');
+        },
+        async postLogin(e) {
+            e.preventDefault();
+            try {
+                await this.$store.dispatch('login', {
+                    email: this.email,
+                    password: this.password,
+                });
+                this.$router.push('/#overview');
+            } catch (error) {
+                console.log("login failed", error);
+            }
+        },
+    },
 }
 </script>
 

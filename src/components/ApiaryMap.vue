@@ -48,8 +48,6 @@
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiMapOutline } from '@mdi/js';
 import L from 'leaflet';
-import axios from 'axios';
-import { mapState } from 'vuex';
 
 import {
     LMap,
@@ -65,10 +63,6 @@ import {
     LRectangle,
 } from "@vue-leaflet/vue-leaflet";
 import "leaflet/dist/leaflet.css";
-
-
-const locationsUrl = "https://api.beep.nl/api/locations";
-
 
 export default {
     name: 'ApiaryMap',
@@ -100,10 +94,6 @@ export default {
         return {
             path: mdiMapOutline,
             url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            // url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-            //url: 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png',
-            // url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-            // url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
             attribution:
                 '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
             zoom: 11,
@@ -115,28 +105,9 @@ export default {
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34]
             }),
-            locationsData: null,
-        }
-    },
-    mounted() {
-        if (this.loginData) {
-            axios.get(locationsUrl, {
-                headers: {
-                    "Authorization": "Bearer " + this.loginData.api_token,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Accept-language": "en",
-                }
-            }).then(response => {
-                this.locationsData = response.data;
-                // console.log(this.locationsData.locations);
-            }).catch(error => {
-                console.log(error);
-            });
         }
     },
     computed: {
-        ...mapState(['loginData']),
         bounds() {
             if (this.hives.length > 0 && this.hives[0].coordinates) {
                 const lats = this.hives.map((hive) => hive.coordinates[0]);
@@ -180,7 +151,6 @@ export default {
                         const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
                         this.center = [latAvg, lngAvg];
                     }
-
                 }
             },
             deep: true

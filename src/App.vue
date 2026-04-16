@@ -17,7 +17,7 @@
 import HeaderCustom from "./components/HeaderCustom.vue";
 import SideBar from "./components/SideBar.vue";
 import Login from "./components/Login.vue";
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'App',
@@ -25,14 +25,13 @@ export default {
     HeaderCustom, SideBar, Login,
   },
   computed: {
-    ...mapState(['isAuthenticated'])
+    ...mapGetters(['isAuthenticated'])
   },
   methods: {
     logout() {
-      this.$store.commit('logout')
+      this.$store.dispatch('logout')
     }
   }
-
 }
 </script>
 
@@ -41,7 +40,6 @@ export default {
   /* Main stroke color */
   --stroke-color: #919296;
 }
-
 
 /* width */
 ::-webkit-scrollbar {
@@ -91,7 +89,6 @@ a {
   color: var(--stroke-color);
 }
 
-
 .flex-container {
   display: flex;
   flex-direction: row;
@@ -108,12 +105,10 @@ a {
   width: 74vw;
   border-radius: 10px;
   padding: 0px 5vw 0px 1vw;
-
   margin-top: 5.5vw;
   display: flex;
   gap: 1vh;
   flex-direction: column;
-  /* overflow: auto; */
 }
 
 .rotated180 {
@@ -134,7 +129,6 @@ a {
   font-family: TwCen;
 }
 
-/* this removes tooltips' white triangle from geojson data (pink circle markers) */
 .leaflet-tooltip-top:before,
 .leaflet-tooltip-bottom:before,
 .leaflet-tooltip-left:before,

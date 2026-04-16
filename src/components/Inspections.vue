@@ -10,11 +10,9 @@
     </h2>
 
     <div v-if="expanded" class="inspections-content">
-        <!-- {{ hive.id }} -->
-        <span v-if="inspectionsData">
-            <div v-for="(inspection, index) in inspectionsData.inspections.data" :key="index"> {{ 'Created at: ' +
-                inspection.created_at + " impression : " + inspection.impression
-            }}
+        <span v-if="hiveInspections">
+            <div v-for="(inspection, index) in hiveInspections.inspections.data" :key="index">
+                {{ 'Created at: ' + inspection.created_at + " impression : " + inspection.impression }}
             </div>
         </span>
         <InspectionItem v-for="(inspection, index) in inspections" :key="index" :inspection="inspection" />
@@ -23,14 +21,9 @@
 
 <script>
 import InspectionItem from './InspectionItem.vue';
-
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiArchiveEditOutline } from '@mdi/js';
-
-import axios from 'axios';
 import { mapState } from 'vuex';
-const inspectionsUrl = "https://api.beep.nl/api/inspections";
-
 
 export default {
     name: 'Inspections',
@@ -45,39 +38,25 @@ export default {
         return {
             expanded: false,
             path: mdiArchiveEditOutline,
-            inspectionsData: null,
         }
     },
     computed: {
-        ...mapState(['loginData'])
+        ...mapState(['inspectionsByHive']),
+        hiveInspections() {
+            if (this.hive && this.hive.id) {
+                return this.inspectionsByHive[this.hive.id] || null;
+            }
+            return null;
+        },
     },
     methods: {
         expandContentButton() {
             this.expanded = !this.expanded;
-        }
-    }, mounted() {
-        if (this.loginData && this.hive && this.hive.id != null) {
-            const headers = {
-                "Authorization": "Bearer " + this.loginData.api_token,
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Accept-language": "en",
-            };
-            let options = {
-                headers: headers,
-                params: {
-                    // "id": this.hive.id,
-                    // "index": 0,s
-                }
-            };
-            axios.get("https://api.beep.nl/api/inspections/hive/" + this.hive.id, options).then(response => {
-                this.inspectionsData = response.data;
-                console.log('inspections ' + this.hive.id + ' : ', this.inspectionsData.inspections.data);
-            }).catch(error => {
-                console.warn(`[Inspections] Failed to fetch inspections for hive ${this.hive.id}:`, error.message); this.inspectionsData = null;
-            });
-        }
-    }
+            if (this.expanded && !this.hiveInspections && this.hive && this.hive.id) {
+                this.$store.dispatch('loadHiveInspections', this.hive.id);
+            }
+        },
+    },
 }
 </script>
 
