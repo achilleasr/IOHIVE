@@ -13,12 +13,12 @@
                 :hives="group.hives" :selectedApiaryName="selectedApiary.name" @click="selectedApiary = group" />
         </template>
 
-        <template v-if="!loginData">
+        <template v-if="!loginData || loginData.guest">
             <ApiaryItem v-for="(apiary, index) in apiaries" :key="'demo-' + index" :name="apiary.name"
                 :hives="apiary.hives" :selectedApiaryName="selectedApiary.name" @click="selectedApiary = apiary" />
         </template>
     </div>
-    <SelectedApiary :selectedApiary="selectedApiary" :locations="locationsData" />
+    <SelectedApiary :selectedApiary="selectedApiary" :locations="locations" />
 </template>
 
 <script>
@@ -53,7 +53,7 @@ export default {
         },
     },
     created() {
-        if (!this.loginData) {
+        if (!this.loginData || this.loginData.guest) {
             this.selectedApiary = this.apiaries[0];
         }
     },

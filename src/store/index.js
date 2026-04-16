@@ -84,6 +84,10 @@ const myStore = createStore({
       }
     },
 
+    loginAsGuest({ commit }) {
+      commit("setLoginData", { guest: true });
+    },
+
     logout({ commit }) {
       commit("clearLogin");
     },

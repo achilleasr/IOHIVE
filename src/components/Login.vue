@@ -31,7 +31,8 @@ export default {
         };
     },
     methods: {
-        loginAsGuest() {
+        async loginAsGuest() {
+            await this.$store.dispatch('loginAsGuest');
             this.$router.push('/#overview');
         },
         async postLogin(e) {
