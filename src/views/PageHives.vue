@@ -1,17 +1,15 @@
 <template>
-    <AddHive />
+    <span id="overview"></span>
     <Apiaries />
 </template>
 
 <script>
-import SelectedApiary from "../components/SelectedApiary.vue";
 import Apiaries from "../components/Apiaries.vue";
-import AddHive from "../components/AddHive.vue";
 
 export default {
     name: 'PageHives',
     components: {
-        SelectedApiary, Apiaries, AddHive,
+        Apiaries,
     },
 }
 </script>

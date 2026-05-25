@@ -1,14 +1,17 @@
 <template>
-    <div class="selected-apiary-title">
-        {{ selectedApiary && selectedApiary.name }}
-        <span v-if="alerted()">
-            <img src="../assets/Hives/i_alert.svg" />
-        </span>
+    <template v-if="hasValidApiary">
+        <div class="selected-apiary-title">
+            {{ selectedApiary && selectedApiary.name }}
+            <span v-if="alerted()">
+                <img src="../assets/Hives/i_alert.svg" />
+            </span>
+        </div>
+        <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary" />
+        <Hives :hives="selectedApiary.hives" />
+    </template>
+    <div v-else class="empty-state">
+        <p>Select an apiary above, or add one with the <strong>+</strong> button.</p>
     </div>
-    <!-- <span v-if="selectedApiary"> -->
-    <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary" />
-    <Hives :hives="selectedApiary.hives" />
-    <!-- </span> -->
 </template>
 
 <script>
@@ -22,24 +25,42 @@ export default {
     },
     props: {
         selectedApiary: Object,
-        locations: Object,
+    },
+
+    computed: {
+        hasValidApiary() {
+            return (
+                this.selectedApiary &&
+                this.selectedApiary.name &&
+                this.selectedApiary.name !== 'none' &&
+                Array.isArray(this.selectedApiary.hives)
+            );
+        },
     },
 
     methods: {
         alerted() {
-            if (this.selectedApiary && this.selectedApiary.hives.filter(e => e.alert == true).length > 0) {
+            if (
+                this.selectedApiary &&
+                Array.isArray(this.selectedApiary.hives) &&
+                this.selectedApiary.hives.filter(e => e.alert == true).length > 0
+            ) {
                 return true;
-            } else {
+            }
+            return false;
+        },
+        checkForLocations() {
+            if (!this.selectedApiary || !Array.isArray(this.selectedApiary.hives)) {
                 return false;
             }
-        }, checkForLocations() {
-            if (this.selectedApiary.hives[0].coordinates || this.selectedApiary.coordinate_lat) {
+            if (this.selectedApiary.hives.length > 0 && this.selectedApiary.hives[0].coordinates) {
                 return true;
-            } else {
-                return false;
             }
-
-        }
+            if (this.selectedApiary.coordinate_lat) {
+                return true;
+            }
+            return false;
+        },
     },
 }
 </script>
@@ -53,5 +74,20 @@ export default {
 
 .selected-apiary-title img {
     height: 1.1rem;
+}
+
+.empty-state {
+    color: #888;
+    font-family: TwCenLight, TwCen, sans-serif;
+    font-size: 1.2vw;
+    text-align: center;
+    padding: 6vh 2vw;
+    background-color: #F9FAFE;
+    border-radius: 16px;
+    margin-top: 3vh;
+}
+
+.empty-state strong {
+    color: #575EAE;
 }
 </style>

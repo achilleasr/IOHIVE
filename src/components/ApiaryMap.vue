@@ -6,7 +6,7 @@
             <span v-for="(hive, index) in hives" :key="index">
                 <span v-if="hive.coordinates">
                     <l-marker :lat-lng="hive.coordinates">
-                        <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
+                        <l-icon :icon-url="markerIconUrl(hive)" :icon-size="[30, 30]" />
                         <l-tooltip
                             :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
                             {{ hive.name }}
@@ -21,7 +21,7 @@
 
                 <span v-else-if="apiary.coordinate_lat">
                     <l-marker :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
-                        <l-icon :icon-url="require('@/assets/Hives/leaflet_hive1.svg')" :icon-size="[30, 30]" />
+                        <l-icon :icon-url="markerIconUrl(hive)" :icon-size="[30, 30]" />
                         <l-tooltip
                             :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
                             {{ hive.name }}
@@ -122,6 +122,30 @@ export default {
                 return [37.4385, 24.9139];
             }
         }
+    },
+    methods: {
+        hiveColor(hive) {
+            let color =
+                (hive && hive.hex_color) ||
+                (this.apiary && this.apiary.hex_color) ||
+                '#FABB13';
+            if (typeof color === 'string' && !color.startsWith('#')) {
+                color = '#' + color;
+            }
+            return color;
+        },
+
+        markerIconUrl(hive) {
+            const color = this.hiveColor(hive);
+            const svg =
+                `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.54 19.24" width="30" height="30">` +
+                `<rect x="0.09" y="0.09" width="23.35" height="1.63" fill="${color}"/>` +
+                `<rect x="1.07" y="2.48" width="21.41" height="13.23" fill="${color}"/>` +
+                `<rect x="3.89" y="16.47" width="1.92" height="2.73" fill="${color}"/>` +
+                `<rect x="17.84" y="16.47" width="1.92" height="2.73" fill="${color}"/>` +
+                `</svg>`;
+            return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+        },
     },
     created() {
         if (this.hives.length > 0 && this.hives[0].coordinates) {

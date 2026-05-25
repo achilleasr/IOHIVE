@@ -13,24 +13,27 @@
                 :hives="group.hives" :selectedApiaryName="selectedApiary.name" @click="selectedApiary = group" />
         </template>
 
-        <template v-if="!loginData || loginData.guest">
+        <template v-if="!loginData">
             <ApiaryItem v-for="(apiary, index) in apiaries" :key="'demo-' + index" :name="apiary.name"
                 :hives="apiary.hives" :selectedApiaryName="selectedApiary.name" @click="selectedApiary = apiary" />
         </template>
+
+        <AddApiary v-if="loginData" />
     </div>
-    <SelectedApiary :selectedApiary="selectedApiary" :locations="locations" />
+    <SelectedApiary :selectedApiary="selectedApiary" />
 </template>
 
 <script>
 import ApiaryItem from './ApiaryItem.vue';
 import SelectedApiary from "./SelectedApiary.vue";
+import AddApiary from "./AddApiary.vue";
 import { apiariesHardcoded } from "./apiariesHardcoded.js"
 import { mapState } from 'vuex';
 
 export default {
     name: 'Apiaries',
     components: {
-        SelectedApiary, ApiaryItem
+        SelectedApiary, ApiaryItem, AddApiary,
     },
     data() {
         return {
@@ -53,7 +56,7 @@ export default {
         },
     },
     created() {
-        if (!this.loginData || this.loginData.guest) {
+        if (!this.loginData) {
             this.selectedApiary = this.apiaries[0];
         }
     },
@@ -64,11 +67,13 @@ export default {
 <style scoped>
 .apiaries-title {
     font-size: 2.2vw;
-    margin-top: 1vh;
+    margin-top: 2vw;
 }
+
 
 .apiaries-scroll {
     height: 8vw;
-    gap: 12px;
+    display: flex;
+    align-items: flex-start;
 }
 </style>

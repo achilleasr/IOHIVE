@@ -1,20 +1,22 @@
 import { createStore } from "vuex";
-import beepConnection from "@/services/beepConnection";
+import { login as apiLogin } from "@/services/api/authApi";
+import { listLocations } from "@/services/api/locationsApi";
+import { listGroups } from "@/services/api/groupsApi";
+import { listDevices } from "@/services/api/devicesApi";
+import { listInspectionsForHive } from "@/services/api/inspectionsApi";
 
-const savedLoginData = (() => {
-  try {
-    const raw = localStorage.getItem("iohive_login");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-})();
+// try {
+//   localStorage.removeItem("iohive_login");
+// } catch {
+//   // ignore — e.g. private-mode quirks
+// }
 
 const myStore = createStore({
   state: {
     // auth
-    loginData: savedLoginData,
+    loginData: null,
     loginStatus: "idle",
+    isGuest: false, // true after "Continue without account"; loginData stays null
 
     // apiaries
     locations: null,
@@ -30,21 +32,21 @@ const myStore = createStore({
     // auth
     setLoginData(state, data) {
       state.loginData = data;
-      if (data) {
-        localStorage.setItem("iohive_login", JSON.stringify(data));
-      }
     },
     setLoginStatus(state, status) {
       state.loginStatus = status;
     },
+    setGuest(state, value) {
+      state.isGuest = value;
+    },
     clearLogin(state) {
       state.loginData = null;
       state.loginStatus = "idle";
+      state.isGuest = false;
       state.locations = null;
       state.groups = null;
       state.devices = null;
       state.inspectionsByHive = {};
-      localStorage.removeItem("iohive_login");
     },
 
     // apiaries
@@ -71,11 +73,9 @@ const myStore = createStore({
     async login({ commit, dispatch }, { email, password }) {
       commit("setLoginStatus", "loading");
       try {
-        const response = await beepConnection.post("/login", {
-          email,
-          password,
-        });
+        const response = await apiLogin(email, password);
         commit("setLoginData", response.data);
+        commit("setGuest", false);
         commit("setLoginStatus", "idle");
         dispatch("loadApiaries");
       } catch (error) {
@@ -84,8 +84,11 @@ const myStore = createStore({
       }
     },
 
+    // "Continue without account" — flips isGuest on so the rest of the app
+    // treats the user as authenticated, while keeping loginData null so
+    // components that branch on !loginData keep using the hardcoded demo data.
     loginAsGuest({ commit }) {
-      commit("setLoginData", { guest: true });
+      commit("setGuest", true);
     },
 
     logout({ commit }) {
@@ -96,9 +99,9 @@ const myStore = createStore({
       commit("setApiariesStatus", "loading");
       try {
         const [locRes, grpRes, devRes] = await Promise.all([
-          beepConnection.get("/locations"),
-          beepConnection.get("/groups"),
-          beepConnection.get("/devices"),
+          listLocations(),
+          listGroups(),
+          listDevices(),
         ]);
         commit("setLocations", locRes.data);
         commit("setGroups", grpRes.data);
@@ -113,9 +116,7 @@ const myStore = createStore({
     async loadHiveInspections({ commit, state }, hiveId) {
       if (state.inspectionsByHive[hiveId]) return;
       try {
-        const response = await beepConnection.get(
-          "/inspections/hive/" + hiveId,
-        );
+        const response = await listInspectionsForHive(hiveId);
         commit("setHiveInspections", { hiveId, data: response.data });
       } catch (error) {
         console.log("failed to load inspections for hive " + hiveId, error);
@@ -125,7 +126,10 @@ const myStore = createStore({
 
   getters: {
     loginData: (state) => state.loginData,
-    isAuthenticated: (state) => !!state.loginData,
+    // Authenticated = real login OR guest mode. App.vue uses this to decide
+    // between the main UI and the Login screen.
+    isAuthenticated: (state) => !!state.loginData || state.isGuest,
+    isGuest: (state) => state.isGuest,
   },
 });
 

@@ -33,7 +33,7 @@ export default {
     methods: {
         async loginAsGuest() {
             await this.$store.dispatch('loginAsGuest');
-            this.$router.push('/#overview');
+            this.$router.push('/');
         },
         async postLogin(e) {
             e.preventDefault();
@@ -42,7 +42,7 @@ export default {
                     email: this.email,
                     password: this.password,
                 });
-                this.$router.push('/#overview');
+                this.$router.push('/');
             } catch (error) {
                 console.log("login failed", error);
             }
