@@ -1,10 +1,9 @@
 <template>
     <div class="map-container">
-        <l-map class="map-box" v-model:zoom="zoom" zoomControl=false :center="center" :bounds="bounds"
-            :options="{ zoomControl: false }">
+        <l-map class="map-box" v-model:zoom="zoom" :center="center" :bounds="bounds" :options="{ zoomControl: false }">
             <l-tile-layer :url="url"></l-tile-layer>
             <span v-for="(hive, index) in hives" :key="index">
-                <span v-if="hive.coordinates">
+                <span v-if="hive.coordinates && hive.coordinates.length === 2">
                     <l-marker :lat-lng="hive.coordinates">
                         <l-icon :icon-url="markerIconUrl(hive)" :icon-size="[30, 30]" />
                         <l-tooltip
@@ -12,14 +11,13 @@
                             {{ hive.name }}
                         </l-tooltip>
                     </l-marker>
-
                     <l-marker v-if="hive.alert" :lat-lng="hive.coordinates">
                         <l-icon :icon-url="require('@/assets/Hives/i_alert.svg')" :icon-size="[20, 20]"
                             :iconAnchor="[-2, 5]" />
                     </l-marker>
                 </span>
 
-                <span v-else-if="apiary.coordinate_lat">
+                <span v-else-if="apiary && apiary.coordinate_lat != null && apiary.coordinate_lon != null">
                     <l-marker :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
                         <l-icon :icon-url="markerIconUrl(hive)" :icon-size="[30, 30]" />
                         <l-tooltip
@@ -27,7 +25,6 @@
                             {{ hive.name }}
                         </l-tooltip>
                     </l-marker>
-
                     <l-marker v-if="hive.alert"
                         :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
                         <l-icon :icon-url="require('@/assets/Hives/i_alert.svg')" :icon-size="[20, 20]"
@@ -47,7 +44,6 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiMapOutline } from '@mdi/js';
-import L from 'leaflet';
 
 import {
     LMap,
@@ -68,17 +64,8 @@ export default {
     name: 'ApiaryMap',
     components: {
         SvgIcon,
-        LMap,
-        LIcon,
-        LTileLayer,
-        LMarker,
-        LControlLayers,
-        LTooltip,
-        LControlZoom,
-        LPopup,
-        LPolyline,
-        LPolygon,
-        LRectangle,
+        LMap, LIcon, LTileLayer, LMarker, LControlLayers,
+        LTooltip, LControlZoom, LPopup, LPolyline, LPolygon, LRectangle,
     },
     props: {
         hives: {
@@ -87,40 +74,46 @@ export default {
         },
         apiary: {
             type: Object,
-            default: () => { }
+            default: () => ({})
         }
     },
     data() {
         return {
             path: mdiMapOutline,
             url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            attribution:
-                '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
             zoom: 11,
-            zoomControl: false,
-            center: [37.4385, 14.9139],
-            icon: L.icon({
-                iconUrl: require('@/assets/Hives/i_hives1.svg'),
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34]
-            }),
-        }
+            center: [37.4385, 24.9139],
+        };
     },
     computed: {
         bounds() {
-            if (this.hives.length > 0 && this.hives[0].coordinates) {
-                const lats = this.hives.map((hive) => hive.coordinates[0]);
-                const lngs = this.hives.map((hive) => hive.coordinates[1]);
-                return [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
-            } else if (this.apiary) {
-                const lats = this.apiary.coordinate_lat;
-                const lngs = this.apiary.coordinate_lon;
-                return [[lats, lngs - 0.001 * this.apiary.hives.length], [lats, lngs + 0.001 * this.apiary.hives.length]];
+            const hivesWithCoords = (this.hives || []).filter(
+                h => h.coordinates && h.coordinates.length === 2 &&
+                    h.coordinates[0] != null && h.coordinates[1] != null
+            );
+
+            if (hivesWithCoords.length > 0) {
+                const lats = hivesWithCoords.map(h => h.coordinates[0]);
+                const lngs = hivesWithCoords.map(h => h.coordinates[1]);
+                const pad = 0.005;
+                return [
+                    [Math.min(...lats) - pad, Math.min(...lngs) - pad],
+                    [Math.max(...lats) + pad, Math.max(...lngs) + pad]
+                ];
             }
-            else {
-                return [37.4385, 24.9139];
+
+            const lat = this.apiary?.coordinate_lat;
+            const lng = this.apiary?.coordinate_lon;
+            if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
+                const hiveCount = this.apiary?.hives?.length ?? 0;
+                const spread = Math.max(0.002 * hiveCount, 0.02);
+                return [
+                    [lat - spread, lng - spread],
+                    [lat + spread, lng + spread]
+                ];
             }
+
+            return [[35.0, 20.0], [42.0, 28.0]];
         }
     },
     methods: {
@@ -148,33 +141,35 @@ export default {
         },
     },
     created() {
-        if (this.hives.length > 0 && this.hives[0].coordinates) {
-            const lats = this.hives.map((hive) => hive.coordinates[0]);
-            const lngs = this.hives.map((hive) => hive.coordinates[1]);
-            const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
-            const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
-            this.center = [latAvg, lngAvg];
-        } else if (this.apiary) {
+        const hivesWithCoords = (this.hives || []).filter(
+            h => h.coordinates && h.coordinates.length === 2
+        );
+        if (hivesWithCoords.length > 0) {
+            const lats = hivesWithCoords.map(h => h.coordinates[0]);
+            const lngs = hivesWithCoords.map(h => h.coordinates[1]);
+            this.center = [
+                lats.reduce((a, b) => a + b, 0) / lats.length,
+                lngs.reduce((a, b) => a + b, 0) / lngs.length
+            ];
+        } else if (this.apiary?.coordinate_lat != null && this.apiary?.coordinate_lon != null) {
             this.center = [this.apiary.coordinate_lat, this.apiary.coordinate_lon];
         }
     },
     watch: {
         hives: {
-            handler(newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    if (this.hives.length > 0 && this.hives[0].coordinates) {
-                        const lats = newVal.map((hive) => hive.coordinates[0]);
-                        const lngs = newVal.map((hive) => hive.coordinates[1]);
-                        const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
-                        const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
-                        this.center = [latAvg, lngAvg];
-                    } else if (this.apiary) {
-                        const lats = newVal.map((apiary) => this.apiary.coordinate_lat);
-                        const lngs = newVal.map((apiary) => this.apiary.coordinate_lon);
-                        const latAvg = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
-                        const lngAvg = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
-                        this.center = [latAvg, lngAvg];
-                    }
+            handler(newVal) {
+                const hivesWithCoords = (newVal || []).filter(
+                    h => h.coordinates && h.coordinates.length === 2
+                );
+                if (hivesWithCoords.length > 0) {
+                    const lats = hivesWithCoords.map(h => h.coordinates[0]);
+                    const lngs = hivesWithCoords.map(h => h.coordinates[1]);
+                    this.center = [
+                        lats.reduce((a, b) => a + b, 0) / lats.length,
+                        lngs.reduce((a, b) => a + b, 0) / lngs.length
+                    ];
+                } else if (this.apiary?.coordinate_lat != null) {
+                    this.center = [this.apiary.coordinate_lat, this.apiary.coordinate_lon];
                 }
             },
             deep: true
