@@ -48,10 +48,16 @@ export default {
     },
     watch: {
         locations(newVal) {
-            if (newVal && newVal.locations && newVal.locations.length > 0) {
-                if (this.selectedApiary.name === 'none') {
-                    this.selectedApiary = newVal.locations[0];
-                }
+            if (!newVal?.locations?.length) return;
+
+            if (this.selectedApiary.name === 'none') {
+                this.selectedApiary = newVal.locations[0];
+                return;
+            }
+
+            const fresh = newVal.locations.find(l => l.id === this.selectedApiary.id);
+            if (fresh) {
+                this.selectedApiary = fresh;
             }
         },
     },
@@ -61,7 +67,6 @@ export default {
         }
     },
 }
-
 </script>
 
 <style scoped>
@@ -69,7 +74,6 @@ export default {
     font-size: 2.2vw;
     margin-top: 2vw;
 }
-
 
 .apiaries-scroll {
     height: 8vw;

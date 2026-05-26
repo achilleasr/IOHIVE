@@ -25,7 +25,6 @@ export default {
     name: 'HiveItem',
     components: {
         HiveItemMain, HiveGrid, Inspections, Measurements, Alerts,
-
     },
     props: {
         hive: Object,
@@ -40,16 +39,15 @@ export default {
             this.expanded = newExpandedValue;
         },
         getHiveColor() {
-            if (this.hive.color) {
-                return this.hive.color;
-            }
-            else {
-                return '#379C5A';
-            }
-        }
+            const raw = (this.hive.hex_color && this.hive.hex_color.trim())
+                || (this.hive.color && this.hive.color.trim());
+            if (!raw) return '#379C5A';
+            return raw.startsWith('#') ? raw : '#' + raw;
+        },
     },
 }
 </script>
+
 <style scoped>
 .hive-item {
     color: white;

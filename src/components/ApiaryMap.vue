@@ -106,7 +106,7 @@ export default {
             const lng = this.apiary?.coordinate_lon;
             if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
                 const hiveCount = this.apiary?.hives?.length ?? 0;
-                const spread = Math.max(0.002 * hiveCount, 0.02);
+                const spread = Math.max(0.0001 * hiveCount, 0.02);
                 return [
                     [lat - spread, lng - spread],
                     [lat + spread, lng + spread]
@@ -119,8 +119,7 @@ export default {
     methods: {
         hiveColor(hive) {
             let color =
-                (hive && hive.hex_color) ||
-                (this.apiary && this.apiary.hex_color) ||
+                (hive && hive.color) ||
                 '#FABB13';
             if (typeof color === 'string' && !color.startsWith('#')) {
                 color = '#' + color;

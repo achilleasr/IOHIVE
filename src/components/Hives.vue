@@ -15,25 +15,32 @@
 
         <div class="hives-content">
             <HiveItem v-for="(hive, index) in hives" :key="index" :hive="hive" />
+            <AddHive v-if="loginData && locationId" :locationId="locationId" />
         </div>
         <span id="devices"></span>
     </div>
 </template>
 
 <script>
-import HiveItem from "./HiveItem.vue"
+import { mapState } from 'vuex';
+import HiveItem from "./HiveItem.vue";
+import AddHive from "./AddHive.vue";
 
 export default {
     name: 'Hives',
     components: {
-        HiveItem
+        HiveItem, AddHive,
     },
     props: {
         hives: Array,
+        locationId: Number,
+    },
+    computed: {
+        ...mapState(['loginData']),
     },
 }
-
 </script>
+
 <style scoped>
 .hives-container {
     background-color: #F9FAFE;
@@ -42,16 +49,12 @@ export default {
     padding-left: 40px;
     padding-right: 40px;
     margin-top: 1em;
-    /* box-shadow: 15px 15px 30px #bebebe,
-        -15px -15px 30px #ffffff; */
-    /* margin-bottom: 120px; */
 }
 
 .hives-container svg {
     stroke: var(--stroke-color);
     height: auto;
 }
-
 
 .hives-title {
     height: 30px;

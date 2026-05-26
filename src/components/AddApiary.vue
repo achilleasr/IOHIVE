@@ -36,7 +36,7 @@
 
                     <div class="form-row form-row-color">
                         <label for="apiary-color">Color</label>
-                        <input id="apiary-color" v-model="apiaryForm.hex_color" type="color" :disabled="submitting" />
+                        <input id="apiary-color" v-model="apiaryForm.color" type="color" :disabled="submitting" />
                     </div>
 
                     <div class="form-row">
@@ -80,7 +80,7 @@
 
                     <div class="form-row form-row-color">
                         <label for="hive-color">Color</label>
-                        <input id="hive-color" v-model="hiveForm.hex_color" type="color" :disabled="submitting" />
+                        <input id="hive-color" v-model="hiveForm.color" type="color" :disabled="submitting" />
                     </div>
 
                     <div v-if="error" class="error-message">{{ error }}</div>
@@ -105,6 +105,9 @@ import "leaflet/dist/leaflet.css";
 import { createLocation } from '@/services/api/locationsApi';
 import { createHive } from '@/services/api/hivesApi';
 
+const DEFAULT_LAT = 38.5;
+const DEFAULT_LON = 23.0;
+
 export default {
     name: 'AddApiary',
     components: { LMap, LTileLayer },
@@ -115,13 +118,13 @@ export default {
             submitting: false,
             error: null,
             newApiaryId: null,
-            mapCenter: [38.5, 23.0],
+            mapCenter: [DEFAULT_LAT, DEFAULT_LON],
             mapZoom: 6,
             locationHint: '',
             leafletMap: null,
             geocodeTimer: null,
-            apiaryForm: { name: '', lat: null, lon: null, hex_color: '#FABB13', city: '' },
-            hiveForm: { name: '', hex_color: '#FABB13' },
+            apiaryForm: { name: '', lat: DEFAULT_LAT, lon: DEFAULT_LON, color: '#FABB13', city: '' },
+            hiveForm: { name: '', color: '#FABB13' },
         };
     },
     computed: {
@@ -140,16 +143,24 @@ export default {
             this.locationHint = '';
             this.leafletMap = null;
             this.newApiaryId = null;
-            this.apiaryForm = { name: '', lat: null, lon: null, hex_color: '#FABB13', city: '' };
-            this.hiveForm = { name: '', hex_color: '#FABB13' };
+            this.mapCenter = [DEFAULT_LAT, DEFAULT_LON];
+            this.apiaryForm = { name: '', lat: DEFAULT_LAT, lon: DEFAULT_LON, color: '#FFBBFF', city: '' };
+            this.hiveForm = { name: '', color: '#FABB13' };
             this.modalOpen = true;
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        this.mapCenter = [pos.coords.latitude, pos.coords.longitude];
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        this.mapCenter = [lat, lon];
                         this.mapZoom = 12;
-                        if (this.leafletMap) this.leafletMap.setView(this.mapCenter, 12);
+                        this.apiaryForm.lat = parseFloat(lat.toFixed(6));
+                        this.apiaryForm.lon = parseFloat(lon.toFixed(6));
+                        if (this.leafletMap) {
+                            this.leafletMap.setView([lat, lon], 12);
+                        }
+                        this.reverseGeocode(lat, lon);
                     },
                     () => { }
                 );
@@ -201,6 +212,12 @@ export default {
         },
 
         async submitApiary() {
+            if (this.leafletMap) {
+                const c = this.leafletMap.getCenter();
+                this.apiaryForm.lat = parseFloat(c.lat.toFixed(6));
+                this.apiaryForm.lon = parseFloat(c.lng.toFixed(6));
+            }
+
             const name = this.apiaryForm.name.trim();
             if (!name) { this.error = 'Name is required'; return; }
 
@@ -212,7 +229,7 @@ export default {
                 hive_amount: 0,
                 lat: this.apiaryForm.lat,
                 lon: this.apiaryForm.lon,
-                hex_color: this.stripHash(this.apiaryForm.hex_color),
+                hex_color: this.apiaryForm.color,
             };
             if (this.apiaryForm.city) payload.city = this.apiaryForm.city;
 
@@ -228,7 +245,7 @@ export default {
                     this.newApiaryId = match?.id ?? null;
                 }
 
-                this.hiveForm.hex_color = this.apiaryForm.hex_color;
+                this.hiveForm.color = this.apiaryForm.color;
                 this.step = 2;
             } catch (err) {
                 const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0];
@@ -250,7 +267,7 @@ export default {
                 await createHive({
                     name,
                     location_id: this.newApiaryId,
-                    hex_color: this.stripHash(this.hiveForm.hex_color),
+                    color: this.hiveForm.color,
                     brood_layers: 1,
                     honey_layers: 1,
                 });

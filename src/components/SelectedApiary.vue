@@ -7,7 +7,7 @@
             </span>
         </div>
         <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary" />
-        <Hives :hives="selectedApiary.hives" />
+        <Hives :hives="selectedApiary.hives" :locationId="selectedApiary.id" />
     </template>
     <div v-else class="empty-state">
         <p>Select an apiary above, or add one with the <strong>+</strong> button.</p>
