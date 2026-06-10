@@ -20,7 +20,7 @@
 
         <AddApiary v-if="loginData" />
     </div>
-    <SelectedApiary :selectedApiary="selectedApiary" />
+    <SelectedApiary :selectedApiary="selectedApiary" :apiaries="apiaries" />
 </template>
 
 <script>

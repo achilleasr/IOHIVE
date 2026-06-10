@@ -32,6 +32,37 @@
                     </l-marker>
                 </span>
             </span>
+
+            <span v-for="(hive, index) in hives" :key="index">
+                <span v-if="hive.coordinates && hive.coordinates.length === 2">
+                    <l-marker :lat-lng="hive.coordinates">
+                        <l-icon :icon-url="markerIconUrl(hive)" :icon-size="[30, 30]" />
+                        <l-tooltip
+                            :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                            {{ hive.name }}
+                        </l-tooltip>
+                    </l-marker>
+                    <l-marker v-if="hive.alert" :lat-lng="hive.coordinates">
+                        <l-icon :icon-url="require('@/assets/Hives/i_alert.svg')" :icon-size="[20, 20]"
+                            :iconAnchor="[-2, 5]" />
+                    </l-marker>
+                </span>
+
+                <span v-else-if="apiary && apiary.coordinate_lat != null && apiary.coordinate_lon != null">
+                    <l-marker :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
+                        <l-icon :icon-url="markerIconUrl(hive)" :icon-size="[30, 30]" />
+                        <l-tooltip
+                            :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                            {{ hive.name }}
+                        </l-tooltip>
+                    </l-marker>
+                    <l-marker v-if="hive.alert"
+                        :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
+                        <l-icon :icon-url="require('@/assets/Hives/i_alert.svg')" :icon-size="[20, 20]"
+                            :iconAnchor="[-2, 5]" />
+                    </l-marker>
+                </span>
+            </span>
             <l-control-zoom position="bottomright"></l-control-zoom>
         </l-map>
         <div class="map-title">
@@ -75,7 +106,15 @@ export default {
         apiary: {
             type: Object,
             default: () => ({})
-        }
+        },
+        apiaries: {
+            type: Array,
+            default: () => []
+        },
+        allHives: {
+            type: Array,
+            default: () => []
+        },
     },
     data() {
         return {

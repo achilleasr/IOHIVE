@@ -6,7 +6,8 @@
                 <img src="../assets/Hives/i_alert.svg" />
             </span>
         </div>
-        <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary" />
+        <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary"
+            :apiaries="apiaries" />
         <Hives :hives="selectedApiary.hives" :locationId="selectedApiary.id" />
     </template>
     <div v-else class="empty-state">
@@ -25,6 +26,7 @@ export default {
     },
     props: {
         selectedApiary: Object,
+        apiaries: Array,
     },
 
     computed: {
