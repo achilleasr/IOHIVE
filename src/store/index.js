@@ -49,12 +49,12 @@ const myStore = createStore({
       state.apiariesStatus = status;
     },
     setHiveInspections(state, { hiveId, data }) {
-      state.inspectionsByHive[hiveId] = data;
+      state.inspectionsByHive = { ...state.inspectionsByHive, [hiveId]: data };
     },
     clearHiveInspections(state, hiveId) {
-      const fresh = { ...state.inspectionsByHive };
-      delete fresh[hiveId];
-      state.inspectionsByHive = fresh;
+      const updated = { ...state.inspectionsByHive };
+      delete updated[hiveId];
+      state.inspectionsByHive = updated;
     },
   },
 

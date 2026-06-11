@@ -7,7 +7,7 @@
                     <button class="close-btn" @click="close">×</button>
                 </div>
 
-                <form class="add-form" @submit.prevent="save">
+                <form v-if="!showDeleteConfirm" class="add-form" @submit.prevent="save">
                     <div class="form-row">
                         <label>Name <span class="required">*</span></label>
                         <input v-model="form.name" type="text" required :disabled="submitting" maxlength="120" />
@@ -21,8 +21,9 @@
                     <div v-if="error" class="error-message">{{ error }}</div>
 
                     <div class="form-actions">
-                        <button type="button" class="btn-danger" @click="confirmDelete" :disabled="submitting">
-                            Delete Apiary
+                        <button type="button" class="btn-danger" @click="showDeleteConfirm = true"
+                            :disabled="submitting">
+                            Delete
                         </button>
                         <div class="spacer"></div>
                         <button type="button" class="btn-secondary" @click="close"
@@ -33,8 +34,9 @@
                     </div>
                 </form>
 
-                <div v-if="showDeleteConfirm" class="delete-confirm">
+                <div v-else class="delete-confirm">
                     <p>Delete <strong>{{ apiary.name }}</strong> and all its hives? This cannot be undone.</p>
+                    <div v-if="error" class="error-message">{{ error }}</div>
                     <div class="form-actions">
                         <button class="btn-secondary" @click="showDeleteConfirm = false"
                             :disabled="submitting">Cancel</button>
@@ -82,9 +84,6 @@ export default {
             if (this.submitting) return;
             this.$emit('close');
         },
-        confirmDelete() {
-            this.showDeleteConfirm = true;
-        },
         async save() {
             const name = this.form.name.trim();
             if (!name) { this.error = 'Name is required'; return; }
@@ -94,6 +93,8 @@ export default {
                 await updateLocation(this.apiary.id, {
                     name,
                     hex_color: this.form.color.replace('#', ''),
+                    lat: this.apiary.coordinate_lat,
+                    lon: this.apiary.coordinate_lon,
                 });
                 await this.$store.dispatch('loadApiaries');
                 this.$emit('close');
@@ -257,6 +258,22 @@ export default {
     flex: 1;
 }
 
+.delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.delete-confirm p {
+    margin: 0;
+    color: #555;
+    font-size: 0.95rem;
+    background: #fff5f5;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #f5c6c6;
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-danger {
@@ -309,20 +326,6 @@ export default {
 .btn-danger:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-}
-
-.delete-confirm {
-    margin-top: 16px;
-    padding: 16px;
-    background: #fff5f5;
-    border-radius: 12px;
-    border: 1px solid #f5c6c6;
-}
-
-.delete-confirm p {
-    margin: 0 0 12px;
-    color: #555;
-    font-size: 0.95rem;
 }
 
 @keyframes fadeIn {
