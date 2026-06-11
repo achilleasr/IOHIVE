@@ -1,43 +1,37 @@
 <template>
     <div class="hive-item">
         <span class="green" :style="{ 'background-color': getHiveColor() }" :class="{ 'green-expanded': expanded }">
-            <HiveItemMain :hive="hive" @update:expanded="onExpandedChange" />
-            <HiveGrid v-if="expanded" />
+            <HiveItemMain :hive="hive" :location-coords="locationCoords" @update:expanded="onExpandedChange" />
         </span>
+
         <span class="white" v-if="expanded">
-            <Inspections :inspections="hive.inspections" :hive="hive" />
+            <Inspections :hive="hive" />
             <hr class="line" />
-            <Measurements />
+            <Measurements :hive="hive" />
             <hr class="line" />
-            <Alerts :alerts="hive.inspections" />
+            <Alerts :hive="hive" />
         </span>
     </div>
 </template>
 
 <script>
-import HiveGrid from './HiveGrid.vue';
+import HiveItemMain from './HiveItemMain.vue';
 import Inspections from './Inspections.vue';
 import Measurements from './Measurements.vue';
 import Alerts from './Alerts.vue';
-import HiveItemMain from './HiveItemMain.vue';
 
 export default {
     name: 'HiveItem',
-    components: {
-        HiveItemMain, HiveGrid, Inspections, Measurements, Alerts,
-    },
+    components: { HiveItemMain, Inspections, Measurements, Alerts },
     props: {
         hive: Object,
+        locationCoords: Array,
     },
     data() {
-        return {
-            expanded: false,
-        }
+        return { expanded: false };
     },
     methods: {
-        onExpandedChange(newExpandedValue) {
-            this.expanded = newExpandedValue;
-        },
+        onExpandedChange(val) { this.expanded = val; },
         getHiveColor() {
             const raw = (this.hive.hex_color && this.hive.hex_color.trim())
                 || (this.hive.color && this.hive.color.trim());
@@ -45,7 +39,7 @@ export default {
             return raw.startsWith('#') ? raw : '#' + raw;
         },
     },
-}
+};
 </script>
 
 <style scoped>
@@ -66,6 +60,7 @@ export default {
     background-color: #379C5A;
     padding: 10px 30px;
     border-radius: 20px;
+    position: relative;
 }
 
 .green-expanded {
@@ -75,7 +70,6 @@ export default {
 .white {
     background-color: white;
     color: rgb(190, 190, 190);
-    padding: 0px;
     padding: 10px 30px;
     border-radius: 0px 0px 20px 20px;
 }

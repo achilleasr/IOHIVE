@@ -8,7 +8,7 @@
         <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary"
             :apiaries="apiaries" :selectedApiaryId="selectedApiary.id"
             @select-apiary="$emit('select-apiary', $event)" />
-        <Hives :hives="selectedApiary.hives" :locationId="selectedApiary.id" />
+        <Hives :hives="selectedApiary.hives" :locationId="selectedApiary.id" :locationCoords="apiaryCoords" />
         <EditApiary v-if="loginData" :apiary="selectedApiary" :open="editOpen" @close="editOpen = false"
             @deleted="$emit('select-apiary', null)" />
     </template>
@@ -18,9 +18,9 @@
 </template>
 
 <script>
-import Hives from "../components/Hives.vue";
-import ApiaryMap from "../components/ApiaryMap.vue";
-import EditApiary from "../components/EditApiary.vue";
+import Hives from '../components/Hives.vue';
+import ApiaryMap from '../components/ApiaryMap.vue';
+import EditApiary from '../components/EditApiary.vue';
 import { mapState } from 'vuex';
 
 export default {
@@ -37,12 +37,23 @@ export default {
     computed: {
         ...mapState(['loginData']),
         hasValidApiary() {
-            return this.selectedApiary && this.selectedApiary.name && this.selectedApiary.name !== 'none' && Array.isArray(this.selectedApiary.hives);
+            return this.selectedApiary
+                && this.selectedApiary.name
+                && this.selectedApiary.name !== 'none'
+                && Array.isArray(this.selectedApiary.hives);
+        },
+        apiaryCoords() {
+            const lat = this.selectedApiary?.coordinate_lat;
+            const lon = this.selectedApiary?.coordinate_lon;
+            if (lat != null && lon != null) return [lat, lon];
+            return null;
         },
     },
     methods: {
         alerted() {
-            return this.selectedApiary && Array.isArray(this.selectedApiary.hives) && this.selectedApiary.hives.some(e => e.alert);
+            return this.selectedApiary
+                && Array.isArray(this.selectedApiary.hives)
+                && this.selectedApiary.hives.some(e => e.alert);
         },
         checkForLocations() {
             if (!this.selectedApiary || !Array.isArray(this.selectedApiary.hives)) return false;

@@ -8,13 +8,11 @@
                 <line x1="6" y1="3.5" x2="10" y2="3.5" />
                 <line x1="6" y1="10.5" x2="10" y2="10.5" />
             </svg>
-            <h5>
-                Hives
-            </h5>
+            <h5>Hives</h5>
         </div>
 
         <div class="hives-content">
-            <HiveItem v-for="(hive, index) in hives" :key="index" :hive="hive" />
+            <HiveItem v-for="hive in hives" :key="hive.id" :hive="hive" :location-coords="locationCoords" />
             <AddHive v-if="loginData && locationId" :locationId="locationId" />
         </div>
         <span id="devices"></span>
@@ -23,31 +21,28 @@
 
 <script>
 import { mapState } from 'vuex';
-import HiveItem from "./HiveItem.vue";
-import AddHive from "./AddHive.vue";
+import HiveItem from './HiveItem.vue';
+import AddHive from './AddHive.vue';
 
 export default {
     name: 'Hives',
-    components: {
-        HiveItem, AddHive,
-    },
+    components: { HiveItem, AddHive },
     props: {
         hives: Array,
         locationId: Number,
+        locationCoords: Array,
     },
     computed: {
         ...mapState(['loginData']),
     },
-}
+};
 </script>
 
 <style scoped>
 .hives-container {
     background-color: #F9FAFE;
     border-radius: 30px;
-    padding: 20px;
-    padding-left: 40px;
-    padding-right: 40px;
+    padding: 20px 40px;
     margin-top: 1em;
 }
 

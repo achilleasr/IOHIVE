@@ -1,11 +1,12 @@
 <template>
-    <h2 class="clickable title" @click="expandContentButton">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="clickable imgicon"
+    <h2 class="clickable title" @click="toggleExpanded">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="imgicon"
             :class="{ rotated180: expanded }" viewBox="0 0 16 16">
             <path fill-rule="evenodd"
                 d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
         </svg>
-        <svg-icon type="mdi" :path="path" /><span></span><span>Measurements</span>
+        <svg-icon type="mdi" :path="path" />
+        <span>Measurements</span>
     </h2>
 
     <div v-if="expanded" class="measurements-content">
@@ -25,9 +26,12 @@
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiChartTimelineVariantShimmer } from '@mdi/js';
 import { getSensorMeasurements } from '@/services/api/measurementsApi';
-import { Chart, LineController, LineElement, PointElement, LinearScale, TimeScale, Tooltip, Filler, CategoryScale } from 'chart.js';
+import {
+    Chart, LineController, LineElement, PointElement,
+    LinearScale, Tooltip, Filler, CategoryScale,
+} from 'chart.js';
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Tooltip, Filler, CategoryScale);
+Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip, Filler, CategoryScale);
 
 const SERIES_CONFIG = [
     { key: 't', label: 'Temperature (°C)', color: '#E46268' },
@@ -44,7 +48,7 @@ export default {
     },
     data() {
         return {
-            expanded: true,
+            expanded: false,
             loading: false,
             error: null,
             rawData: null,
@@ -64,7 +68,7 @@ export default {
         },
     },
     methods: {
-        async expandContentButton() {
+        async toggleExpanded() {
             this.expanded = !this.expanded;
             if (this.expanded && !this.rawData && !this.loading) {
                 await this.fetchData();
@@ -82,36 +86,28 @@ export default {
                 if (this.hive?.id) params.hive_id = this.hive.id;
                 const res = await getSensorMeasurements(params);
                 this.rawData = res.data;
-            } catch (e) {
+                this.$nextTick(() => this.renderCharts());
+            } catch {
                 this.error = 'Could not load measurements. The device may not have sent data yet.';
             } finally {
                 this.loading = false;
             }
         },
 
-        buildDatasets(seriesKey) {
-            const measurements = this.rawData?.measurements || [];
-            const points = measurements
-                .filter(m => m[seriesKey] != null)
-                .map(m => ({ x: m.time, y: m[seriesKey] }));
-            return points;
-        },
-
         renderCharts() {
             this.chartSeries.forEach(series => {
                 const canvas = this.canvasRefs[series.key];
                 if (!canvas) return;
-
                 if (this.chartInstances[series.key]) {
                     this.chartInstances[series.key].destroy();
                 }
-
-                const points = this.buildDatasets(series.key);
+                const measurements = this.rawData?.measurements || [];
+                const points = measurements.filter(m => m[series.key] != null);
                 const labels = points.map(p => {
-                    const d = new Date(p.x * 1000);
+                    const d = new Date(p.time * 1000);
                     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric' });
                 });
-                const values = points.map(p => p.y);
+                const values = points.map(p => p[series.key]);
 
                 this.chartInstances[series.key] = new Chart(canvas, {
                     type: 'line',
@@ -139,11 +135,7 @@ export default {
                         },
                         scales: {
                             x: {
-                                ticks: {
-                                    maxTicksLimit: 6,
-                                    maxRotation: 0,
-                                    font: { family: 'TwCen, sans-serif', size: 11 },
-                                },
+                                ticks: { maxTicksLimit: 6, maxRotation: 0, font: { family: 'TwCen, sans-serif', size: 11 } },
                                 grid: { color: '#f0f0f0' },
                             },
                             y: {
@@ -165,13 +157,19 @@ export default {
 <style scoped>
 .title {
     display: flex;
+    align-items: center;
     gap: 10px;
+    user-select: none;
 }
 
 .imgicon {
     fill: rgb(190, 190, 190);
     stroke: rgb(190, 190, 190);
-    transition: all 0.15s ease 0s;
+    transition: transform 0.15s ease;
+}
+
+.rotated180 {
+    transform: rotate(180deg);
 }
 
 .measurements-content {

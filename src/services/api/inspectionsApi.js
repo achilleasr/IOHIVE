@@ -5,7 +5,7 @@ export function listInspectionsForHive(hiveId) {
 }
 
 export function createInspection(payload) {
-  return beepConnection.post("/inspections", { inspection: payload });
+  return beepConnection.post("/inspections/store", payload);
 }
 
 export function deleteInspection(id) {

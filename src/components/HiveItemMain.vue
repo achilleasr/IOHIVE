@@ -1,48 +1,56 @@
 <template>
-  <div class="hive-item-edit">
-    <div>EDIT</div> <img src="../assets/Hives/i_edit.svg" />
+  <div class="hive-header-row">
+    <h2 class="hive-item-title">
+      {{ hive.name }}
+      <span v-if="hive.alert"><img src="../assets/Hives/i_alert_selected.svg" /></span>
+    </h2>
+    <div class="hive-actions">
+      <AddInspection :hive="hive" />
+    </div>
   </div>
-
-  <h2 class="hive-item-title">{{ hive.name }} <span v-if="hive.alert">
-      <img src="../assets/Hives/i_alert_selected.svg" />
-    </span></h2>
 
   <div class="hive-item-info">
     <div class="hive-item-icon"><img src="../assets/Hives/i_hives3.svg" /></div>
     <div class="hive-item-text">
       <div class="hive-item-location">
         <img src="../assets/Hives/i_location_pin.svg" />
-        {{ hive.location_name || 'Unknown location' }}
+        <span>{{ locationName }}</span>
       </div>
-      <div class="hive-item-description">
-        {{ hive.notes ? hive.notes : 'No notes' }}
+      <div v-if="hive.notes" class="hive-item-description">
+        <span class="notes-label">Note:</span> {{ hive.notes }}
       </div>
+      <div v-else class="hive-item-description no-notes">No notes</div>
     </div>
-    <div class="hive-item-status">
-      <p>{{ isOnline ? 'ON' : 'OFF' }}</p>
-      <img :src="isOnline ? require('../assets/Hives/i_status.svg') : require('../assets/Hives/i_status_grey.svg')" />
-      <p>Device:<br>{{ deviceName }}</p>
+    <div v-if="linkedDevice" class="hive-item-status">
+      <img :src="require('../assets/Hives/i_status.svg')" :style="{ opacity: isOnline ? 1 : 0.35 }"
+        :title="isOnline ? 'Device online' : 'Device offline'" />
+      <p class="device-name">{{ deviceName }}</p>
     </div>
   </div>
 
-  <div class="hive-item-inspection">
-    <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }"
-      @click="expandContentButton" />
-    <span @click="expandContentButton" class="clickable">{{ latestInspectionText }}</span>
+  <div class="hive-item-inspection" @click="expandContentButton">
+    <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }" />
+    <span class="clickable">{{ latestInspectionText }}</span>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import AddInspection from './AddInspection.vue';
+
 export default {
   name: 'HiveItemMain',
+  components: { AddInspection },
   props: {
     hive: Object,
+    locationCoords: Array,
   },
+  emits: ['update:expanded'],
   data() {
     return {
       expanded: false,
-    }
+      locationName: 'Locating…',
+    };
   },
   computed: {
     ...mapState(['devices', 'inspectionsByHive']),
@@ -60,51 +68,73 @@ export default {
     },
 
     deviceName() {
-      return this.linkedDevice?.name ?? 'No device';
+      return this.linkedDevice?.name ?? '';
     },
 
     latestInspectionText() {
       const data = this.inspectionsByHive[this.hive?.id];
-      if (!data) return 'Expand to load inspections';
+      if (!data) return 'Click to expand';
       const list = data?.inspections?.data ?? [];
       if (list.length === 0) return 'No inspections yet';
-      return 'Latest: ' + new Date(list[0].created_at).toLocaleString('en-US', {
+      const d = new Date(list[0].created_at).toLocaleString('en-US', {
         year: 'numeric', month: 'short', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', hour12: true
+        hour: 'numeric', minute: 'numeric', hour12: true,
       });
+      return `Latest: ${d}`;
+    },
+  },
+  mounted() {
+    if (this.hive?.id && !this.inspectionsByHive[this.hive.id]) {
+      this.$store.dispatch('loadHiveInspections', this.hive.id);
+    }
+    this.resolveLocationName();
+  },
+  watch: {
+    locationCoords(val) {
+      if (val) this.resolveLocationName();
     },
   },
   methods: {
     expandContentButton() {
       this.expanded = !this.expanded;
       this.$emit('update:expanded', this.expanded);
-      if (this.expanded && this.hive?.id && !this.inspectionsByHive[this.hive.id]) {
-        this.$store.dispatch('loadHiveInspections', this.hive.id);
-      }
-    }
-  }
-}
+    },
 
+    async resolveLocationName() {
+      const coords = this.locationCoords;
+      if (!coords || coords.length < 2) {
+        this.locationName = this.hive.location_name || 'Unknown location';
+        return;
+      }
+      const [lat, lon] = coords;
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await res.json();
+        const a = data.address || {};
+        const place = a.village || a.town || a.city || a.county || a.state || '';
+        const country = a.country || '';
+        this.locationName = [place, country].filter(Boolean).join(', ') || data.display_name || 'Unknown location';
+      } catch {
+        this.locationName = this.hive.location_name || 'Unknown location';
+      }
+    },
+  },
+};
 </script>
 
-
 <style scoped>
-.hive-item-edit {
-  position: absolute;
-  top: 8px;
-  right: 20px;
+.hive-header-row {
   display: flex;
-  font-size: 12px;
   align-items: center;
-  gap: 8px;
-}
-
-.hive-item-edit img {
-  height: 20px;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .hive-item-title {
-  margin: 0.4vw 0px;
+  margin: 0.4vw 0;
   font-size: 2.8vw;
   flex: 1;
 }
@@ -113,9 +143,16 @@ export default {
   height: 2vw;
 }
 
+.hive-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .hive-item-info {
   flex: 1;
-  margin: 14px 0px;
+  margin: 14px 0;
   height: 7vw;
   display: flex;
   gap: 2.4vw;
@@ -149,8 +186,21 @@ export default {
 }
 
 .hive-item-description {
-  font-size: 1.3vw;
+  font-size: 1.15vw;
   font-family: "TwCenLight";
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.notes-label {
+  font-family: TwCen, sans-serif;
+  font-weight: bold;
+  opacity: 0.7;
+  margin-right: 4px;
+}
+
+.no-notes {
+  opacity: 0.45;
+  font-style: italic;
 }
 
 .hive-item-status {
@@ -160,7 +210,7 @@ export default {
   align-items: center;
   flex-direction: column;
   text-align: center;
-  gap: 12px;
+  gap: 8px;
   height: 7vw;
 }
 
@@ -168,8 +218,10 @@ export default {
   height: 5vw;
 }
 
-.hive-item-status p {
-  margin: 0px;
+.device-name {
+  margin: 0;
+  font-size: 0.9vw;
+  opacity: 0.8;
 }
 
 .hive-item-inspection {
@@ -178,10 +230,16 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .hive-item-inspection img {
   height: 2.4vw;
   transition: all 0.15s ease 0s;
+}
+
+.rotated180 {
+  transform: rotate(180deg);
 }
 </style>
