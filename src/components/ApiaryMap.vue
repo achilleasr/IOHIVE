@@ -19,7 +19,8 @@
                     <span v-for="m in entry.markers" :key="'hive-' + m.hive.id">
                         <l-marker :lat-lng="m.latlng" @click="selectApiary(entry.apiary)">
                             <l-icon :icon-url="markerIconUrl(m.hive, entry.apiary)" :icon-size="[30, 30]" />
-                            <l-tooltip :options="hiveTooltipOptions(entry.apiary)">
+                            <l-tooltip :key="'tip-' + selectedApiaryId + '-' + m.hive.id"
+                                :options="hiveTooltipOptions(entry.apiary)">
                                 {{ m.hive.name }}
                             </l-tooltip>
                         </l-marker>
@@ -37,7 +38,7 @@
                         <l-marker :lat-lng="hive.coordinates">
                             <l-icon :icon-url="markerIconUrl(hive, apiary)" :icon-size="[30, 30]" />
                             <l-tooltip
-                                :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                                :options="{ permanent: true, interactive: true, direction: 'bottom', offset: [0, 4], className: 'popup' }">
                                 {{ hive.name }}
                             </l-tooltip>
                         </l-marker>
@@ -50,7 +51,7 @@
                         <l-marker :lat-lng="[apiary.coordinate_lat, apiary.coordinate_lon + index / 2000.0]">
                             <l-icon :icon-url="markerIconUrl(hive, apiary)" :icon-size="[30, 30]" />
                             <l-tooltip
-                                :options="{ permanent: true, interactive: true, direction: 'top', className: 'popup' }">
+                                :options="{ permanent: true, interactive: true, direction: 'bottom', offset: [0, 4], className: 'popup' }">
                                 {{ hive.name }}
                             </l-tooltip>
                         </l-marker>
@@ -152,7 +153,7 @@ export default {
         },
         focusOnApiary(apiaryId) {
             if (!this.leafletMap) return;
-            const entry = this.mapApiaries.find(e => e.apiary.id === apiaryId);
+            const entry = this.mapApiaries.find(e => Number(e.apiary.id) === Number(apiaryId));
             if (!entry) return;
             if (entry.markers.length > 1) {
                 const lats = entry.markers.map(m => m.latlng[0]);
@@ -163,18 +164,21 @@ export default {
                 this.leafletMap.setView(entry.centroid, 14, { animate: true });
             }
         },
+        isSelectedApiary(apiary) {
+            return Number(apiary.id) === Number(this.selectedApiaryId);
+        },
         apiaryLabelStyle(apiary) {
             return {
                 color: this.normalizeColor(apiary.hex_color) || '#575EAE',
                 fontWeight: 'bold',
                 fontSize: '13px',
-                textDecoration: apiary.id === this.selectedApiaryId ? 'underline' : 'none',
+                textDecoration: this.isSelectedApiary(apiary) ? 'underline' : 'none',
                 textShadow: '-1px -1px 0 #333, 1px -1px 0 #333, -1px 1px 0 #333, 1px 1px 0 #333',
                 cursor: 'pointer',
             };
         },
         hiveTooltipOptions(apiary) {
-            return { permanent: apiary.id === this.selectedApiaryId, interactive: true, direction: 'top', className: 'popup' };
+            return { permanent: this.isSelectedApiary(apiary), interactive: true, direction: 'bottom', offset: [0, 4], className: 'popup' };
         },
         markerIconUrl(hive, apiary) {
             const color = this.hiveColor(hive, apiary);
