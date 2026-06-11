@@ -20,7 +20,7 @@
 
         <AddApiary v-if="loginData" />
     </div>
-    <SelectedApiary :selectedApiary="selectedApiary" :apiaries="apiaries" />
+    <SelectedApiary :selectedApiary="selectedApiary" :apiaries="apiaries" @select-apiary="onMapSelect" />
 </template>
 
 <script>
@@ -58,6 +58,20 @@ export default {
             const fresh = newVal.locations.find(l => l.id === this.selectedApiary.id);
             if (fresh) {
                 this.selectedApiary = fresh;
+            }
+        },
+    },
+    methods: {
+        onMapSelect(apiaryId) {
+            const locs = this.locations?.locations || [];
+            const match = locs.find(l => l.id === apiaryId);
+            if (match) {
+                this.selectedApiary = match;
+                return;
+            }
+            const demo = this.apiaries.find(a => a.id === apiaryId);
+            if (demo) {
+                this.selectedApiary = demo;
             }
         },
     },

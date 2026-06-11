@@ -5,31 +5,19 @@ import { listGroups } from "@/services/api/groupsApi";
 import { listDevices } from "@/services/api/devicesApi";
 import { listInspectionsForHive } from "@/services/api/inspectionsApi";
 
-// try {
-//   localStorage.removeItem("iohive_login");
-// } catch {
-//   // ignore — e.g. private-mode quirks
-// }
-
 const myStore = createStore({
   state: {
-    // auth
     loginData: null,
     loginStatus: "idle",
-    isGuest: false, // true after "Continue without account"; loginData stays null
-
-    // apiaries
+    isGuest: false,
     locations: null,
     groups: null,
     devices: null,
     apiariesStatus: "idle",
-
-    // inspections per hive: { 42: { inspections: {...} }, 55: { inspections: {...} } }
     inspectionsByHive: {},
   },
 
   mutations: {
-    // auth
     setLoginData(state, data) {
       state.loginData = data;
     },
@@ -48,8 +36,6 @@ const myStore = createStore({
       state.devices = null;
       state.inspectionsByHive = {};
     },
-
-    // apiaries
     setLocations(state, data) {
       state.locations = data;
     },
@@ -62,10 +48,13 @@ const myStore = createStore({
     setApiariesStatus(state, status) {
       state.apiariesStatus = status;
     },
-
-    // inspections
     setHiveInspections(state, { hiveId, data }) {
       state.inspectionsByHive[hiveId] = data;
+    },
+    clearHiveInspections(state, hiveId) {
+      const fresh = { ...state.inspectionsByHive };
+      delete fresh[hiveId];
+      state.inspectionsByHive = fresh;
     },
   },
 
@@ -83,18 +72,12 @@ const myStore = createStore({
         throw error;
       }
     },
-
-    // "Continue without account" — flips isGuest on so the rest of the app
-    // treats the user as authenticated, while keeping loginData null so
-    // components that branch on !loginData keep using the hardcoded demo data.
     loginAsGuest({ commit }) {
       commit("setGuest", true);
     },
-
     logout({ commit }) {
       commit("clearLogin");
     },
-
     async loadApiaries({ commit }) {
       commit("setApiariesStatus", "loading");
       try {
@@ -112,7 +95,6 @@ const myStore = createStore({
         console.log("failed to load apiaries:", error);
       }
     },
-
     async loadHiveInspections({ commit, state }, hiveId) {
       if (state.inspectionsByHive[hiveId]) return;
       try {
@@ -126,8 +108,6 @@ const myStore = createStore({
 
   getters: {
     loginData: (state) => state.loginData,
-    // Authenticated = real login OR guest mode. App.vue uses this to decide
-    // between the main UI and the Login screen.
     isAuthenticated: (state) => !!state.loginData || state.isGuest,
     isGuest: (state) => state.isGuest,
   },

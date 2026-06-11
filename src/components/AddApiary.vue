@@ -144,8 +144,8 @@ export default {
             this.leafletMap = null;
             this.newApiaryId = null;
             this.mapCenter = [DEFAULT_LAT, DEFAULT_LON];
-            this.apiaryForm = { name: '', lat: DEFAULT_LAT, lon: DEFAULT_LON, color: '#FFBBFF', city: '' };
-            this.hiveForm = { name: '', color: '#FABB13' };
+            this.apiaryForm = { name: '', lat: DEFAULT_LAT, lon: DEFAULT_LON, color: '#FFBF00', city: '' };
+            this.hiveForm = { name: '', color: '#FFBF00' };
             this.modalOpen = true;
 
             if (navigator.geolocation) {
