@@ -16,7 +16,6 @@
         </span>
         <div v-if="expanded" class="details">
             Note: {{ inspection.note }}
-            <!-- Inspection expanded description details blah blah -->
         </div>
     </div>
 </template>
@@ -26,7 +25,7 @@ export default {
     name: 'InspectionItem',
     data() {
         return {
-            expanded: false,
+            expanded: true,
         }
     },
     methods: {

@@ -45,7 +45,7 @@ export default {
     components: { SvgIcon, AddInspection },
     data() {
         return {
-            expanded: false,
+            expanded: true,
             path: mdiArchiveEditOutline,
         };
     },

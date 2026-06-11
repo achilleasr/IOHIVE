@@ -3,7 +3,7 @@
         <div class="selected-apiary-title">
             <span>{{ selectedApiary.name }}</span>
             <span v-if="alerted()"><img src="../assets/Hives/i_alert.svg" /></span>
-            <button v-if="loginData" class="edit-btn" @click="editOpen = true">✏️ Edit</button>
+            <button v-if="loginData" class="edit-btn" @click="editOpen = true">Edit</button>
         </div>
         <ApiaryMap v-if="checkForLocations()" :hives="selectedApiary.hives" :apiary="selectedApiary"
             :apiaries="apiaries" :selectedApiaryId="selectedApiary.id"

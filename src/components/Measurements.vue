@@ -44,7 +44,7 @@ export default {
     },
     data() {
         return {
-            expanded: false,
+            expanded: true,
             loading: false,
             error: null,
             rawData: null,

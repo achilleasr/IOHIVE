@@ -74,7 +74,7 @@
 
                     <div class="form-row">
                         <label for="hive-name">Hive name <span class="required">*</span></label>
-                        <input id="hive-name" v-model="hiveForm.name" type="text" placeholder="Hive 1" required
+                        <input id="hive-name" v-model="hiveForm.name" type="text" placeholder="Hive" required
                             :disabled="submitting" maxlength="120" />
                     </div>
 
@@ -83,13 +83,31 @@
                         <input id="hive-color" v-model="hiveForm.color" type="color" :disabled="submitting" />
                     </div>
 
+                    <div class="form-row form-row-copies">
+                        <label for="hive-copies">Copies (1–50)</label>
+                        <input id="hive-copies" v-model.number="hiveForm.copies" type="number" min="1" max="50"
+                            :disabled="submitting" />
+                        <span class="copies-hint">
+                            {{ hiveForm.copies > 1 ? `Will create: ${hiveForm.name.trim() || 'Hive'} 1 …
+                            ${hiveForm.name.trim() || 'Hive'} ${hiveForm.copies}` : '' }}
+                        </span>
+                    </div>
+
+                    <div v-if="submitting && hiveForm.copies > 1" class="progress-wrap">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" :style="{ width: progressPct + '%' }"></div>
+                        </div>
+                        <div class="progress-label">Creating hive {{ progressCurrent }} of {{ hiveForm.copies }}…</div>
+                    </div>
+
                     <div v-if="error" class="error-message">{{ error }}</div>
 
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" @click="skipHive"
                             :disabled="submitting">Skip</button>
                         <button type="submit" class="btn-primary" :disabled="submitting || !hiveForm.name.trim()">
-                            {{ submitting ? 'Creating…' : 'Create' }}
+                            {{ submitting ? 'Creating…' : (hiveForm.copies > 1 ? `Create ${hiveForm.copies} Hives` :
+                                'Create Hive') }}
                         </button>
                     </div>
                 </form>
@@ -123,13 +141,18 @@ export default {
             locationHint: '',
             leafletMap: null,
             geocodeTimer: null,
+            progressCurrent: 0,
             apiaryForm: { name: '', lat: DEFAULT_LAT, lon: DEFAULT_LON, color: '#FABB13', city: '' },
-            hiveForm: { name: '', color: '#FABB13' },
+            hiveForm: { name: '', color: '#FABB13', copies: 1 },
         };
     },
     computed: {
         tileUrl() {
             return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        },
+        progressPct() {
+            if (!this.hiveForm.copies || this.hiveForm.copies <= 1) return 0;
+            return Math.round((this.progressCurrent / this.hiveForm.copies) * 100);
         },
     },
     methods: {
@@ -143,9 +166,10 @@ export default {
             this.locationHint = '';
             this.leafletMap = null;
             this.newApiaryId = null;
+            this.progressCurrent = 0;
             this.mapCenter = [DEFAULT_LAT, DEFAULT_LON];
             this.apiaryForm = { name: '', lat: DEFAULT_LAT, lon: DEFAULT_LON, color: '#FFBF00', city: '' };
-            this.hiveForm = { name: '', color: '#FFBF00' };
+            this.hiveForm = { name: '', color: '#FFBF00', copies: 1 };
             this.modalOpen = true;
 
             if (navigator.geolocation) {
@@ -256,29 +280,37 @@ export default {
         },
 
         async submitHive() {
-            const name = this.hiveForm.name.trim();
-            if (!name) { this.error = 'Hive name is required'; return; }
+            const baseName = this.hiveForm.name.trim();
+            if (!baseName) { this.error = 'Hive name is required'; return; }
             if (!this.newApiaryId) { this.error = 'Could not find the new apiary. Please close and try again.'; return; }
+
+            const copies = Math.max(1, Math.min(50, parseInt(this.hiveForm.copies) || 1));
 
             this.submitting = true;
             this.error = null;
+            this.progressCurrent = 0;
 
             try {
-                await createHive({
-                    name,
-                    location_id: this.newApiaryId,
-                    color: this.hiveForm.color,
-                    brood_layers: 1,
-                    honey_layers: 1,
-                });
+                for (let i = 1; i <= copies; i++) {
+                    this.progressCurrent = i;
+                    const name = copies > 1 ? `${baseName} ${i}` : baseName;
+                    await createHive({
+                        name,
+                        location_id: this.newApiaryId,
+                        color: this.hiveForm.color,
+                        brood_layers: 1,
+                        honey_layers: 1,
+                    });
+                }
                 await this.$store.dispatch('loadApiaries');
                 this.modalOpen = false;
             } catch (err) {
                 const msg = err?.response?.data?.message
                     || Object.values(err?.response?.data?.errors || {})?.[0]?.[0];
-                this.error = msg || 'Failed to create hive. Please try again.';
+                this.error = msg || `Failed to create hive ${this.progressCurrent}. Please try again.`;
             } finally {
                 this.submitting = false;
+                this.progressCurrent = 0;
             }
         },
 
@@ -495,7 +527,8 @@ export default {
     color: #d05050;
 }
 
-.form-row input[type="text"] {
+.form-row input[type="text"],
+.form-row input[type="number"] {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 9px 12px;
@@ -506,7 +539,8 @@ export default {
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.form-row input[type="text"]:focus {
+.form-row input[type="text"]:focus,
+.form-row input[type="number"]:focus {
     outline: none;
     border-color: #575EAE;
     box-shadow: 0 0 0 3px rgba(87, 94, 174, 0.15);
@@ -526,6 +560,50 @@ export default {
     border-radius: 8px;
     background: white;
     cursor: pointer;
+}
+
+.form-row-copies {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.form-row-copies input[type="number"] {
+    width: 80px;
+}
+
+.copies-hint {
+    font-size: 0.8rem;
+    color: #888;
+    font-style: italic;
+    flex: 1;
+}
+
+.progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.progress-bar-track {
+    height: 8px;
+    background: #e8e8e8;
+    border-radius: 100px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #575EAE;
+    border-radius: 100px;
+    transition: width 0.3s ease;
+}
+
+.progress-label {
+    font-size: 0.82rem;
+    color: #666;
+    text-align: center;
 }
 
 .map-picker-container {
