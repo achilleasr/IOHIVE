@@ -1,19 +1,23 @@
 <template>
-    <button class="add-inspection-btn" @click="open = true">
+    <button class="apiary-inspection-btn" @click="open = true" :disabled="!hives || hives.length === 0">
         <svg class="plus-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
         </svg>
-        Add Inspection
+        Inspect all hives
     </button>
 
     <teleport to="body">
         <div v-if="open" class="overlay" @click.self="open = false">
             <div class="modal-card" @click.stop>
                 <div class="modal-header">
-                    <h2>New Inspection — {{ hive.name }}</h2>
+                    <div>
+                        <h2>Apiary Inspection</h2>
+                        <p class="subtitle">Record one inspection across multiple hives. Uncheck any you want to skip.
+                        </p>
+                    </div>
                     <button class="close-btn" @click="open = false">×</button>
                 </div>
-                <InspectionForm :hive="hive" @saved="open = false" @cancel="open = false" />
+                <InspectionForm :hives="hives" @saved="open = false" @cancel="open = false" />
             </div>
         </div>
     </teleport>
@@ -23,10 +27,10 @@
 import InspectionForm from './InspectionForm.vue';
 
 export default {
-    name: 'AddInspection',
+    name: 'AddApiaryInspection',
     components: { InspectionForm },
     props: {
-        hive: { type: Object, required: true },
+        hives: { type: Array, default: () => [] },
     },
     data() {
         return { open: false };
@@ -35,36 +39,36 @@ export default {
 </script>
 
 <style scoped>
-.add-inspection-btn {
+.apiary-inspection-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: #575EAE;
+    border: none;
     border-radius: 100px;
     color: white;
     padding: 9px 20px;
     font-family: TwCen, sans-serif;
-    font-size: 1.05vw;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
+    box-shadow: 0 2px 6px #575eae40;
 }
 
-.add-inspection-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+.apiary-inspection-btn:hover:not(:disabled) {
+    background: #3e4379;
     transform: translateY(-1px);
 }
 
-.add-inspection-btn:active {
-    transform: translateY(0);
+.apiary-inspection-btn:disabled {
+    background: #b5b8d4;
+    cursor: not-allowed;
 }
 
 .plus-icon {
-    width: 1.2vw;
-    height: 1.2vw;
-    min-width: 16px;
-    min-height: 16px;
+    width: 16px;
+    height: 16px;
     fill: white;
     flex-shrink: 0;
 }
@@ -101,14 +105,21 @@ export default {
 .modal-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 20px;
+    gap: 16px;
 }
 
 .modal-header h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     color: #333;
+}
+
+.subtitle {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: #888;
 }
 
 .close-btn {
@@ -119,6 +130,7 @@ export default {
     cursor: pointer;
     color: #999;
     padding: 0 8px;
+    flex-shrink: 0;
 }
 
 .close-btn:hover {

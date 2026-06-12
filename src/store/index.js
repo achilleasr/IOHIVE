@@ -4,7 +4,12 @@ import { listLocations } from "@/services/api/locationsApi";
 import { listGroups } from "@/services/api/groupsApi";
 import { listDevices } from "@/services/api/devicesApi";
 import { listInspectionsForHive } from "@/services/api/inspectionsApi";
-import { listChecklists, listChecklist } from "@/services/api/checklistsApi";
+import {
+  listChecklists,
+  getChecklist,
+  getChecklistForInspection,
+  listCategories,
+} from "@/services/api/checklistsApi";
 
 const myStore = createStore({
   state: {
@@ -16,6 +21,17 @@ const myStore = createStore({
     devices: null,
     apiariesStatus: "idle",
     inspectionsByHive: {},
+
+    // Checklists
+    checklists: [], // summary list from /inspections/lists
+    defaultChecklist: null, // the `checklist` field BEEP returns as the user default
+    checklistsById: {}, // full checklists (editor shape: category_ids) cached by id
+    checklistTreeById: {}, // inspection-renderable nested `categories` tree cached by id
+    checklistsStatus: "idle",
+
+    // Category catalogue (the pool you pick items from when editing a checklist)
+    categories: null,
+    categoriesStatus: "idle",
   },
 
   mutations: {
@@ -36,6 +52,13 @@ const myStore = createStore({
       state.groups = null;
       state.devices = null;
       state.inspectionsByHive = {};
+      state.checklists = [];
+      state.defaultChecklist = null;
+      state.checklistsById = {};
+      state.checklistTreeById = {};
+      state.checklistsStatus = "idle";
+      state.categories = null;
+      state.categoriesStatus = "idle";
     },
     setLocations(state, data) {
       state.locations = data;
@@ -57,6 +80,45 @@ const myStore = createStore({
       delete updated[hiveId];
       state.inspectionsByHive = updated;
     },
+
+    setChecklists(state, list) {
+      state.checklists = Array.isArray(list) ? list : [];
+    },
+    setDefaultChecklist(state, checklist) {
+      state.defaultChecklist = checklist || null;
+    },
+    setChecklistById(state, checklist) {
+      if (checklist && checklist.id != null) {
+        state.checklistsById = {
+          ...state.checklistsById,
+          [checklist.id]: checklist,
+        };
+      }
+    },
+    setChecklistTree(state, checklist) {
+      if (checklist && checklist.id != null) {
+        state.checklistTreeById = {
+          ...state.checklistTreeById,
+          [checklist.id]: checklist,
+        };
+      }
+    },
+    invalidateChecklistTree(state, id) {
+      if (id != null && state.checklistTreeById[id]) {
+        const updated = { ...state.checklistTreeById };
+        delete updated[id];
+        state.checklistTreeById = updated;
+      }
+    },
+    setChecklistsStatus(state, status) {
+      state.checklistsStatus = status;
+    },
+    setCategories(state, data) {
+      state.categories = data;
+    },
+    setCategoriesStatus(state, status) {
+      state.categoriesStatus = status;
+    },
   },
 
   actions: {
@@ -68,6 +130,7 @@ const myStore = createStore({
         commit("setGuest", false);
         commit("setLoginStatus", "idle");
         dispatch("loadApiaries");
+        dispatch("loadChecklists");
       } catch (error) {
         commit("setLoginStatus", "error");
         throw error;
@@ -105,22 +168,68 @@ const myStore = createStore({
         console.log("failed to load inspections for hive " + hiveId, error);
       }
     },
-    async loadChecklists() {
+
+    /**
+     * Load the checklist summary list + the user's default checklist.
+     * Source: GET /inspections/lists -> { checklists, checklist }.
+     */
+    async loadChecklists({ commit, state }, force = false) {
+      if (!force && state.checklists.length > 0) return;
+      commit("setChecklistsStatus", "loading");
       try {
-        const response = await listChecklists();
-        console.log("CHECKLISTS:");
-        console.log(response.data);
-      } catch (err) {
-        console.error(err);
+        const res = await listChecklists();
+        commit("setChecklists", res.data?.checklists ?? []);
+        commit("setDefaultChecklist", res.data?.checklist ?? null);
+        commit("setChecklistsStatus", "idle");
+      } catch (error) {
+        commit("setChecklistsStatus", "error");
+        console.log("failed to load checklists:", error);
       }
     },
-    async loadChecklist(id) {
+
+    /**
+     * Load one full checklist (editor shape: category_ids) and cache it by id.
+     * Source: GET /checklists/{id}. Used by the checklist manager.
+     */
+    async loadChecklist({ commit, state }, { id, force = false }) {
+      if (!force && state.checklistsById[id]) return state.checklistsById[id];
       try {
-        const response = await listChecklist(id);
-        console.log("CHECKLIST:");
-        console.log(response.data);
-      } catch (err) {
-        console.log(err);
+        const res = await getChecklist(id);
+        commit("setChecklistById", res.data);
+        return res.data;
+      } catch (error) {
+        console.log("failed to load checklist " + id, error);
+        throw error;
+      }
+    },
+
+    /**
+     * Load one checklist's RENDERABLE category tree and cache it by id.
+     * Source: GET /inspections/lists?id={id} -> { checklist: { categories: [...] } }.
+     * Used by the inspection form to build the dynamic field set.
+     */
+    async loadChecklistTree({ commit, state }, { id, force = false }) {
+      if (!force && state.checklistTreeById[id])
+        return state.checklistTreeById[id];
+      const res = await getChecklistForInspection(id);
+      const checklist = res.data?.checklist ?? null;
+      if (checklist) commit("setChecklistTree", checklist);
+      return checklist;
+    },
+
+    /** Load the category catalogue once (the item pool for editing checklists). */
+    async loadCategories({ commit, state }, force = false) {
+      if (!force && state.categories) return state.categories;
+      commit("setCategoriesStatus", "loading");
+      try {
+        const res = await listCategories();
+        commit("setCategories", res.data);
+        commit("setCategoriesStatus", "idle");
+        return res.data;
+      } catch (error) {
+        commit("setCategoriesStatus", "error");
+        console.log("failed to load categories:", error);
+        throw error;
       }
     },
   },
@@ -129,6 +238,8 @@ const myStore = createStore({
     loginData: (state) => state.loginData,
     isAuthenticated: (state) => !!state.loginData || state.isGuest,
     isGuest: (state) => state.isGuest,
+    checklists: (state) => state.checklists,
+    defaultChecklist: (state) => state.defaultChecklist,
   },
 });
 

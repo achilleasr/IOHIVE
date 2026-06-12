@@ -1,200 +1,270 @@
 <template>
   <form class="add-form" @submit.prevent="submit">
-    <div class="form-row form-row-datetime">
-      <label>Date</label>
-      <input v-model="form.dateOnly" type="date" :disabled="submitting" />
-      <label>Time</label>
-      <input v-model="form.timeOnly" type="time" :disabled="submitting" />
+    <!-- Checklist picker -->
+    <div class="form-row">
+      <label>Checklist</label>
+      <div v-if="checklistsLoading" class="muted">Loading checklists…</div>
+      <select v-else v-model="selectedChecklistId" class="checklist-select" :disabled="submitting"
+        @change="onChecklistChange">
+        <option v-for="cl in checklists" :key="cl.id" :value="cl.id">{{ cl.name }}</option>
+      </select>
     </div>
 
-    <div class="form-row">
-      <label>Overall impression</label>
-      <div class="choice-row">
-        <button type="button" v-for="opt in impressionOptions" :key="opt.value"
-          :class="['choice-btn', form.impression === opt.value ? 'selected' : '']" @click="form.impression = opt.value"
+    <!-- Hive selector (only for bulk / apiary inspections) -->
+    <div v-if="selectableHives.length > 1" class="form-row">
+      <label>Hives in this inspection ({{ selectedHiveIds.length }}/{{ selectableHives.length }})</label>
+      <div class="hive-chips">
+        <button type="button" class="hive-chip-all" @click="toggleAll" :disabled="submitting">
+          {{ allSelected ? 'Clear all' : 'Select all' }}
+        </button>
+        <button v-for="h in selectableHives" :key="h.id" type="button"
+          :class="['hive-chip', selectedHiveIds.includes(h.id) ? 'on' : '']" @click="toggleHive(h.id)"
           :disabled="submitting">
-          {{ opt.label }}
+          {{ h.name }}
         </button>
       </div>
     </div>
 
-    <div class="form-row">
-      <label>Queen seen?</label>
-      <div class="choice-row">
-        <button type="button" :class="['choice-btn', form.queen_seen === 1 ? 'selected' : '']"
-          @click="form.queen_seen = 1" :disabled="submitting">Yes</button>
-        <button type="button" :class="['choice-btn', form.queen_seen === 0 ? 'selected' : '']"
-          @click="form.queen_seen = 0" :disabled="submitting">No</button>
-      </div>
+    <!-- Date / time -->
+    <div class="form-row form-row-datetime">
+      <label>Date</label>
+      <input v-model="dateOnly" type="date" :disabled="submitting" />
+      <label>Time</label>
+      <input v-model="timeOnly" type="time" :disabled="submitting" />
     </div>
 
-    <div class="form-row">
-      <label>Needs attention?</label>
-      <div class="choice-row">
-        <button type="button" :class="['choice-btn', form.needs_attention === 1 ? 'selected' : '']"
-          @click="form.needs_attention = 1" :disabled="submitting">Yes</button>
-        <button type="button" :class="['choice-btn', form.needs_attention === 0 ? 'selected' : '']"
-          @click="form.needs_attention = 0" :disabled="submitting">No</button>
-      </div>
-    </div>
+    <!-- General inspection fields (always present, posted at top level) -->
+    <div class="section">
+      <div class="form-section-label">General</div>
+      <div class="section-grid">
+        <div class="gen-field">
+          <label class="gen-label">Overall impression</label>
+          <div class="choice-row">
+            <button v-for="opt in impressionOptions" :key="opt.value" type="button"
+              :class="['choice-btn', general.impression === opt.value ? 'selected' : '']"
+              @click="general.impression = general.impression === opt.value ? null : opt.value"
+              :disabled="submitting">{{ opt.label }}</button>
+          </div>
+        </div>
 
-    <div class="form-section-label">Brood</div>
-    <div class="form-grid">
-      <div class="form-row">
-        <label>Brood frames</label>
-        <input v-model.number="form.brood" type="number" min="0" max="30" placeholder="0" :disabled="submitting" />
-      </div>
-      <div class="form-row">
-        <label>Eggs seen?</label>
-        <div class="choice-row">
-          <button type="button" :class="['choice-btn', form.eggs === 1 ? 'selected' : '']" @click="form.eggs = 1"
-            :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', form.eggs === 0 ? 'selected' : '']" @click="form.eggs = 0"
-            :disabled="submitting">No</button>
+        <div class="gen-field">
+          <label class="gen-label">Needs attention</label>
+          <div class="choice-row">
+            <button type="button" :class="['choice-btn danger', general.attention === 1 ? 'selected-danger' : '']"
+              @click="general.attention = general.attention === 1 ? null : 1" :disabled="submitting">Yes</button>
+            <button type="button" :class="['choice-btn', general.attention === 0 ? 'selected' : '']"
+              @click="general.attention = general.attention === 0 ? null : 0" :disabled="submitting">No</button>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="form-section-label">Food & treatments</div>
-    <div class="form-grid">
-      <div class="form-row">
-        <label>Summer feed?</label>
-        <div class="choice-row">
-          <button type="button" :class="['choice-btn', form.summer_feed === 1 ? 'selected' : '']"
-            @click="form.summer_feed = 1" :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', form.summer_feed === 0 ? 'selected' : '']"
-            @click="form.summer_feed = 0" :disabled="submitting">No</button>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>Winter feed?</label>
-        <div class="choice-row">
-          <button type="button" :class="['choice-btn', form.winter_feed === 1 ? 'selected' : '']"
-            @click="form.winter_feed = 1" :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', form.winter_feed === 0 ? 'selected' : '']"
-            @click="form.winter_feed = 0" :disabled="submitting">No</button>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>Varroa treatment?</label>
-        <div class="choice-row">
-          <button type="button" :class="['choice-btn', form.varroa_treatment === 1 ? 'selected' : '']"
-            @click="form.varroa_treatment = 1" :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', form.varroa_treatment === 0 ? 'selected' : '']"
-            @click="form.varroa_treatment = 0" :disabled="submitting">No</button>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>Varroa count</label>
-        <input v-model.number="form.varroa_count" type="number" min="0" placeholder="0" :disabled="submitting" />
-      </div>
-      <div class="form-row">
-        <label>Honey super added?</label>
-        <div class="choice-row">
-          <button type="button" :class="['choice-btn', form.honey_super === 1 ? 'selected' : '']"
-            @click="form.honey_super = 1" :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', form.honey_super === 0 ? 'selected' : '']"
-            @click="form.honey_super = 0" :disabled="submitting">No</button>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>Mouse guard?</label>
-        <div class="choice-row">
-          <button type="button" :class="['choice-btn', form.mouse_guard === 1 ? 'selected' : '']"
-            @click="form.mouse_guard = 1" :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', form.mouse_guard === 0 ? 'selected' : '']"
-            @click="form.mouse_guard = 0" :disabled="submitting">No</button>
+        <div class="gen-field gen-field-wide">
+          <label class="gen-label">Notes</label>
+          <textarea v-model="general.notes" rows="2" :disabled="submitting"
+            placeholder="Observations, actions taken…"></textarea>
         </div>
       </div>
     </div>
 
-    <div class="form-row">
-      <label>Notes</label>
-      <textarea v-model="form.notes" rows="3" :disabled="submitting"
-        placeholder="Observations, treatments, actions taken…"></textarea>
-    </div>
+    <!-- Dynamic checklist body -->
+    <div v-if="checklistLoading" class="muted">Loading checklist items…</div>
+    <template v-else>
+      <div v-if="groups.length === 0" class="muted">
+        This checklist has no extra input fields beyond the general ones above.
+      </div>
+      <div v-for="(group, gi) in groups" :key="group.id + '-' + gi" class="section"
+        :style="{ marginLeft: group.depth ? group.depth * 14 + 'px' : '0' }">
+        <div class="form-section-label" :class="{ sub: group.depth > 0 }">{{ group.label }}</div>
+        <div class="section-grid">
+          <ChecklistField v-for="item in group.items" :key="item.id" :item="item" :model-value="values[item.id]"
+            :nested-values="values" :disabled="submitting" @update:modelValue="setValue(item.id, $event)"
+            @update:nested="setValue($event.id, $event.value)" />
+        </div>
+      </div>
+    </template>
 
     <div v-if="error" class="error-message">{{ error }}</div>
 
     <div class="form-actions">
       <button type="button" class="btn-secondary" @click="$emit('cancel')" :disabled="submitting">Cancel</button>
-      <button type="submit" class="btn-primary" :disabled="submitting">
-        {{ submitting ? 'Saving…' : 'Save Inspection' }}
+      <button type="submit" class="btn-primary" :disabled="submitting || selectedHiveIds.length === 0">
+        {{ submitButtonLabel }}
       </button>
     </div>
   </form>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { createInspection } from '@/services/api/inspectionsApi';
+import ChecklistField from './ChecklistField.vue';
+import { flattenSections, coerceValue, label } from './checklistUtils';
 
 export default {
   name: 'InspectionForm',
+  components: { ChecklistField },
   props: {
-    hive: { type: Object, required: true },
+    // single-hive inspection
+    hive: { type: Object, default: null },
+    // bulk/apiary inspection: pass the apiary's hives
+    hives: { type: Array, default: null },
   },
   emits: ['saved', 'cancel'],
   data() {
     const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const dateOnly = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    const timeOnly = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const pad = (n) => String(n).padStart(2, '0');
     return {
       submitting: false,
       error: null,
+      dateOnly: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
+      timeOnly: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
+      selectedChecklistId: null,
+      selectedHiveIds: [],
+      values: {}, // { [category_id]: value }
+      checklistLoading: false,
       impressionOptions: [
         { value: 1, label: '😞 Bad' },
         { value: 2, label: '😐 Ok' },
         { value: 3, label: '😊 Good' },
       ],
-      form: {
-        dateOnly,
-        timeOnly,
+      general: {
         impression: null,
-        queen_seen: null,
-        needs_attention: null,
-        brood: null,
-        eggs: null,
-        summer_feed: null,
-        winter_feed: null,
-        varroa_treatment: null,
-        varroa_count: null,
-        honey_super: null,
-        mouse_guard: null,
+        attention: null,
         notes: '',
       },
     };
   },
+  computed: {
+    ...mapState({
+      checklists: (s) => s.checklists,
+      defaultChecklist: (s) => s.defaultChecklist,
+      checklistTreeById: (s) => s.checklistTreeById,
+      checklistsStatus: (s) => s.checklistsStatus,
+    }),
+    checklistsLoading() {
+      return this.checklistsStatus === 'loading' && this.checklists.length === 0;
+    },
+    selectableHives() {
+      if (Array.isArray(this.hives)) return this.hives;
+      return this.hive ? [this.hive] : [];
+    },
+    allSelected() {
+      return (
+        this.selectableHives.length > 0 &&
+        this.selectedHiveIds.length === this.selectableHives.length
+      );
+    },
+    activeChecklist() {
+      return this.selectedChecklistId != null
+        ? this.checklistTreeById[this.selectedChecklistId] || null
+        : null;
+    },
+    groups() {
+      return this.activeChecklist ? flattenSections(this.activeChecklist.categories) : [];
+    },
+    isBulk() {
+      return this.selectableHives.length > 1;
+    },
+    submitButtonLabel() {
+      if (this.submitting) return 'Saving…';
+      if (this.isBulk) {
+        return `Save for ${this.selectedHiveIds.length} ${this.selectedHiveIds.length === 1 ? 'hive' : 'hives'}`;
+      }
+      return 'Save Inspection';
+    },
+  },
+  async created() {
+    // default-select all hives for a bulk inspection (BEEP behaviour)
+    this.selectedHiveIds = this.selectableHives.map((h) => h.id);
+
+    await this.$store.dispatch('loadChecklists');
+    // pick the server default, else first available
+    const def = this.defaultChecklist?.id ?? this.checklists[0]?.id ?? null;
+    this.selectedChecklistId = def;
+    if (def != null) await this.loadChecklistBody(def);
+  },
   methods: {
+    label,
+    setValue(id, val) {
+      this.values = { ...this.values, [id]: val };
+    },
+    toggleHive(id) {
+      const i = this.selectedHiveIds.indexOf(id);
+      if (i === -1) this.selectedHiveIds = [...this.selectedHiveIds, id];
+      else this.selectedHiveIds = this.selectedHiveIds.filter((x) => x !== id);
+    },
+    toggleAll() {
+      this.selectedHiveIds = this.allSelected
+        ? []
+        : this.selectableHives.map((h) => h.id);
+    },
+    async onChecklistChange() {
+      this.values = {};
+      await this.loadChecklistBody(this.selectedChecklistId);
+    },
+    async loadChecklistBody(id) {
+      if (id == null) return;
+      this.checklistLoading = true;
+      this.error = null;
+      try {
+        await this.$store.dispatch('loadChecklistTree', { id });
+      } catch {
+        this.error = 'Could not load this checklist. Try another one.';
+      } finally {
+        this.checklistLoading = false;
+      }
+    },
+    buildItems() {
+      const items = {};
+      if (!this.activeChecklist) return items;
+      // Map raw values -> coerced values keyed by category id, dropping empties.
+      const inputByID = {};
+      for (const group of this.groups) {
+        for (const item of group.items) {
+          inputByID[item.id] = item.input;
+          for (const child of item.children || []) inputByID[child.id] = child.input;
+        }
+      }
+      Object.entries(this.values).forEach(([id, raw]) => {
+        const input = inputByID[id] || 'number';
+        const v = coerceValue(input, raw);
+        if (v !== null) items[id] = v;
+      });
+      return items;
+    },
     async submit() {
+      if (this.selectedHiveIds.length === 0) {
+        this.error = 'Select at least one hive.';
+        return;
+      }
       this.submitting = true;
       this.error = null;
       try {
-        const inner = { hive_id: this.hive.id };
+        const pad = (n) => String(n).padStart(2, '0');
+        const time = this.timeOnly || '00:00';
+        const d = this.dateOnly ? new Date(`${this.dateOnly}T${time}:00`) : new Date();
+        const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+          d.getDate()
+        )} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 
-        const dateStr = this.form.dateOnly;
-        const time = this.form.timeOnly || '00:00';
-        // BEEP API requires field name 'date' (not 'created_at'), MySQL format
-        const pad = n => String(n).padStart(2, '0');
-        const d = dateStr ? new Date(`${dateStr}T${time}:00`) : new Date();
-        inner.date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+        const payload = {
+          date,
+          checklist_id: this.selectedChecklistId,
+          hive_ids: this.selectedHiveIds,
+          items: this.buildItems(),
+        };
 
-        if (this.form.notes && this.form.notes.trim()) inner.notes = this.form.notes.trim();
-        if (this.form.impression !== null) inner.impression = this.form.impression;
-        if (this.form.queen_seen !== null) inner.queen_seen = this.form.queen_seen;
-        if (this.form.needs_attention !== null) inner.needs_attention = this.form.needs_attention;
-        if (this.form.brood !== null && this.form.brood !== '') inner.brood = this.form.brood;
-        if (this.form.eggs !== null) inner.eggs = this.form.eggs;
-        if (this.form.summer_feed !== null) inner.summer_feed = this.form.summer_feed;
-        if (this.form.winter_feed !== null) inner.winter_feed = this.form.winter_feed;
-        if (this.form.varroa_treatment !== null) inner.varroa_treatment = this.form.varroa_treatment;
-        if (this.form.varroa_count !== null && this.form.varroa_count !== '') inner.varroa_count = this.form.varroa_count;
-        if (this.form.honey_super !== null) inner.honey_super = this.form.honey_super;
-        if (this.form.mouse_guard !== null) inner.mouse_guard = this.form.mouse_guard;
+        // General fields go at the top level, not inside items.
+        if (this.general.impression !== null) payload.impression = this.general.impression;
+        if (this.general.attention !== null) payload.attention = this.general.attention;
+        if (this.general.notes && this.general.notes.trim()) payload.notes = this.general.notes.trim();
 
-        await createInspection(inner);
-        this.$store.commit('clearHiveInspections', this.hive.id);
-        await this.$store.dispatch('loadHiveInspections', this.hive.id);
+        await createInspection(payload);
+
+        // refresh inspections for each affected hive
+        for (const hiveId of this.selectedHiveIds) {
+          this.$store.commit('clearHiveInspections', hiveId);
+          await this.$store.dispatch('loadHiveInspections', hiveId);
+        }
         this.$emit('saved');
       } catch (err) {
         const data = err?.response?.data;
@@ -212,23 +282,13 @@ export default {
 .add-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
-.form-section-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #aaa;
-  margin-top: 6px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.muted {
+  color: #999;
+  font-size: 0.9rem;
+  padding: 8px 0;
 }
 
 .form-row {
@@ -238,9 +298,62 @@ export default {
 }
 
 .form-row label {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: #666;
   font-family: TwCen, sans-serif;
+}
+
+.checklist-select {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: TwCen, sans-serif;
+  font-size: 1rem;
+  background: #F9FAFE;
+  color: #333;
+  cursor: pointer;
+}
+
+.checklist-select:focus {
+  outline: none;
+  border-color: #575EAE;
+  box-shadow: 0 0 0 3px rgba(87, 94, 174, 0.15);
+}
+
+.hive-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.hive-chip {
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 2px solid #ddd;
+  background: white;
+  color: #555;
+  font-family: TwCen, sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hive-chip.on {
+  border-color: #379C5A;
+  background: #379C5A;
+  color: white;
+}
+
+.hive-chip-all {
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid #575EAE;
+  background: #f5f6ff;
+  color: #575EAE;
+  font-family: TwCen, sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .form-row-datetime {
@@ -249,9 +362,7 @@ export default {
   gap: 10px;
 }
 
-.form-row input[type="number"],
-.form-row input[type="date"],
-.form-row input[type="time"] {
+.form-row-datetime input {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 7px 10px;
@@ -261,15 +372,69 @@ export default {
   color: #333;
 }
 
-.form-row textarea {
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-section-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #575EAE;
+  margin-top: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e3e4f3;
+  font-weight: bold;
+}
+
+.form-section-label.sub {
+  color: #8b8fc4;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.72rem;
+}
+
+.section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.gen-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gen-field-wide {
+  grid-column: 1 / -1;
+}
+
+.gen-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-family: TwCen, sans-serif;
+}
+
+.gen-field textarea {
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 9px 12px;
+  padding: 7px 10px;
   font-family: TwCen, sans-serif;
-  font-size: 1rem;
+  font-size: 0.95rem;
   background: #F9FAFE;
   color: #333;
+  width: 100%;
+  box-sizing: border-box;
   resize: vertical;
+}
+
+.gen-field textarea:focus {
+  outline: none;
+  border-color: #575EAE;
+  box-shadow: 0 0 0 3px rgba(87, 94, 174, 0.15);
 }
 
 .choice-row {
@@ -293,6 +458,12 @@ export default {
 .choice-btn.selected {
   border-color: #575EAE;
   background: #575EAE;
+  color: white;
+}
+
+.choice-btn.selected-danger {
+  border-color: #e46268;
+  background: #e46268;
   color: white;
 }
 
@@ -349,5 +520,11 @@ export default {
 
 .btn-secondary:hover:not(:disabled) {
   background: #e0e0e0;
+}
+
+@media (max-width: 560px) {
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
