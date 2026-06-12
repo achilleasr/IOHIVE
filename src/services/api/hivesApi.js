@@ -9,7 +9,7 @@ export function getHive(id) {
 }
 
 export function updateHive(id, payload) {
-  return beepConnection.put(`/hives/${id}`, payload);
+  return beepConnection.patch(`/hives/${id}`, payload);
 }
 
 export function deleteHive(id) {

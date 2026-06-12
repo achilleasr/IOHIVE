@@ -22,8 +22,9 @@
                 <label>New Password</label>
                 <input type="password" />
             </div>
+
             <div class="form-item">
-                <label> Confirm Password</label>
+                <label>Confirm Password</label>
                 <input type="password" />
             </div>
             <!-- <div class="form-item">

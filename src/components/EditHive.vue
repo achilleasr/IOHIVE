@@ -117,26 +117,11 @@ export default {
             this.moveError = null;
             try {
                 await updateHive(this.hive.id, {
+                    ...this.hive,
                     name,
-                    color: this.form.color.replace('#', ''),
-                    brood_layers: this.hive.brood_layers ?? 1,
-                    honey_layers: this.hive.honey_layers ?? 1,
+                    color: this.form.color,
+                    location_id: this.form.locationId,
                 });
-
-                if (this.form.locationId && this.form.locationId !== this.originalLocationId) {
-                    try {
-                        await updateHive(this.hive.id, {
-                            name,
-                            color: this.form.color.replace('#', ''),
-                            location_id: this.form.locationId,
-                            brood_layers: this.hive.brood_layers ?? 1,
-                            honey_layers: this.hive.honey_layers ?? 1,
-                        });
-                    } catch {
-                        this.moveError = 'Saved, but could not move hive to the new apiary.';
-                    }
-                }
-
                 await this.$store.dispatch('loadApiaries');
                 this.$emit('close');
             } catch (err) {
