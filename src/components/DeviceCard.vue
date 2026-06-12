@@ -10,8 +10,9 @@
                 <div class="device-meta">
                     <span class="meta-row"><strong>Hive:</strong> {{ hiveName }}</span>
                     <span class="meta-row"><strong>Apiary:</strong> {{ apiaryName }}</span>
-                    <span v-if="device.hardware_id" class="meta-row hw"><strong>HW:</strong> {{ device.hardware_id
-                        }}</span>
+                    <span v-if="device.hardware_id" class="meta-row hw"><strong>Hardware ID:</strong> {{
+                        device.hardware_id
+                    }}</span>
                 </div>
                 <div class="last-seen">
                     {{ lastSeenText }}
@@ -81,11 +82,20 @@ export default {
         lastSeenText() {
             const ts = this.device.last_message_received;
             if (!ts) return 'Never received data';
-            const d = new Date(ts * 1000);
-            return 'Last data: ' + d.toLocaleString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: 'numeric', minute: 'numeric', hour12: true,
-            });
+
+            const date = new Date(ts.replace(" ", "T"));
+
+            const formatted = date.toLocaleString("en-GB", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            }).replace(",", "");
+
+            // console.log(formatted);
+            return 'Last data: ' + formatted;
         },
         chartSeries() {
             if (!this.rawData) return [];
@@ -112,6 +122,7 @@ export default {
                 else if (this.device.id) params.device_id = this.device.id;
                 const res = await getSensorMeasurements(params);
                 this.rawData = res.data;
+                console.log(this.rawData);
                 this.$nextTick(() => this.renderCharts());
             } catch {
                 this.chartError = 'Could not load measurements for this device.';
