@@ -5,3 +5,4 @@ export * from "./devicesApi";
 export * from "./inspectionsApi";
 export * from "./hivesApi";
 export * from "./measurementsApi";
+export * from "./checklistsApi";

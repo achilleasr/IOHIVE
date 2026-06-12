@@ -4,6 +4,7 @@ import { listLocations } from "@/services/api/locationsApi";
 import { listGroups } from "@/services/api/groupsApi";
 import { listDevices } from "@/services/api/devicesApi";
 import { listInspectionsForHive } from "@/services/api/inspectionsApi";
+import { listChecklists, listChecklist } from "@/services/api/checklistsApi";
 
 const myStore = createStore({
   state: {
@@ -102,6 +103,24 @@ const myStore = createStore({
         commit("setHiveInspections", { hiveId, data: response.data });
       } catch (error) {
         console.log("failed to load inspections for hive " + hiveId, error);
+      }
+    },
+    async loadChecklists() {
+      try {
+        const response = await listChecklists();
+        console.log("CHECKLISTS:");
+        console.log(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async loadChecklist(id) {
+      try {
+        const response = await listChecklist(id);
+        console.log("CHECKLIST:");
+        console.log(response.data);
+      } catch (err) {
+        console.log(err);
       }
     },
   },

@@ -54,32 +54,32 @@
                 Logout
             </div>
 
+            <div @click='printCheck(7011)'>
+                checliksts
+            </div>
+
         </div>
     </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiLogin } from '@mdi/js';
-
+// import { mapGetters } from ' vuex';
+import SvgIcon from '@jamescoyle/vue-icon'; import { mdiLogin } from '@mdi/js';
 export default {
-    name: "SideBar",
-    components: {
-        SvgIcon
-    },
-    data() {
-        return {
-            path: mdiLogin,
-        }
-    },
+    name: "SideBar", components: { SvgIcon }, data() { return { path: mdiLogin, } },
     methods: {
         logout() {
             this.$store.dispatch('logout')
         },
+        printChecks() {
+            this.$store.dispatch('loadChecklists')
+        },
+        printCheck(id) {
+            this.$store.dispatch('loadChecklist', id)
+        },
     }
-}
-</script>
+} </script>
+
 <style scoped>
 .sidebar {
     position: fixed;
