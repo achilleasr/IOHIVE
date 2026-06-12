@@ -16,7 +16,7 @@
                 Overview
             </router-link>
 
-            <router-link :to="{ path: '/', hash: '#hives' }" class="page"
+            <!-- <router-link :to="{ path: '/', hash: '#hives' }" class="page"
                 v-bind:class="{ 'activePage': $route.hash === '#hives' }">
                 <svg class="page-icon2" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="0.5" y="0.5" width="15" height="7" />
@@ -25,10 +25,9 @@
                     <line x1="6" y1="10.5" x2="10" y2="10.5" />
                 </svg>
                 Hives
-            </router-link>
+            </router-link> -->
 
-            <router-link :to="{ path: '/', hash: '#devices' }" class="page"
-                v-bind:class="{ 'activePage': $route.hash === '#devices' }">
+            <router-link to="/devices" class="page" :class="{ 'activePage': $route.path === '/devices' }">
                 <img class="page-icon"
                     :src="$route.hash === '#devices' ? require('../assets/Hives/i_status.svg') : require('../assets/Hives/i_status_grey.svg')" />
                 Devices

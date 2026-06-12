@@ -77,6 +77,10 @@ export function controlFor(input) {
       return "slider";
     case "label":
       return "label";
+    case "image":
+    case "photo":
+    case "file":
+      return "hidden";
     default:
       return "number"; // safe fallback
   }
@@ -206,4 +210,24 @@ export function coerceValue(input, value) {
   }
   if (Array.isArray(value)) return value.length ? value.join(",") : null;
   return value;
+}
+
+const NOISE_KEEP_IN_RANGE = new Set([
+  973, 974, 975, 983, 1258, 1259, 1260, 1261, 1262, 1263, 1264, 1265, 1266,
+  1267, 1268, 1269, 1270, 1271, 1272, 1273, 1346, 1347, 1348, 1349, 1350, 1351,
+  1352, 1353, 1354, 1355, 1356, 1357, 1358, 1359, 1360, 1361, 1371, 1372, 1373,
+  1374, 1375,
+]);
+
+export function isNoiseId(id) {
+  if (id == null) return false;
+  if (id >= 972 && id <= 1407) return !NOISE_KEEP_IN_RANGE.has(id);
+  return false;
+}
+
+export function pruneTree(nodes) {
+  if (!Array.isArray(nodes)) return [];
+  return nodes
+    .filter((n) => n && !isNoiseId(n.id))
+    .map((n) => ({ ...n, children: pruneTree(n.children) }));
 }

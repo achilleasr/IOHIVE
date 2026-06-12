@@ -1,5 +1,5 @@
 <template>
-    <div class="field" :class="{ 'field-inline': inlineControl }">
+    <div v-if="control !== 'hidden'" class="field" :class="{ 'field-inline': inlineControl }">
         <label class="field-label">
             {{ label(item) }}
             <button v-if="item.description || item.source" type="button" class="info-btn" @click="showInfo = !showInfo"
@@ -132,6 +132,7 @@ export default {
         control() {
             return controlFor(this.item.input);
         },
+
         step() {
             return stepFor(this.control);
         },

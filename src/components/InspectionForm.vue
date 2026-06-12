@@ -75,9 +75,9 @@
         :style="{ marginLeft: group.depth ? group.depth * 14 + 'px' : '0' }">
         <div class="form-section-label" :class="{ sub: group.depth > 0 }">{{ group.label }}</div>
         <div class="section-grid">
-          <ChecklistField v-for="item in group.items" :key="item.id" :item="item" :model-value="values[item.id]"
-            :nested-values="values" :disabled="submitting" @update:modelValue="setValue(item.id, $event)"
-            @update:nested="setValue($event.id, $event.value)" />
+          <ChecklistField v-for="item in visibleItems(group.items)" :key="item.id" :item="item"
+            :model-value="values[item.id]" :nested-values="values" :disabled="submitting"
+            @update:modelValue="setValue(item.id, $event)" @update:nested="setValue($event.id, $event.value)" />
         </div>
       </div>
     </template>
@@ -97,7 +97,7 @@
 import { mapState } from 'vuex';
 import { createInspection } from '@/services/api/inspectionsApi';
 import ChecklistField from './ChecklistField.vue';
-import { flattenSections, coerceValue, label } from './checklistUtils';
+import { flattenSections, coerceValue, label, pruneTree, controlFor } from './checklistUtils';
 
 export default {
   name: 'InspectionForm',
@@ -159,7 +159,9 @@ export default {
         : null;
     },
     groups() {
-      return this.activeChecklist ? flattenSections(this.activeChecklist.categories) : [];
+      if (!this.activeChecklist) return [];
+      const pruned = pruneTree(this.activeChecklist.categories);
+      return flattenSections(pruned);
     },
     isBulk() {
       return this.selectableHives.length > 1;
@@ -273,6 +275,9 @@ export default {
       } finally {
         this.submitting = false;
       }
+    },
+    visibleItems(items) {
+      return items.filter((it) => controlFor(it.input) !== 'hidden');
     },
   },
 };

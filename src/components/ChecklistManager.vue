@@ -105,6 +105,7 @@ import {
     deleteChecklist,
 } from '@/services/api/checklistsApi';
 import CategoryTreeNode from './CategoryTreeNode.vue';
+import { pruneTree, isNoiseId } from './checklistUtils';
 
 export default {
     name: 'ChecklistManager',
@@ -137,8 +138,10 @@ export default {
             return this.selectedId != null ? this.checklistsById[this.selectedId] : null;
         },
         taxonomy() {
-            if (this.creating) return this.createTaxonomy || [];
-            return this.activeChecklist?.taxonomy || [];
+            const raw = this.creating
+                ? (this.createTaxonomy || [])
+                : (this.activeChecklist?.taxonomy || []);
+            return pruneTree(raw);
         },
         dirty() {
             if (this.creating) return this.included.size > 0;
@@ -218,7 +221,7 @@ export default {
             }
             if (!cl) return;
             this.editName = cl.name || '';
-            const ids = cl.category_ids || [];
+            const ids = (cl.category_ids || []).filter((id) => !isNoiseId(id));
             this.included = new Set(ids);
         },
 
@@ -306,7 +309,7 @@ export default {
                 return;
             }
             const cl = this.selectedId != null ? this.checklistsById[this.selectedId] : null;
-            this.included = new Set(cl?.category_ids || []);
+            this.included = new Set((cl?.category_ids || []).filter((id) => !isNoiseId(id)));
         },
     },
 };

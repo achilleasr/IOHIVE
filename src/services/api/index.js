@@ -6,3 +6,4 @@ export * from "./inspectionsApi";
 export * from "./hivesApi";
 export * from "./measurementsApi";
 export * from "./checklistsApi";
+export * from "./usersApi";
