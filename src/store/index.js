@@ -21,6 +21,7 @@ const myStore = createStore({
     devices: null,
     apiariesStatus: "idle",
     inspectionsByHive: {},
+    apiaryLocations: {},
 
     // Checklists
     checklists: [], // summary list from /inspections/lists
@@ -59,6 +60,7 @@ const myStore = createStore({
       state.checklistsStatus = "idle";
       state.categories = null;
       state.categoriesStatus = "idle";
+      state.apiaryLocations = {};
     },
     setLocations(state, data) {
       state.locations = data;
@@ -118,6 +120,12 @@ const myStore = createStore({
     },
     setCategoriesStatus(state, status) {
       state.categoriesStatus = status;
+    },
+    setApiaryLocation(state, { apiaryId, location }) {
+      state.apiaryLocations = {
+        ...state.apiaryLocations,
+        [apiaryId]: location,
+      };
     },
   },
 
@@ -230,6 +238,32 @@ const myStore = createStore({
         commit("setCategoriesStatus", "error");
         console.log("failed to load categories:", error);
         throw error;
+      }
+    },
+    async loadApiaryLocation({ commit, state }, { id, lat, lon }) {
+      if (state.apiaryLocations[id]) {
+        return;
+      }
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+          { headers: { "Accept-Language": "en" } },
+        );
+        const data = await res.json();
+        const a = data.address || {};
+        const place =
+          a.village || a.town || a.city || a.county || a.state || "";
+        const country = a.country || "";
+        const loc =
+          [place, country].filter(Boolean).join(", ") ||
+          data.display_name ||
+          "Unknown location";
+        commit("setApiaryLocation", { apiaryId: id, location: loc });
+      } catch {
+        commit("setApiaryLocation", {
+          apiaryId: id,
+          location: "Unknown location",
+        });
       }
     },
   },

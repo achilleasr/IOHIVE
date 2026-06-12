@@ -5,6 +5,7 @@
       <span v-if="hive.alert"><img src="../assets/Hives/i_alert_selected.svg" /></span>
     </h2>
     <div class="hive-actions">
+      <button v-if="loginData" class="edit-btn" @click="editOpen = true">Edit</button>
       <AddInspection :hive="hive" />
     </div>
   </div>
@@ -14,7 +15,7 @@
     <div class="hive-item-text">
       <div class="hive-item-location">
         <img src="../assets/Hives/i_location_pin.svg" />
-        <span>{{ locationName }}</span>
+        <span>{{ apiaryLocation }}</span>
       </div>
       <div v-if="hive.notes" class="hive-item-description">
         <span class="notes-label">Note:</span> {{ hive.notes }}
@@ -32,28 +33,34 @@
     <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }" />
     <span class="clickable">{{ latestInspectionText }}</span>
   </div>
+
+  <EditHive v-if="loginData" :hive="hive" :open="editOpen" @close="editOpen = false" @deleted="editOpen = false" />
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import AddInspection from './AddInspection.vue';
+import EditHive from './EditHive.vue';
 
 export default {
   name: 'HiveItemMain',
-  components: { AddInspection },
+  components: { AddInspection, EditHive },
   props: {
     hive: Object,
-    locationCoords: Array,
   },
   emits: ['update:expanded'],
   data() {
     return {
       expanded: false,
-      locationName: 'Locating…',
+      editOpen: false,
     };
   },
   computed: {
-    ...mapState(['devices', 'inspectionsByHive']),
+    ...mapState(['devices', 'inspectionsByHive', 'loginData', 'apiaryLocations']),
+
+    apiaryLocation() {
+      return this.apiaryLocations[this.hive?.location_id] || 'Unknown location';
+    },
 
     linkedDevice() {
       if (!this.devices || !this.hive?.id) return null;
@@ -87,39 +94,11 @@ export default {
     if (this.hive?.id && !this.inspectionsByHive[this.hive.id]) {
       this.$store.dispatch('loadHiveInspections', this.hive.id);
     }
-    this.resolveLocationName();
-  },
-  watch: {
-    locationCoords(val) {
-      if (val) this.resolveLocationName();
-    },
   },
   methods: {
     expandContentButton() {
       this.expanded = !this.expanded;
       this.$emit('update:expanded', this.expanded);
-    },
-
-    async resolveLocationName() {
-      const coords = this.locationCoords;
-      if (!coords || coords.length < 2) {
-        this.locationName = this.hive.location_name || 'Unknown location';
-        return;
-      }
-      const [lat, lon] = coords;
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-          { headers: { 'Accept-Language': 'en' } }
-        );
-        const data = await res.json();
-        const a = data.address || {};
-        const place = a.village || a.town || a.city || a.county || a.state || '';
-        const country = a.country || '';
-        this.locationName = [place, country].filter(Boolean).join(', ') || data.display_name || 'Unknown location';
-      } catch {
-        this.locationName = this.hive.location_name || 'Unknown location';
-      }
     },
   },
 };
@@ -148,6 +127,28 @@ export default {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.edit-btn {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 100px;
+  color: white;
+  padding: 7px 18px;
+  font-family: TwCen, sans-serif;
+  font-size: 1.05vw;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.edit-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.edit-btn:active {
+  transform: translateY(0);
 }
 
 .hive-item-info {

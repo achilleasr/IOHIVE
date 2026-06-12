@@ -34,6 +34,23 @@ export default {
     data() {
         return { editOpen: false };
     },
+    watch: {
+        selectedApiary: {
+            immediate: true,
+            handler(apiary) {
+                if (!apiary) return;
+                if (typeof apiary.coordinate_lat !== 'number' || typeof apiary.coordinate_lon !== 'number') {
+                    return;
+                }
+
+                this.$store.dispatch('loadApiaryLocation', {
+                    id: apiary.id,
+                    lat: apiary.coordinate_lat,
+                    lon: apiary.coordinate_lon,
+                });
+            }
+        }
+    },
     computed: {
         ...mapState(['loginData']),
         hasValidApiary() {

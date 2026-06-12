@@ -1,7 +1,7 @@
 <template>
     <div class="hive-item">
         <span class="green" :style="{ 'background-color': getHiveColor() }" :class="{ 'green-expanded': expanded }">
-            <HiveItemMain :hive="hive" :location-coords="locationCoords" @update:expanded="onExpandedChange" />
+            <HiveItemMain :hive="hive" @update:expanded="onExpandedChange" />
         </span>
 
         <span class="white" v-if="expanded">
@@ -25,7 +25,6 @@ export default {
     components: { HiveItemMain, Inspections, Measurements, Alerts },
     props: {
         hive: Object,
-        locationCoords: Array,
     },
     data() {
         return { expanded: false };
