@@ -8,8 +8,8 @@
             <Inspections :hive="hive" />
             <hr class="line" />
             <Measurements :hive="hive" />
-            <hr class="line" />
-            <Alerts :hive="hive" />
+            <!-- <hr class="line" /> -->
+            <!-- <Alerts :hive="hive" /> -->
         </span>
     </div>
 </template>
