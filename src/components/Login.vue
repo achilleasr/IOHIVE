@@ -16,7 +16,7 @@
                     <button type="submit" @click="postLogin"> Login </button>
                 </div>
             </form>
-            <div class="noAccountBox" @click="loginAsGuest">Continue without account</div>
+            <!-- s<div class="noAccountBox" @click="loginAsGuest">Continue without account</div> -->
         </div>
     </span>
 </template>

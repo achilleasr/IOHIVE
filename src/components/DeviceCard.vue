@@ -12,7 +12,7 @@
                     <span class="meta-row"><strong>Apiary:</strong> {{ apiaryName }}</span>
                     <span v-if="device.hardware_id" class="meta-row hw"><strong>Hardware ID:</strong> {{
                         device.hardware_id
-                    }}</span>
+                        }}</span>
                 </div>
                 <div class="last-seen">
                     {{ lastSeenText }}
@@ -24,16 +24,24 @@
         </div>
 
         <div v-if="expanded" class="device-body">
+            <div class="body-toolbar">
+                <button class="refresh-btn" @click="refresh" :disabled="chartLoading">
+                    {{ chartLoading ? 'Refreshing…' : 'Refresh' }}
+                </button>
+            </div>
             <div v-if="chartLoading" class="state-msg">Loading measurements…</div>
             <div v-else-if="chartError" class="state-msg error">{{ chartError }}</div>
-            <div v-else-if="!chartSeries.length" class="state-msg">No measurement data available.</div>
-            <div v-else class="charts-grid">
-                <div v-for="series in chartSeries" :key="series.key" class="chart-wrap">
-                    <div class="chart-label">{{ series.label }}</div>
-                    <canvas :ref="el => canvasRefs[series.key] = el"></canvas>
+            <div v-else>
+                <div v-if="!chartSeries.length" class="state-msg">No measurement data available.</div>
+                <div v-else class="charts-grid">
+                    <div v-for="series in chartSeries" :key="series.key" class="chart-wrap">
+                        <div class="chart-label">{{ series.label }}</div>
+                        <canvas :ref="el => canvasRefs[series.key] = el"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -48,8 +56,9 @@ Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip, 
 
 const SERIES_CONFIG = [
     { key: 't', label: 'Temperature (°C)', color: '#E46268' },
+    { key: 't_0', label: 'Ambient Temp (°C)', color: '#EAA94E' },
     { key: 'h', label: 'Humidity (%)', color: '#587FC0' },
-    { key: 'w', label: 'Weight (kg)', color: '#379C5A' },
+    { key: 'weight_kg', label: 'Weight (kg)', color: '#379C5A' },
     { key: 'bv', label: 'Battery (V)', color: '#E3C323' },
     { key: 's_tot', label: 'Sound (dB)', color: '#B575CF' },
     { key: 'p', label: 'Pressure (hPa)', color: '#3CA9A9' },
@@ -61,6 +70,7 @@ export default {
         device: { type: Object, required: true },
         hiveName: { type: String, default: '—' },
         apiaryName: { type: String, default: '—' },
+        interval: { type: String, default: 'day' },
     },
     data() {
         return {
@@ -72,12 +82,20 @@ export default {
             chartInstances: {},
         };
     },
+    watch: {
+        interval() {
+            if (this.expanded) {
+                this.rawData = null;
+                this.fetchData();
+            }
+        },
+    },
     computed: {
         isOnline() {
             const ts = this.device.last_message_received;
             if (!ts) return false;
-            const last = new Date(ts * 1000);
-            return (Date.now() - last) < 7 * 24 * 60 * 60 * 1000;
+            const last = new Date(ts.replace(" ", "T"));
+            return (Date.now() - last) < 6 * 60 * 60 * 1000;
         },
         lastSeenText() {
             const ts = this.device.last_message_received;
@@ -113,17 +131,24 @@ export default {
                 this.$nextTick(() => this.renderCharts());
             }
         },
+        async refresh() {
+            this.rawData = null;
+            await this.fetchData();
+        },
         async fetchData() {
             this.chartLoading = true;
             this.chartError = null;
             try {
-                const params = {};
-                if (this.device.hive_id) params.hive_id = this.device.hive_id;
-                else if (this.device.id) params.device_id = this.device.id;
+                const params = {
+                    interval: this.interval,
+                    index: 0,
+                };
+                if (this.device.id) params.device_id = this.device.id;
+                else if (this.device.hive_id) params.hive_id = this.device.hive_id;
                 const res = await getSensorMeasurements(params);
                 this.rawData = res.data;
-                console.log(this.rawData);
-                this.$nextTick(() => this.renderCharts());
+                await this.$nextTick();
+                if (this.chartSeries.length) this.renderCharts();
             } catch {
                 this.chartError = 'Could not load measurements for this device.';
             } finally {
@@ -138,8 +163,8 @@ export default {
                 const measurements = this.rawData?.measurements || [];
                 const points = measurements.filter(m => m[series.key] != null);
                 const labels = points.map(p => {
-                    const d = new Date(p.time * 1000);
-                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric' });
+                    const d = new Date(p.time);
+                    return d.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
                 });
                 this.chartInstances[series.key] = new Chart(canvas, {
                     type: 'line',
@@ -298,6 +323,35 @@ export default {
     font-size: 0.85rem;
     color: #666;
     margin-bottom: 6px;
+}
+
+.body-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.refresh-btn {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-family: TwCen, sans-serif;
+    font-size: 0.82rem;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+    background: #f5f6ff;
+    border-color: #575EAE;
+    color: #575EAE;
+}
+
+.refresh-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 @media (max-width: 700px) {
