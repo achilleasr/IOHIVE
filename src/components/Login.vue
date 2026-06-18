@@ -6,7 +6,7 @@
             <form class="form">
                 <div class="form-item">
                     <label>Email</label>
-                    <input type="email" v-model="email" placeholder="katemail.gmail.com" required />
+                    <input type="email" v-model="email" placeholder="beepExample@gmail.com" required />
                 </div>
                 <div class="form-item">
                     <label>Password</label>
