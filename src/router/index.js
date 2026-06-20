@@ -12,16 +12,19 @@ const routes = [
     path: "/devices",
     name: "/devices",
     component: PageDevices,
+    meta: { requiresAuth: true },
   },
   {
     path: "/settings",
     name: "/settings",
     component: PageSettings,
+    meta: { requiresAuth: true },
   },
   {
     path: "/account",
     name: "/account",
     component: PageAccount,
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -32,7 +35,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const loggedIn = !!store.state.loginData?.api_token;
-  if (!loggedIn) {
+  if (to.meta.requiresAuth && !loggedIn) {
     return { path: "/" };
   }
 });
