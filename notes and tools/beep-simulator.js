@@ -5,7 +5,7 @@ dotenv.config({ path: "../.env.local" });
 const DEVICE_KEY = process.env.BEEP_DEVICE_KEY;
 const API_TOKEN = process.env.BEEP_API_TOKEN;
 const API_BASE = "https://api.beep.nl/api";
-const INTERVAL_MS = 5 * 60 * 1000;
+const INTERVAL_MS = 1 * 60 * 1000;
 
 if (!DEVICE_KEY || !API_TOKEN) {
   console.error(
