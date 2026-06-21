@@ -76,6 +76,7 @@ export default {
 .devices-page {
     color: #333;
     padding-bottom: 4vh;
+    padding-top: 2vh;
 }
 
 h2 {

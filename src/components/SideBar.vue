@@ -42,9 +42,14 @@
                 <svg-icon type="mdi" :path="path"></svg-icon>
                 Logout
             </div>
+            <div class="last">
+                <AccountLink />
+            </div>
         </div>
 
-        <ChecklistManager v-if="loginData" :open="checklistOpen" @close="checklistOpen = false" />
+        <ChecklistManager :open="checklistOpen" @close="checklistOpen = false" />
+
+
     </div>
 </template>
 
@@ -53,10 +58,12 @@ import { mapState } from 'vuex';
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiLogin, mdiClipboardCheckOutline } from '@mdi/js';
 import ChecklistManager from './ChecklistManager.vue';
+import AccountLink from './AccountLink.vue';
+
 
 export default {
     name: "SideBar",
-    components: { SvgIcon, ChecklistManager },
+    components: { SvgIcon, ChecklistManager, AccountLink },
     data() {
         return {
             path: mdiLogin,
@@ -78,21 +85,33 @@ export default {
 <style scoped>
 .sidebar {
     position: fixed;
-    top: 20px;
+    /* top: 20px; */
     left: 0px;
-    border-radius: 10px;
+    /* border-radius: 10px; */
     width: 12vw;
-    display: flex;
+    height: 100%;
+    /* display: flex; */
+    border-right: 1px solid #e0e0e0;
     justify-content: space-between;
     flex-direction: column;
-    padding: 0vw 3.4vw;
+    padding: 0vw 2vw;
 }
 
 
+.main-logo {
+    /* width: 8vw; */
+    padding: 1vw;
+    /* margin: 2em; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1vw 0 2vw 0;
+}
+
 .main-logo img {
-    width: 8vw;
-    padding: 0 1vw;
-    margin-bottom: 3em;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
 }
 
 .pages {
@@ -100,6 +119,8 @@ export default {
     display: flex;
     gap: 1.2vw;
     flex-direction: column;
+    /* justify-content: space-between; */
+    height: 100%;
 }
 
 .page {
@@ -115,6 +136,15 @@ export default {
 .page:hover {
     background-color: rgb(248, 248, 248);
     box-shadow: 0px 5px 10px #575eae29;
+}
+
+.last {
+    display: flex;
+    justify-content: left;
+    align-items: flex-end;
+    /* padding: 1vw; */
+    margin-top: auto;
+    margin-bottom: 10vw;
 }
 
 .activePage {

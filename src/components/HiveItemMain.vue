@@ -28,7 +28,7 @@
       <p class="device-name">{{ deviceName }}</p>
     </div>
   </div>
-
+  <!-- <HiveGrid /> -->
   <div class="hive-item-inspection" @click="expandContentButton">
     <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }" />
     <span class="clickable">{{ latestInspectionText }}</span>
@@ -41,10 +41,11 @@
 import { mapState } from 'vuex';
 import AddInspection from './AddInspection.vue';
 import EditHive from './EditHive.vue';
+import HiveGrid from './HiveGrid.vue';
 
 export default {
   name: 'HiveItemMain',
-  components: { AddInspection, EditHive },
+  components: { AddInspection, EditHive, HiveGrid },
   props: {
     hive: Object,
   },

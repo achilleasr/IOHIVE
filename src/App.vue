@@ -1,7 +1,7 @@
 <template>
   <span v-if="isAuthenticated">
     <SideBar />
-    <HeaderCustom />
+    <!-- <HeaderCustom /> -->
     <div class="flex-container">
       <div class="empty"></div>
       <div class="main-content">
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import HeaderCustom from "./components/HeaderCustom.vue";
+// import HeaderCustom from "./components/HeaderCustom.vue";
 import SideBar from "./components/SideBar.vue";
 import Login from "./components/Login.vue";
 import { mapGetters } from 'vuex'
@@ -22,7 +22,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'App',
   components: {
-    HeaderCustom, SideBar, Login,
+    SideBar, Login,//HeaderCustom, 
   },
   computed: {
     ...mapGetters(['isAuthenticated'])
@@ -37,27 +37,22 @@ export default {
 
 <style>
 :root {
-  /* Main stroke color */
   --stroke-color: #919296;
 }
 
-/* width */
 ::-webkit-scrollbar {
   width: 10px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
   background: #F9FAFE;
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
   background: #575EAE;
   border-radius: 20px;
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #2f3364;
 }
@@ -102,10 +97,10 @@ a {
 }
 
 .main-content {
-  width: 74vw;
+  width: 76vw;
   border-radius: 10px;
   padding: 0px 5vw 0px 1vw;
-  margin-top: 5.5vw;
+  /* margin-top: 5.5vw; */
   display: flex;
   gap: 1vh;
   flex-direction: column;
