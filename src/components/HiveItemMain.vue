@@ -88,7 +88,7 @@ export default {
         year: 'numeric', month: 'short', day: 'numeric',
         hour: 'numeric', minute: 'numeric', hour12: true,
       });
-      return `Latest: ${d}`;
+      return `Latest Inspection: ${d}`;
     },
   },
   mounted() {

@@ -1,15 +1,15 @@
 <template>
     <div class="devices-page">
         <h2>Devices</h2>
-        <p class="subtitle">All sensors connected to your apiaries.</p>
+        <!-- <p class="subtitle">All your devices.</p> -->
 
-        <div class="interval-bar">
+        <!-- <div class="interval-bar">
             <span class="interval-label">Time range:</span>
             <button v-for="opt in intervalOptions" :key="opt.value" class="interval-btn"
                 :class="{ active: selectedInterval === opt.value }" @click="selectedInterval = opt.value">
                 {{ opt.label }}
             </button>
-        </div>
+        </div> -->
 
         <div v-if="loading" class="state-msg">Loading devices…</div>
         <div v-else-if="!deviceList.length" class="state-msg">No devices found on your account.</div>
@@ -30,7 +30,7 @@ export default {
     components: { DeviceCard },
     data() {
         return {
-            selectedInterval: 'day',
+            selectedInterval: 'hour',
             intervalOptions: [
                 { value: 'hour', label: 'Hour' },
                 { value: 'day', label: 'Day' },

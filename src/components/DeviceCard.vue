@@ -24,53 +24,23 @@
         </div>
 
         <div v-if="expanded" class="device-body">
-            <div class="body-toolbar">
-                <button class="refresh-btn" @click="refresh" :disabled="chartLoading">
-                    {{ chartLoading ? 'Refreshing…' : 'Refresh' }}
-                </button>
-            </div>
-            <div v-if="chartLoading" class="state-msg">Loading measurements…</div>
-            <div v-else-if="chartError" class="state-msg error">{{ chartError }}</div>
-            <div v-else>
-                <div v-if="!chartSeries.length" class="state-msg">No measurement data available.</div>
-                <div v-else class="charts-grid">
-                    <div v-for="series in chartSeries" :key="series.key" class="chart-wrap">
-                        <div class="chart-label">{{ series.label }}</div>
-                        <canvas :ref="el => canvasRefs[series.key] = el"></canvas>
-                    </div>
-                </div>
-            </div>
+            <DeviceCharts :rawData="rawData" :loading="chartLoading" :error="chartError" @refresh="refresh" />
         </div>
-
     </div>
 </template>
 
 <script>
 import { getSensorMeasurements } from '@/services/api/measurementsApi';
-import {
-    Chart, LineController, LineElement, PointElement,
-    LinearScale, Tooltip, Filler, CategoryScale,
-} from 'chart.js';
-
-Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip, Filler, CategoryScale);
-
-const SERIES_CONFIG = [
-    { key: 't', label: 'Temperature (°C)', color: '#E46268' },
-    { key: 't_0', label: 'Ambient Temp (°C)', color: '#EAA94E' },
-    { key: 'h', label: 'Humidity (%)', color: '#587FC0' },
-    { key: 'weight_kg', label: 'Weight (kg)', color: '#379C5A' },
-    { key: 'bv', label: 'Battery (V)', color: '#E3C323' },
-    { key: 's_tot', label: 'Sound (dB)', color: '#B575CF' },
-    { key: 'p', label: 'Pressure (hPa)', color: '#3CA9A9' },
-];
+import DeviceCharts from '@/components/DeviceCharts.vue';
 
 export default {
     name: 'DeviceCard',
+    components: { DeviceCharts },
     props: {
         device: { type: Object, required: true },
         hiveName: { type: String, default: '—' },
         apiaryName: { type: String, default: '—' },
-        interval: { type: String, default: 'day' },
+        interval: { type: String, default: 'hour' },
     },
     data() {
         return {
@@ -78,8 +48,6 @@ export default {
             chartLoading: false,
             chartError: null,
             rawData: null,
-            canvasRefs: {},
-            chartInstances: {},
         };
     },
     watch: {
@@ -94,31 +62,22 @@ export default {
         isOnline() {
             const ts = this.device.last_message_received;
             if (!ts) return false;
-            const last = new Date(ts.replace(" ", "T"));
+            const last = new Date(ts.replace(' ', 'T'));
             return (Date.now() - last) < 6 * 60 * 60 * 1000;
         },
         lastSeenText() {
             const ts = this.device.last_message_received;
             if (!ts) return 'Never received data';
-
-            const date = new Date(ts.replace(" ", "T"));
-
-            const formatted = date.toLocaleString("en-GB", {
-                hour: "numeric",
-                minute: "2-digit",
+            const date = new Date(ts.replace(' ', 'T'));
+            const formatted = date.toLocaleString('en-GB', {
+                hour: 'numeric',
+                minute: '2-digit',
                 hour12: true,
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-            }).replace(",", "");
-
-            // console.log(formatted);
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }).replace(',', '');
             return 'Last data: ' + formatted;
-        },
-        chartSeries() {
-            if (!this.rawData) return [];
-            const measurements = this.rawData.measurements || [];
-            return SERIES_CONFIG.filter(s => measurements.some(m => m[s.key] != null));
         },
     },
     methods: {
@@ -126,9 +85,6 @@ export default {
             this.expanded = !this.expanded;
             if (this.expanded && !this.rawData && !this.chartLoading) {
                 await this.fetchData();
-            }
-            if (this.expanded && this.chartSeries.length) {
-                this.$nextTick(() => this.renderCharts());
             }
         },
         async refresh() {
@@ -139,61 +95,18 @@ export default {
             this.chartLoading = true;
             this.chartError = null;
             try {
-                const params = {
-                    interval: this.interval,
-                    index: 0,
-                };
+                const params = { interval: this.interval, index: 0 };
                 if (this.device.id) params.device_id = this.device.id;
                 else if (this.device.hive_id) params.hive_id = this.device.hive_id;
                 const res = await getSensorMeasurements(params);
                 this.rawData = res.data;
-                await this.$nextTick();
-                if (this.chartSeries.length) this.renderCharts();
+                console.log('Fetched measurements for device', this.device.id, this.rawData);
             } catch {
                 this.chartError = 'Could not load measurements for this device.';
             } finally {
                 this.chartLoading = false;
             }
         },
-        renderCharts() {
-            this.chartSeries.forEach(series => {
-                const canvas = this.canvasRefs[series.key];
-                if (!canvas) return;
-                if (this.chartInstances[series.key]) this.chartInstances[series.key].destroy();
-                const measurements = this.rawData?.measurements || [];
-                const points = measurements.filter(m => m[series.key] != null);
-                const labels = points.map(p => {
-                    const d = new Date(p.time);
-                    return d.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
-                });
-                this.chartInstances[series.key] = new Chart(canvas, {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            data: points.map(p => p[series.key]),
-                            borderColor: series.color,
-                            backgroundColor: series.color + '22',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: points.length > 60 ? 0 : 3,
-                            borderWidth: 2,
-                        }],
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { ticks: { maxTicksLimit: 6, maxRotation: 0, font: { family: 'TwCen, sans-serif', size: 11 } }, grid: { color: '#f0f0f0' } },
-                            y: { ticks: { font: { family: 'TwCen, sans-serif', size: 11 } }, grid: { color: '#f0f0f0' } },
-                        },
-                    },
-                });
-            });
-        },
-    },
-    beforeUnmount() {
-        Object.values(this.chartInstances).forEach(c => c.destroy());
     },
 };
 </script>
