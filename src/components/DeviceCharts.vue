@@ -41,7 +41,7 @@ echarts.use([
 
 const SERIES_CONFIG = [
     { key: 't', label: 'Temperature (°C)', color: '#E46268' },
-    { key: 't_0', label: 'Ambient Temp (°C)', color: '#EAA94E' },
+    { key: 't_0', label: 'Inside Temperature (°C)', color: '#EAA94E' },
     { key: 'h', label: 'Humidity (%)', color: '#587FC0' },
     { key: 'weight_kg', label: 'Weight (kg)', color: '#379C5A' },
     { key: 'bv', label: 'Battery (V)', color: '#E3C323' },
@@ -55,7 +55,7 @@ function pad(n) {
     return String(n).padStart(2, '0');
 }
 
-// Converts a UTC ISO string to a local-time display label
+//  UTC ISO string to local-time
 function toLocalLabel(isoString) {
     const d = new Date(isoString);
     return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;

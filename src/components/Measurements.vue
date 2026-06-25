@@ -1,6 +1,6 @@
 <template>
     <h2 class="clickable title" @click="toggleExpanded">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="imgicon"
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="imgicon"
             :class="{ rotated180: expanded }" viewBox="0 0 16 16">
             <path fill-rule="evenodd"
                 d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
@@ -8,17 +8,8 @@
         <svg-icon type="mdi" :path="path" />
         <span>Measurements</span>
     </h2>
-
     <div v-if="expanded" class="measurements-content">
-        <div v-if="loading" class="state-msg">Loading measurements…</div>
-        <div v-else-if="error" class="state-msg error-msg">{{ error }}</div>
-        <div v-else-if="!hasData" class="state-msg">No sensor data available for this hive.</div>
-        <div v-else class="charts-grid">
-            <div v-for="series in chartSeries" :key="series.key" class="chart-wrap">
-                <div class="chart-label">{{ series.label }}</div>
-                <canvas :ref="el => canvasRefs[series.key] = el"></canvas>
-            </div>
-        </div>
+        <DeviceCharts :rawData="rawData" :loading="chartLoading" :error="chartError" @refresh="refresh" />
     </div>
 </template>
 
@@ -26,130 +17,83 @@
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiChartTimelineVariantShimmer } from '@mdi/js';
 import { getSensorMeasurements } from '@/services/api/measurementsApi';
-import {
-    Chart, LineController, LineElement, PointElement,
-    LinearScale, Tooltip, Filler, CategoryScale,
-} from 'chart.js';
-
-Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip, Filler, CategoryScale);
-
-const SERIES_CONFIG = [
-    { key: 't', label: 'Temperature (°C)', color: '#E46268' },
-    { key: 'h', label: 'Humidity (%)', color: '#587FC0' },
-    { key: 'w', label: 'Weight (kg)', color: '#379C5A' },
-    { key: 'bv', label: 'Battery (V)', color: '#E3C323' },
-];
+import DeviceCharts from '@/components/DeviceCharts.vue';
 
 export default {
     name: 'Measurements',
-    components: { SvgIcon },
+    components: { SvgIcon, DeviceCharts },
     props: {
         hive: Object,
+        device: { type: Object, required: true },
+        hiveName: { type: String, default: '—' },
+        apiaryName: { type: String, default: '—' },
+        interval: { type: String, default: 'hour' },
     },
     data() {
         return {
-            expanded: false,
-            loading: false,
-            error: null,
-            rawData: null,
             path: mdiChartTimelineVariantShimmer,
-            canvasRefs: {},
-            chartInstances: {},
+            expanded: false,
+            chartLoading: false,
+            chartError: null,
+            rawData: null,
         };
     },
-    computed: {
-        hasData() {
-            return this.rawData && this.chartSeries.length > 0;
+    watch: {
+        interval() {
+            if (this.expanded) {
+                this.rawData = null;
+                this.fetchData();
+            }
         },
-        chartSeries() {
-            if (!this.rawData) return [];
-            const measurements = this.rawData.measurements || [];
-            return SERIES_CONFIG.filter(s => measurements.some(m => m[s.key] != null));
+    },
+    computed: {
+        isOnline() {
+            const ts = this.device.last_message_received;
+            if (!ts) return false;
+            const last = new Date(ts.replace(' ', 'T'));
+            return (Date.now() - last) < 6 * 60 * 60 * 1000;
+        },
+        lastSeenText() {
+            const ts = this.device.last_message_received;
+            if (!ts) return 'Never received data';
+            const date = new Date(ts.replace(' ', 'T'));
+            const formatted = date.toLocaleString('en-GB', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }).replace(',', '');
+            return 'Last data: ' + formatted;
         },
     },
     methods: {
         async toggleExpanded() {
             this.expanded = !this.expanded;
-            if (this.expanded && !this.rawData && !this.loading) {
+            if (this.expanded && !this.rawData && !this.chartLoading) {
                 await this.fetchData();
             }
-            if (this.expanded && this.hasData) {
-                this.$nextTick(() => this.renderCharts());
-            }
         },
-
+        async refresh() {
+            this.rawData = null;
+            await this.fetchData();
+        },
         async fetchData() {
-            this.loading = true;
-            this.error = null;
+            this.chartLoading = true;
+            this.chartError = null;
             try {
-                const params = {};
-                if (this.hive?.id) params.hive_id = this.hive.id;
+                const params = { interval: this.interval, index: 0, relative_interval: true };
+                if (this.device.id) params.device_id = this.device.id;
+                else if (this.device.hive_id) params.hive_id = this.device.hive_id;
                 const res = await getSensorMeasurements(params);
                 this.rawData = res.data;
-                this.$nextTick(() => this.renderCharts());
             } catch {
-                this.error = 'Could not load measurements. The device may not have sent data yet.';
+                this.chartError = 'Could not load measurements for this device.';
             } finally {
-                this.loading = false;
+                this.chartLoading = false;
             }
         },
-
-        renderCharts() {
-            this.chartSeries.forEach(series => {
-                const canvas = this.canvasRefs[series.key];
-                if (!canvas) return;
-                if (this.chartInstances[series.key]) {
-                    this.chartInstances[series.key].destroy();
-                }
-                const measurements = this.rawData?.measurements || [];
-                const points = measurements.filter(m => m[series.key] != null);
-                const labels = points.map(p => {
-                    const d = new Date(p.time * 1000);
-                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric' });
-                });
-                const values = points.map(p => p[series.key]);
-
-                this.chartInstances[series.key] = new Chart(canvas, {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            data: values,
-                            borderColor: series.color,
-                            backgroundColor: series.color + '22',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: points.length > 60 ? 0 : 3,
-                            borderWidth: 2,
-                        }],
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => ctx.parsed.y + ' ' + (series.label.match(/\(([^)]+)\)/)?.[1] || ''),
-                                },
-                            },
-                        },
-                        scales: {
-                            x: {
-                                ticks: { maxTicksLimit: 6, maxRotation: 0, font: { family: 'TwCen, sans-serif', size: 11 } },
-                                grid: { color: '#f0f0f0' },
-                            },
-                            y: {
-                                ticks: { font: { family: 'TwCen, sans-serif', size: 11 } },
-                                grid: { color: '#f0f0f0' },
-                            },
-                        },
-                    },
-                });
-            });
-        },
-    },
-    beforeUnmount() {
-        Object.values(this.chartInstances).forEach(c => c.destroy());
     },
 };
 </script>
