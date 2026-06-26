@@ -1,44 +1,61 @@
 <template>
     <div class="hive-item">
         <span class="green" :style="{ 'background-color': getHiveColor() }" :class="{ 'green-expanded': expanded }">
-            <HiveItemMain :hive="hive" @update:expanded="onExpandedChange" />
+            <HiveItemMain :hive="hive" :linkedDevice="linkedDevice" @update:expanded="onExpandedChange" />
+            <!-- <HiveGrid v-if="expanded" /> -->
         </span>
-
         <span class="white" v-if="expanded">
-            <Inspections :hive="hive" />
-            <hr class="line" />
-            <Measurements :hive="hive" />
-            <!-- <hr class="line" /> -->
-            <!-- <Alerts :hive="hive" /> -->
+            <Inspections :inspections="hive.inspections" :hive="hive" />
+
+            <template v-if="linkedDevice">
+                <hr class="line" />
+                <Measurements :linkedDevice="linkedDevice" />
+                <!-- <hr class="line" /> -->
+            </template>
+            <!-- <Alerts :alerts="hive.inspections" /> -->
         </span>
     </div>
 </template>
 
 <script>
-import HiveItemMain from './HiveItemMain.vue';
+import HiveGrid from './HiveGrid.vue';
 import Inspections from './Inspections.vue';
 import Measurements from './Measurements.vue';
 import Alerts from './Alerts.vue';
+import HiveItemMain from './HiveItemMain.vue';
 
 export default {
     name: 'HiveItem',
-    components: { HiveItemMain, Inspections, Measurements, Alerts },
+    components: {
+        HiveItemMain, HiveGrid, Inspections, Measurements, Alerts,
+    },
     props: {
         hive: Object,
     },
     data() {
-        return { expanded: false };
+        return {
+            expanded: false,
+        }
     },
-    methods: {
-        onExpandedChange(val) { this.expanded = val; },
-        getHiveColor() {
-            const raw = (this.hive.hex_color && this.hive.hex_color.trim())
-                || (this.hive.color && this.hive.color.trim());
-            if (!raw) return '#379C5A';
-            return raw.startsWith('#') ? raw : '#' + raw;
+    computed: {
+        linkedDevice() {
+            const devices = this.$store.state.devices || [];
+            return devices.find(d => d.hive_id === this.hive.id) || null;
         },
     },
-};
+    methods: {
+        onExpandedChange(newExpandedValue) {
+            this.expanded = newExpandedValue;
+        },
+        getHiveColor() {
+            if (this.hive.color) {
+                return this.hive.color;
+            } else {
+                return '#379C5A';
+            }
+        }
+    },
+}
 </script>
 
 <style scoped>
@@ -59,7 +76,6 @@ export default {
     background-color: #379C5A;
     padding: 10px 30px;
     border-radius: 20px;
-    position: relative;
 }
 
 .green-expanded {
@@ -69,6 +85,7 @@ export default {
 .white {
     background-color: white;
     color: rgb(190, 190, 190);
+    padding: 0px;
     padding: 10px 30px;
     border-radius: 0px 0px 20px 20px;
 }
