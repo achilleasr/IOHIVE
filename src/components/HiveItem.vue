@@ -1,6 +1,7 @@
 <template>
     <div class="hive-item">
         <span class="green" :style="{ 'background-color': getHiveColor() }" :class="{ 'green-expanded': expanded }">
+            <InspectionHistory :hive="hive" />
             <HiveItemMain :hive="hive" :linkedDevice="linkedDevice" @update:expanded="onExpandedChange" />
             <!-- <HiveGrid v-if="expanded" /> -->
         </span>
@@ -24,10 +25,12 @@ import Measurements from './Measurements.vue';
 import Alerts from './Alerts.vue';
 import HiveItemMain from './HiveItemMain.vue';
 
+import InspectionHistory from './InspectionHistory.vue';
+
 export default {
     name: 'HiveItem',
     components: {
-        HiveItemMain, HiveGrid, Inspections, Measurements, Alerts,
+        HiveItemMain, InspectionHistory, HiveGrid, Inspections, Measurements, Alerts,
     },
     props: {
         hive: Object,

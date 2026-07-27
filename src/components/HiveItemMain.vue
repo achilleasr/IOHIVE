@@ -6,7 +6,7 @@
     </h2>
     <div class="hive-actions">
       <button v-if="loginData" class="edit-btn" @click="editOpen = true">Edit</button>
-      <AddInspection :hive="hive" />
+      <AddInspectionNew :hive="hive" />
     </div>
   </div>
 
@@ -39,13 +39,17 @@
 
 <script>
 import { mapState } from 'vuex';
-import AddInspection from './AddInspection.vue';
+// import AddInspection from './AddInspection.vue';
 import EditHive from './EditHive.vue';
 import HiveGrid from './HiveGrid.vue';
 
+import AddInspectionNew from './AddInspectionNew.vue';
+
+
+
 export default {
   name: 'HiveItemMain',
-  components: { AddInspection, EditHive, HiveGrid },
+  components: { AddInspectionNew, EditHive, HiveGrid },
   props: {
     hive: Object,
   },
