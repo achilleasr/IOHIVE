@@ -6,7 +6,7 @@
     </h2>
     <div class="hive-actions">
       <button v-if="loginData" class="edit-btn" @click="editOpen = true">Edit</button>
-      <AddInspectionNew :hive="hive" />
+      <button v-if="loginData" class="edit-btn" @click="inspectionOpen = true">+ Inspection</button>
     </div>
   </div>
 
@@ -28,36 +28,43 @@
       <p class="device-name">{{ deviceName }}</p>
     </div>
   </div>
-  <!-- <HiveGrid /> -->
+
   <div class="hive-item-inspection" @click="expandContentButton">
     <img src="../assets/Hives/i_arrow_down.svg" class="clickable" :class="{ rotated180: expanded }" />
     <span class="clickable">{{ latestInspectionText }}</span>
   </div>
 
   <EditHive v-if="loginData" :hive="hive" :open="editOpen" @close="editOpen = false" @deleted="editOpen = false" />
+
+  <div v-if="inspectionOpen" class="modal-backdrop" @click.self="inspectionOpen = false">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">New Inspection — {{ hive.name }}</span>
+        <button class="modal-close" @click="inspectionOpen = false">✕</button>
+      </div>
+      <MinimalInspectionForm :hive="hive" @saved="onInspectionSaved" @cancel="inspectionOpen = false" />
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-// import AddInspection from './AddInspection.vue';
 import EditHive from './EditHive.vue';
-import HiveGrid from './HiveGrid.vue';
-
-import AddInspectionNew from './AddInspectionNew.vue';
-
-
+import MinimalInspectionForm from './MinimalInspectionForm.vue';
 
 export default {
   name: 'HiveItemMain',
-  components: { AddInspectionNew, EditHive, HiveGrid },
+  components: { EditHive, MinimalInspectionForm },
   props: {
     hive: Object,
+    linkedDevice: Object,
   },
   emits: ['update:expanded'],
   data() {
     return {
       expanded: false,
       editOpen: false,
+      inspectionOpen: false,
     };
   },
   computed: {
@@ -65,12 +72,6 @@ export default {
 
     apiaryLocation() {
       return this.apiaryLocations[this.hive?.location_id] || 'Unknown location';
-    },
-
-    linkedDevice() {
-      if (!this.devices || !this.hive?.id) return null;
-      const list = Array.isArray(this.devices) ? this.devices : [];
-      return list.find(d => d.hive_id === this.hive.id) ?? null;
     },
 
     isOnline() {
@@ -104,6 +105,9 @@ export default {
     expandContentButton() {
       this.expanded = !this.expanded;
       this.$emit('update:expanded', this.expanded);
+    },
+    onInspectionSaved() {
+      this.inspectionOpen = false;
     },
   },
 };
@@ -247,5 +251,53 @@ export default {
 
 .rotated180 {
   transform: rotate(180deg);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 32px;
+  width: min(680px, 95vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #333;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.modal-close:hover {
+  color: #555;
 }
 </style>

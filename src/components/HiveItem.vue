@@ -1,36 +1,28 @@
 <template>
     <div class="hive-item">
         <span class="green" :style="{ 'background-color': getHiveColor() }" :class="{ 'green-expanded': expanded }">
-            <InspectionHistory :hive="hive" />
             <HiveItemMain :hive="hive" :linkedDevice="linkedDevice" @update:expanded="onExpandedChange" />
-            <!-- <HiveGrid v-if="expanded" /> -->
         </span>
         <span class="white" v-if="expanded">
-            <Inspections :inspections="hive.inspections" :hive="hive" />
+            <InspectionHistory :hive="hive" />
 
             <template v-if="linkedDevice">
                 <hr class="line" />
                 <Measurements :linkedDevice="linkedDevice" />
-                <!-- <hr class="line" /> -->
             </template>
-            <!-- <Alerts :alerts="hive.inspections" /> -->
         </span>
     </div>
 </template>
 
 <script>
-import HiveGrid from './HiveGrid.vue';
-import Inspections from './Inspections.vue';
 import Measurements from './Measurements.vue';
-import Alerts from './Alerts.vue';
 import HiveItemMain from './HiveItemMain.vue';
-
 import InspectionHistory from './InspectionHistory.vue';
 
 export default {
     name: 'HiveItem',
     components: {
-        HiveItemMain, InspectionHistory, HiveGrid, Inspections, Measurements, Alerts,
+        HiveItemMain, Measurements, InspectionHistory,
     },
     props: {
         hive: Object,
@@ -38,7 +30,7 @@ export default {
     data() {
         return {
             expanded: false,
-        }
+        };
     },
     computed: {
         linkedDevice() {
@@ -56,9 +48,9 @@ export default {
             } else {
                 return '#379C5A';
             }
-        }
+        },
     },
-}
+};
 </script>
 
 <style scoped>
@@ -88,7 +80,6 @@ export default {
 .white {
     background-color: white;
     color: rgb(190, 190, 190);
-    padding: 0px;
     padding: 10px 30px;
     border-radius: 0px 0px 20px 20px;
 }
