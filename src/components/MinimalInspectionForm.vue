@@ -30,41 +30,49 @@
 
         <div class="field">
           <label>Total frames</label>
-          <input v-model.number="observed.totalFrames" type="number" min="0" max="30" :disabled="submitting" placeholder="0" />
+          <input v-model.number="observed.totalFrames" type="number" min="0" max="30" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Brood frames (eggs)</label>
-          <input v-model.number="observed.broodEggs" type="number" min="0" max="30" :disabled="submitting" placeholder="0" />
+          <input v-model.number="observed.broodEggs" type="number" min="0" max="30" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Brood frames (larvae)</label>
-          <input v-model.number="observed.broodLarvae" type="number" min="0" max="30" :disabled="submitting" placeholder="0" />
+          <input v-model.number="observed.broodLarvae" type="number" min="0" max="30" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Brood frames (capped)</label>
-          <input v-model.number="observed.broodCapped" type="number" min="0" max="30" :disabled="submitting" placeholder="0" />
+          <input v-model.number="observed.broodCapped" type="number" min="0" max="30" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Honey frames</label>
-          <input v-model.number="observed.honeyFrames" type="number" min="0" max="30" :disabled="submitting" placeholder="0" />
+          <input v-model.number="observed.honeyFrames" type="number" min="0" max="30" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Pollen frames</label>
-          <input v-model.number="observed.pollenFrames" type="number" min="0" max="30" :disabled="submitting" placeholder="0" />
+          <input v-model.number="observed.pollenFrames" type="number" min="0" max="30" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Queen seen</label>
           <div class="choice-row">
             <button type="button" :class="['choice-btn', observed.queenSeen === true ? 'selected' : '']"
-              @click="observed.queenSeen = observed.queenSeen === true ? null : true" :disabled="submitting">Yes</button>
+              @click="observed.queenSeen = observed.queenSeen === true ? null : true"
+              :disabled="submitting">Yes</button>
             <button type="button" :class="['choice-btn', observed.queenSeen === false ? 'selected-danger' : '']"
-              @click="observed.queenSeen = observed.queenSeen === false ? null : false" :disabled="submitting">No</button>
+              @click="observed.queenSeen = observed.queenSeen === false ? null : false"
+              :disabled="submitting">No</button>
           </div>
         </div>
 
@@ -81,16 +89,20 @@
         <div class="field">
           <label>Needs attention</label>
           <div class="choice-row">
-            <button type="button" :class="['choice-btn danger', observed.needsAttention === true ? 'selected-danger' : '']"
-              @click="observed.needsAttention = observed.needsAttention === true ? null : true" :disabled="submitting">Yes</button>
+            <button type="button"
+              :class="['choice-btn danger', observed.needsAttention === true ? 'selected-danger' : '']"
+              @click="observed.needsAttention = observed.needsAttention === true ? null : true"
+              :disabled="submitting">Yes</button>
             <button type="button" :class="['choice-btn', observed.needsAttention === false ? 'selected' : '']"
-              @click="observed.needsAttention = observed.needsAttention === false ? null : false" :disabled="submitting">No</button>
+              @click="observed.needsAttention = observed.needsAttention === false ? null : false"
+              :disabled="submitting">No</button>
           </div>
         </div>
 
         <div class="field field-wide">
           <label>Notes</label>
-          <textarea v-model="observed.notes" rows="2" :disabled="submitting" placeholder="What did you observe?"></textarea>
+          <textarea v-model="observed.notes" rows="2" :disabled="submitting"
+            placeholder="What did you observe?"></textarea>
         </div>
       </div>
     </div>
@@ -108,12 +120,14 @@
       <div v-if="hasMutation" class="field-grid">
         <div class="field">
           <label>Frames added</label>
-          <input v-model.number="mutation.framesAdded" type="number" min="0" max="20" :disabled="submitting" placeholder="0" />
+          <input v-model.number="mutation.framesAdded" type="number" min="0" max="20" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
           <label>Frames removed</label>
-          <input v-model.number="mutation.framesRemoved" type="number" min="0" max="20" :disabled="submitting" placeholder="0" />
+          <input v-model.number="mutation.framesRemoved" type="number" min="0" max="20" :disabled="submitting"
+            placeholder="0" />
         </div>
 
         <div class="field">
@@ -121,44 +135,51 @@
           <div class="choice-row">
             <button v-for="opt in feedingOptions" :key="opt" type="button"
               :class="['choice-btn', mutation.feeding === opt ? 'selected' : '']"
-              @click="mutation.feeding = mutation.feeding === opt ? null : opt"
-              :disabled="submitting">{{ opt }}</button>
+              @click="mutation.feeding = mutation.feeding === opt ? null : opt" :disabled="submitting">{{ opt
+              }}</button>
           </div>
         </div>
 
         <div class="field">
           <label>Feed amount</label>
-          <input v-model="mutation.feedAmount" type="text" :disabled="submitting || !mutation.feeding" placeholder="e.g. 500ml syrup" />
+          <input v-model="mutation.feedAmount" type="text" :disabled="submitting || !mutation.feeding"
+            placeholder="e.g. 500ml syrup" />
         </div>
 
         <div class="field">
           <label>Treatment applied</label>
           <div class="choice-row">
             <button type="button" :class="['choice-btn', mutation.treatmentApplied === true ? 'selected' : '']"
-              @click="mutation.treatmentApplied = mutation.treatmentApplied === true ? null : true" :disabled="submitting">Yes</button>
+              @click="mutation.treatmentApplied = mutation.treatmentApplied === true ? null : true"
+              :disabled="submitting">Yes</button>
             <button type="button" :class="['choice-btn', mutation.treatmentApplied === false ? 'selected' : '']"
-              @click="mutation.treatmentApplied = mutation.treatmentApplied === false ? null : false" :disabled="submitting">No</button>
+              @click="mutation.treatmentApplied = mutation.treatmentApplied === false ? null : false"
+              :disabled="submitting">No</button>
           </div>
         </div>
 
         <div class="field">
           <label>Treatment details</label>
-          <input v-model="mutation.treatmentDetails" type="text" :disabled="submitting || !mutation.treatmentApplied" placeholder="e.g. Oxalic acid" />
+          <input v-model="mutation.treatmentDetails" type="text" :disabled="submitting || !mutation.treatmentApplied"
+            placeholder="e.g. Oxalic acid" />
         </div>
 
         <div class="field">
           <label>Queen replaced</label>
           <div class="choice-row">
             <button type="button" :class="['choice-btn', mutation.queenReplaced === true ? 'selected' : '']"
-              @click="mutation.queenReplaced = mutation.queenReplaced === true ? null : true" :disabled="submitting">Yes</button>
+              @click="mutation.queenReplaced = mutation.queenReplaced === true ? null : true"
+              :disabled="submitting">Yes</button>
             <button type="button" :class="['choice-btn', mutation.queenReplaced === false ? 'selected' : '']"
-              @click="mutation.queenReplaced = mutation.queenReplaced === false ? null : false" :disabled="submitting">No</button>
+              @click="mutation.queenReplaced = mutation.queenReplaced === false ? null : false"
+              :disabled="submitting">No</button>
           </div>
         </div>
 
         <div class="field field-wide">
           <label>Mutation notes</label>
-          <textarea v-model="mutation.notes" rows="2" :disabled="submitting" placeholder="What changes did you make?"></textarea>
+          <textarea v-model="mutation.notes" rows="2" :disabled="submitting"
+            placeholder="What changes did you make?"></textarea>
         </div>
       </div>
     </div>
@@ -315,15 +336,29 @@ export default {
       const d = this.dateOnly ? new Date(`${this.dateOnly}T${time}:00`) : new Date();
       const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
       const rs = this.resultingState;
+
+      const items = {};
+
+      if (rs.totalFrames != null) items[80] = rs.totalFrames;
+      if (rs.honeyFrames != null) items[955] = rs.honeyFrames;
+      if (rs.pollenFrames != null) items[900] = rs.pollenFrames;
+      if (rs.queenSeen != null) items[399] = rs.queenSeen ? 1 : 0;
+      if (rs.broodEggs != null) items[270] = rs.broodEggs > 0 ? 1 : 0;
+      if (rs.broodLarvae != null) items[276] = rs.broodLarvae > 0 ? 1 : 0;
+      if (rs.broodCapped != null) items[273] = rs.broodCapped > 0 ? 1 : 0;
+
       const payload = {
         date,
         hive_ids: [this.hive.id],
-        items: {},
+        items,
       };
+
       if (rs.impression != null) payload.impression = rs.impression;
       if (rs.needsAttention != null) payload.attention = rs.needsAttention ? 1 : 0;
       if (rs.notes) payload.notes = rs.notes;
+
       return payload;
+
     },
     async submit() {
       this.submitting = true;
