@@ -26,7 +26,8 @@
           </svg>
           <span class="entry-date">{{ formatDate(item.date) }}</span>
           <div class="entry-chips">
-            <span v-if="item.observedState?.impression" class="chip" :class="impressionClass(item.observedState.impression)">
+            <span v-if="item.observedState?.impression" class="chip"
+              :class="impressionClass(item.observedState.impression)">
               {{ impressionLabel(item.observedState.impression) }}
             </span>
             <span v-if="item.mutation" class="chip chip-mutation">Mutation</span>
@@ -56,14 +57,14 @@
             <div class="detail-col" v-if="item.mutation">
               <div class="col-header mut-header">Mutation (step 2)</div>
               <div class="data-rows">
-                <div v-if="item.mutation.framesAdded" class="data-row">
-                  <span class="data-label">Frames added</span>
-                  <span class="data-val pos">+{{ item.mutation.framesAdded }}</span>
-                </div>
-                <div v-if="item.mutation.framesRemoved" class="data-row">
-                  <span class="data-label">Frames removed</span>
-                  <span class="data-val neg">-{{ item.mutation.framesRemoved }}</span>
-                </div>
+                <template v-for="row in mutationFrameRows(item.mutation)" :key="row.label">
+                  <div class="data-row">
+                    <span class="data-label">{{ row.label }}</span>
+                    <span :class="['data-val', row.delta > 0 ? 'pos' : 'neg']">
+                      {{ row.delta > 0 ? '+' : '' }}{{ row.delta }}
+                    </span>
+                  </div>
+                </template>
                 <div v-if="item.mutation.feeding" class="data-row">
                   <span class="data-label">Feeding</span>
                   <span class="data-val">{{ item.mutation.feeding }} {{ item.mutation.feedAmount || '' }}</span>
@@ -145,6 +146,19 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    mutationFrameRows(m) {
+      const types = [
+        { label: 'Brood (eggs)', addKey: 'broodEggsAdded', removeKey: 'broodEggsRemoved' },
+        { label: 'Brood (larvae)', addKey: 'broodLarvaeAdded', removeKey: 'broodLarvaeRemoved' },
+        { label: 'Brood (capped)', addKey: 'broodCappedAdded', removeKey: 'broodCappedRemoved' },
+        { label: 'Honey frames', addKey: 'honeyFramesAdded', removeKey: 'honeyFramesRemoved' },
+        { label: 'Pollen frames', addKey: 'pollenFramesAdded', removeKey: 'pollenFramesRemoved' },
+        { label: 'Empty frames', addKey: 'emptyFramesAdded', removeKey: 'emptyFramesRemoved' },
+      ];
+      return types
+        .map(t => ({ label: t.label, delta: (m[t.addKey] || 0) - (m[t.removeKey] || 0) }))
+        .filter(r => r.delta !== 0);
     },
     toggleItem(idx) {
       this.openItems = { ...this.openItems, [idx]: !this.openItems[idx] };
