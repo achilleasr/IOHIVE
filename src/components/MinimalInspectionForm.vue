@@ -30,37 +30,37 @@
 
         <div class="field">
           <label>Total frames</label>
-          <input v-model.number="observed.totalFrames" type="number" min="0" max="30" :disabled="submitting"
+          <input v-model.number="observed.totalFrames" type="number" min="0" max="30" step="0.5" :disabled="submitting"
             placeholder="0" />
         </div>
 
         <div class="field">
           <label>Brood frames (eggs)</label>
-          <input v-model.number="observed.broodEggs" type="number" min="0" max="30" :disabled="submitting"
+          <input v-model.number="observed.broodEggs" type="number" min="0" max="30" step="0.5" :disabled="submitting"
             placeholder="0" />
         </div>
 
         <div class="field">
           <label>Brood frames (larvae)</label>
-          <input v-model.number="observed.broodLarvae" type="number" min="0" max="30" :disabled="submitting"
+          <input v-model.number="observed.broodLarvae" type="number" min="0" max="30" step="0.5" :disabled="submitting"
             placeholder="0" />
         </div>
 
         <div class="field">
           <label>Brood frames (capped)</label>
-          <input v-model.number="observed.broodCapped" type="number" min="0" max="30" :disabled="submitting"
+          <input v-model.number="observed.broodCapped" type="number" min="0" max="30" step="0.5" :disabled="submitting"
             placeholder="0" />
         </div>
 
         <div class="field">
           <label>Honey frames</label>
-          <input v-model.number="observed.honeyFrames" type="number" min="0" max="30" :disabled="submitting"
+          <input v-model.number="observed.honeyFrames" type="number" min="0" max="30" step="0.5" :disabled="submitting"
             placeholder="0" />
         </div>
 
         <div class="field">
           <label>Pollen frames</label>
-          <input v-model.number="observed.pollenFrames" type="number" min="0" max="30" :disabled="submitting"
+          <input v-model.number="observed.pollenFrames" type="number" min="0" max="30" step="0.5" :disabled="submitting"
             placeholder="0" />
         </div>
 
@@ -115,19 +115,91 @@
           {{ hasMutation ? 'Skip this step' : 'I made changes to the hive' }}
         </button>
       </div>
-      <p class="step-desc">Did you add/remove frames, feed, treat, or intervene? If not, skip this step.</p>
+      <p class="step-desc">Did you add/remove specific frame types, feed, treat, or replace the queen? If not, skip.</p>
 
       <div v-if="hasMutation" class="field-grid">
-        <div class="field">
-          <label>Frames added</label>
-          <input v-model.number="mutation.framesAdded" type="number" min="0" max="20" :disabled="submitting"
-            placeholder="0" />
+        <div class="field col-header-label field-wide">
+          <span class="section-label">Frames added</span>
         </div>
 
         <div class="field">
-          <label>Frames removed</label>
-          <input v-model.number="mutation.framesRemoved" type="number" min="0" max="20" :disabled="submitting"
-            placeholder="0" />
+          <label>Brood frames added (eggs)</label>
+          <input v-model.number="mutation.broodEggsAdded" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Brood frames added (larvae)</label>
+          <input v-model.number="mutation.broodLarvaeAdded" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Brood frames added (capped)</label>
+          <input v-model.number="mutation.broodCappedAdded" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Honey frames added</label>
+          <input v-model.number="mutation.honeyFramesAdded" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Pollen frames added</label>
+          <input v-model.number="mutation.pollenFramesAdded" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Empty frames added</label>
+          <input v-model.number="mutation.emptyFramesAdded" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field col-header-label field-wide">
+          <span class="section-label">Frames removed</span>
+        </div>
+
+        <div class="field">
+          <label>Brood frames removed (eggs)</label>
+          <input v-model.number="mutation.broodEggsRemoved" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Brood frames removed (larvae)</label>
+          <input v-model.number="mutation.broodLarvaeRemoved" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Brood frames removed (capped)</label>
+          <input v-model.number="mutation.broodCappedRemoved" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Honey frames removed</label>
+          <input v-model.number="mutation.honeyFramesRemoved" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Pollen frames removed</label>
+          <input v-model.number="mutation.pollenFramesRemoved" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label>Empty frames removed</label>
+          <input v-model.number="mutation.emptyFramesRemoved" type="number" min="0" max="20" step="0.5"
+            :disabled="submitting" placeholder="0" />
+        </div>
+
+        <div class="field col-header-label field-wide">
+          <span class="section-label">Other interventions</span>
         </div>
 
         <div class="field">
@@ -190,15 +262,37 @@
         <span class="step-title">Resulting state</span>
       </div>
       <div class="result-grid">
-        <div class="result-item" v-if="mutation.framesAdded || mutation.framesRemoved">
-          <span class="result-label">Frames</span>
+        <div class="result-item" v-if="resultingState.totalFrames !== observed.totalFrames">
+          <span class="result-label">Total frames</span>
           <span class="result-val">
             {{ observed.totalFrames || 0 }}
-            <span class="result-delta" :class="frameDelta > 0 ? 'pos' : 'neg'" v-if="frameDelta !== 0">
-              {{ frameDelta > 0 ? '+' : '' }}{{ frameDelta }}
+            <span class="result-delta"
+              :class="(resultingState.totalFrames - (observed.totalFrames || 0)) > 0 ? 'pos' : 'neg'">
+              {{ (resultingState.totalFrames - (observed.totalFrames || 0)) > 0 ? '+' : '' }}{{
+                (resultingState.totalFrames - (observed.totalFrames || 0)).toFixed(1) }}
             </span>
-            → {{ resultingFrames }}
+            → {{ resultingState.totalFrames }}
           </span>
+        </div>
+        <div class="result-item" v-if="resultingState.broodEggs !== observed.broodEggs">
+          <span class="result-label">Brood (eggs)</span>
+          <span class="result-val">{{ observed.broodEggs || 0 }} → {{ resultingState.broodEggs }}</span>
+        </div>
+        <div class="result-item" v-if="resultingState.broodLarvae !== observed.broodLarvae">
+          <span class="result-label">Brood (larvae)</span>
+          <span class="result-val">{{ observed.broodLarvae || 0 }} → {{ resultingState.broodLarvae }}</span>
+        </div>
+        <div class="result-item" v-if="resultingState.broodCapped !== observed.broodCapped">
+          <span class="result-label">Brood (capped)</span>
+          <span class="result-val">{{ observed.broodCapped || 0 }} → {{ resultingState.broodCapped }}</span>
+        </div>
+        <div class="result-item" v-if="resultingState.honeyFrames !== observed.honeyFrames">
+          <span class="result-label">Honey frames</span>
+          <span class="result-val">{{ observed.honeyFrames || 0 }} → {{ resultingState.honeyFrames }}</span>
+        </div>
+        <div class="result-item" v-if="resultingState.pollenFrames !== observed.pollenFrames">
+          <span class="result-label">Pollen frames</span>
+          <span class="result-val">{{ observed.pollenFrames || 0 }} → {{ resultingState.pollenFrames }}</span>
         </div>
         <div class="result-item" v-if="mutation.feeding">
           <span class="result-label">Fed</span>
@@ -227,6 +321,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { createInspection } from '@/services/api/inspectionsApi';
 import { saveIohiveInspection, getIohiveHistory } from '@/services/api/iohiveApi';
 
@@ -260,8 +355,18 @@ export default {
         notes: '',
       },
       mutation: {
-        framesAdded: null,
-        framesRemoved: null,
+        broodEggsAdded: null,
+        broodLarvaeAdded: null,
+        broodCappedAdded: null,
+        honeyFramesAdded: null,
+        pollenFramesAdded: null,
+        emptyFramesAdded: null,
+        broodEggsRemoved: null,
+        broodLarvaeRemoved: null,
+        broodCappedRemoved: null,
+        honeyFramesRemoved: null,
+        pollenFramesRemoved: null,
+        emptyFramesRemoved: null,
         feeding: null,
         feedAmount: '',
         treatmentApplied: null,
@@ -283,26 +388,53 @@ export default {
     };
   },
   computed: {
-    frameDelta() {
-      return (this.mutation.framesAdded || 0) - (this.mutation.framesRemoved || 0);
-    },
-    resultingFrames() {
-      return (this.observed.totalFrames || 0) + this.frameDelta;
-    },
+    ...mapState(['defaultChecklist']),
+
     hasAnyMutationData() {
       const m = this.mutation;
-      return m.framesAdded || m.framesRemoved || m.feeding || m.treatmentApplied || m.queenReplaced;
+      return (
+        m.broodEggsAdded || m.broodLarvaeAdded || m.broodCappedAdded ||
+        m.honeyFramesAdded || m.pollenFramesAdded || m.emptyFramesAdded ||
+        m.broodEggsRemoved || m.broodLarvaeRemoved || m.broodCappedRemoved ||
+        m.honeyFramesRemoved || m.pollenFramesRemoved || m.emptyFramesRemoved ||
+        m.feeding || m.treatmentApplied || m.queenReplaced
+      );
     },
+
     resultingState() {
       const base = { ...this.observed };
-      if (this.hasMutation) {
-        base.totalFrames = this.resultingFrames;
-        if (this.mutation.queenReplaced) base.queenSeen = true;
-      }
+      if (!this.hasMutation) return base;
+      const m = this.mutation;
+
+      const add = (field, addKey, removeKey) => {
+        const cur = base[field] || 0;
+        const added = m[addKey] || 0;
+        const removed = m[removeKey] || 0;
+        base[field] = Math.max(0, cur + added - removed);
+      };
+
+      add('broodEggs', 'broodEggsAdded', 'broodEggsRemoved');
+      add('broodLarvae', 'broodLarvaeAdded', 'broodLarvaeRemoved');
+      add('broodCapped', 'broodCappedAdded', 'broodCappedRemoved');
+      add('honeyFrames', 'honeyFramesAdded', 'honeyFramesRemoved');
+      add('pollenFrames', 'pollenFramesAdded', 'pollenFramesRemoved');
+
+      base.totalFrames = (
+        (base.broodEggs || 0) +
+        (base.broodLarvae || 0) +
+        (base.broodCapped || 0) +
+        (base.honeyFrames || 0) +
+        (base.pollenFrames || 0) +
+        (m.emptyFramesAdded || 0) -
+        (m.emptyFramesRemoved || 0)
+      );
+
+      if (m.queenReplaced) base.queenSeen = true;
       return base;
     },
   },
   async created() {
+    await this.$store.dispatch('loadChecklists');
     await this.prefillFromLastInspection();
   },
   methods: {
@@ -330,6 +462,7 @@ export default {
         // no previous inspection or functions not deployed yet
       }
     },
+
     buildBeepPayload() {
       const pad = (n) => String(n).padStart(2, '0');
       const time = this.timeOnly || '00:00';
@@ -339,16 +472,49 @@ export default {
 
       const items = {};
 
-      if (rs.totalFrames != null) items[80] = rs.totalFrames;
-      if (rs.honeyFrames != null) items[955] = rs.honeyFrames;
+      // Bee colony > Size > Frames with bees (774) — use population as proxy
+      // population stays MongoDB-only; no direct BEEP equivalent at score 1/2/3
+
+      // Space > Unoccupied frames > Bee colony > Brood frames (80) — total brood frame count
+      const totalBrood = (rs.broodEggs || 0) + (rs.broodLarvae || 0) + (rs.broodCapped || 0);
+      if (totalBrood > 0) items[264] = totalBrood; // Bee colony > Brood > Frames with brood
+
+      // Brood stage presence booleans
+      if (rs.broodEggs != null) items[270] = rs.broodEggs > 0 ? 1 : 0;   // Eggs presence
+      if (rs.broodLarvae != null) items[276] = rs.broodLarvae > 0 ? 1 : 0; // Larvae presence
+      if (rs.broodCapped != null) items[273] = rs.broodCapped > 0 ? 1 : 0; // Pupae presence
+
+      // Brood frame amounts (dm2 field, but frame count works in practice)
+      if (rs.broodEggs != null && rs.broodEggs > 0) items[870] = rs.broodEggs;
+      if (rs.broodLarvae != null && rs.broodLarvae > 0) items[871] = rs.broodLarvae;
+      if (rs.broodCapped != null && rs.broodCapped > 0) items[872] = rs.broodCapped;
+
+      // Food > Stock > Honey > Number of frames (494)
+      if (rs.honeyFrames != null) items[494] = rs.honeyFrames;
+      // Food > Stock > Pollen > Number of frames (900)
       if (rs.pollenFrames != null) items[900] = rs.pollenFrames;
+
+      // Bee colony > Queen > Presence (399)
       if (rs.queenSeen != null) items[399] = rs.queenSeen ? 1 : 0;
-      if (rs.broodEggs != null) items[270] = rs.broodEggs > 0 ? 1 : 0;
-      if (rs.broodLarvae != null) items[276] = rs.broodLarvae > 0 ? 1 : 0;
-      if (rs.broodCapped != null) items[273] = rs.broodCapped > 0 ? 1 : 0;
+
+      // Queen replacement
+      if (this.hasMutation && this.mutation.queenReplaced) {
+        items[429] = 1; // Bee colony > Queen > Introduction (boolean)
+      }
+
+      // Feeding
+      if (this.hasMutation && this.mutation.feeding) {
+        items[832] = 1; // Food > Feeding > Amount (volume) presence — just mark as fed
+      }
+
+      // Treatment
+      if (this.hasMutation && this.mutation.treatmentApplied) {
+        items[595] = 1; // Disorder > Varroa > Treatment (boolean)
+      }
 
       const payload = {
         date,
+        checklist_id: this.defaultChecklist?.id ?? null,
         hive_ids: [this.hive.id],
         items,
       };
@@ -358,8 +524,8 @@ export default {
       if (rs.notes) payload.notes = rs.notes;
 
       return payload;
-
     },
+
     async submit() {
       this.submitting = true;
       this.error = null;
@@ -500,6 +666,18 @@ export default {
   color: white;
 }
 
+.section-label {
+  font-size: 0.78rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a32020;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #fde8e8;
+  display: block;
+  width: 100%;
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -514,6 +692,10 @@ export default {
 
 .field-wide {
   grid-column: 1 / -1;
+}
+
+.col-header-label {
+  margin-top: 6px;
 }
 
 .field label {
