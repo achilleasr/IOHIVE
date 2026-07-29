@@ -1,12 +1,6 @@
 <template>
   <div class="history">
-    <div class="history-head" @click="open = !open">
-      <img src="../assets/Hives/i_arrow_down.svg" class="chev" :class="{ rotated180: open }" />
-      <span class="history-title">Inspection History</span>
-      <span v-if="items.length" class="count">{{ items.length }}</span>
-    </div>
-
-    <div v-if="open" class="history-body">
+    <div class="history-body">
       <div v-if="loading" class="state-msg">Loading…</div>
       <div v-else-if="error" class="state-msg error">{{ error }}</div>
       <div v-else-if="items.length === 0" class="state-msg">No inspections recorded yet.</div>
@@ -114,7 +108,6 @@ export default {
   },
   data() {
     return {
-      open: false,
       loading: false,
       error: null,
       items: [],
@@ -139,10 +132,8 @@ export default {
       ],
     };
   },
-  watch: {
-    open(val) {
-      if (val && this.items.length === 0) this.load();
-    },
+  mounted() {
+    this.load();
   },
   methods: {
     round1(v) {

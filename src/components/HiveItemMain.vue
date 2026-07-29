@@ -267,7 +267,7 @@ export default {
   background: white;
   border-radius: 20px;
   padding: 28px 32px;
-  width: min(680px, 95vw);
+  width: 80vw;
   max-height: 90vh;
   overflow-y: auto;
   color: #333;

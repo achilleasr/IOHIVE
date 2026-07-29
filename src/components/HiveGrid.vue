@@ -23,7 +23,7 @@
         </div>
         <div class="expanded-third-col">
             <div class="expanded-grid-brood">
-                <WatchItem title="Brood" :val="5" />
+                <WatchItem title="Capped Brood" :val="5" />
             </div>
             <div class="expanded-grid-third-group">
                 <div class="expanded-grid-capped">
