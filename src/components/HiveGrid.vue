@@ -1,62 +1,55 @@
 <template>
     <div v-if="s" class="grid">
-        <div class="col narrow">
-            <div class="box sq">
-                <WatchItem title="Nº Frames" :val="v(s.totalFrames)" />
-            </div>
-            <div class="box sq">
-                <WatchItem title="Population" :val="v(s.population)" />
+        <div class="frames-rect">
+            <div v-for="f in frames" :key="f.key" class="cell">
+                <span class="lbl">{{ f.label }}</span>
+                <span class="val">{{ fmt1(s[f.key]) }}</span>
             </div>
         </div>
 
-        <div class="col wide">
-            <div class="head">
-                <WatchItem title="Food" :val="v(s.honey) + v(s.pollen)" />
-            </div>
-            <div class="row">
-                <WatchItem title="Honey" :val="v(s.honey)" />
-                <WatchItem title="Pollen" :val="v(s.pollen)" />
-            </div>
-        </div>
-
-        <div class="col wide">
-            <div class="head">
-                <WatchItem title="Brood" :val="brood" />
-            </div>
-            <div class="row">
-                <WatchItem title="Capped" :val="v(s.brood)" />
-                <WatchItem title="Open" :val="v(s.larvae)" />
-                <WatchItem title="Egg" :val="v(s.eggs)" />
-            </div>
-        </div>
-
-        <div class="col narrow">
-            <div class="box sq">
-                <WatchItem title="Queen" :val="s.queenSeen ? 1 : 0" :small="true" />
-            </div>
-            <div class="box sq">
-                <WatchItem title="Overall Impression" :val="v(s.impression)" :small="true" />
-            </div>
-            <div class="box sq">
-                <WatchItem title="Needs Attention" :boolVal="!!s.needsAttention" :small="true" />
+        <div class="meta-grid">
+            <div v-for="m in metas" :key="m.label" class="cell box">
+                <span class="lbl">{{ m.label }}</span>
+                <span class="val">{{ m.value }}</span>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import WatchItem from './WatchItem.vue';
+const FRAMES = [
+    { key: 'eggs', label: 'Eggs' },
+    { key: 'larvae', label: 'Larvae' },
+    { key: 'brood', label: 'Capped brood' },
+    { key: 'honey', label: 'Honey' },
+    { key: 'pollen', label: 'Pollen' },
+    { key: 'empty', label: 'Empty' },
+];
+const POP = { 1: 'Weak', 2: 'Medium', 3: 'Strong' };
+const COND = { 1: '😞', 2: '😐', 3: '😊' };
 
 export default {
     name: 'HiveGrid',
-    components: { WatchItem },
     props: { state: { type: Object, default: null } },
+    data() { return { frames: FRAMES }; },
     computed: {
         s() { return this.state; },
-        brood() { return this.v(this.s.eggs) + this.v(this.s.larvae) + this.v(this.s.brood); },
+        metas() {
+            const s = this.s;
+            return [
+                { label: 'Nº Frames', value: this.fmtTotal(s.totalFrames) },
+                { label: 'Population', value: POP[s.population] || '—' },
+                { label: 'Queen seen', value: this.bool(s.queenSeen) },
+                { label: 'Impression', value: COND[s.impression] || '—' },
+                { label: 'Needs attention', value: this.bool(s.needsAttention) },
+            ];
+        },
     },
     methods: {
-        v(x) { const n = Number(x); return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0; },
+        r1(v) { const n = Number(v); return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0; },
+        fmt1(v) { return this.r1(v).toFixed(1); },
+        fmtTotal(v) { const n = this.r1(v); return Number.isInteger(n) ? String(n) : n.toFixed(1); },
+        bool(v) { return v === true ? 'Yes' : v === false ? 'No' : '—'; },
     },
 };
 </script>
@@ -64,47 +57,89 @@ export default {
 <style scoped>
 .grid {
     display: flex;
-    height: 20vw;
-    gap: 6px;
-    padding: 2vw 0;
+    gap: 10px;
+    padding: 1.2vw 0;
+    align-items: stretch;
 }
 
-.col {
+.frames-rect {
+    flex: 3;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    border: 1px solid #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.frames-rect .cell {
+    border-right: 1px solid rgba(255, 255, 255, .5);
+    border-bottom: 1px solid rgba(255, 255, 255, .5);
+}
+
+.frames-rect .cell:nth-child(3n) {
+    border-right: 0;
+}
+
+.frames-rect .cell:nth-child(n+4) {
+    border-bottom: 0;
+}
+
+.meta-grid {
+    flex: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.cell {
     display: flex;
     flex-direction: column;
-    gap: 6px;
     align-items: center;
-}
-
-.narrow {
-    flex: 2;
-}
-
-.wide {
-    flex: 4;
-    border: 1px solid #fff;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 4px;
+    min-width: 0;
+    min-height: 3.4vw;
 }
 
 .box {
-    flex: 1;
     border: 1px solid #fff;
-    width: fit-content;
+    border-radius: 8px;
 }
 
-.sq {
-    aspect-ratio: 1;
+.lbl {
+    font-size: .72vw;
+    opacity: .75;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-.head {
-    flex: 1;
-    width: 85%;
-    border-bottom: 1px solid #fff;
+.val {
+    font-size: 1.25vw;
+    font-weight: bold;
 }
 
-.row {
-    display: flex;
-    flex: 1;
-    width: 100%;
-    justify-content: space-evenly;
+@media (max-width: 900px) {
+    .grid {
+        flex-direction: column;
+    }
+
+    .lbl {
+        font-size: 9px;
+    }
+
+    .val {
+        font-size: 15px;
+    }
+
+    .cell {
+        min-height: 42px;
+    }
 }
 </style>

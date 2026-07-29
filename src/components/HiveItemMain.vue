@@ -19,9 +19,9 @@
           <span>{{ apiaryLocation }}</span>
         </div>
         <div v-for="n in notes" :key="n.label" class="note">
-          <span class="note-label">{{ n.label }}:</span> {{ n.text }}
+          <span class="note-label">{{ n.label }}</span> {{ n.text }}
         </div>
-        <div v-if="!notes.length" class="note empty">No notes</div>
+        <div v-if="!notes.length" class="note empty">No inspection notes</div>
       </div>
       <div v-if="linkedDevice" class="status">
         <img :src="require('../assets/Hives/i_status.svg')" :style="{ opacity: isOnline ? 1 : 0.35 }"
@@ -79,11 +79,10 @@ export default {
     },
     notes() {
       const out = [];
-      if (this.hive?.notes) out.push({ label: 'Hive', text: this.hive.notes });
       const obs = this.latest?.observedState?.notes;
       const int = this.latest?.mutation?.notes;
-      if (obs) out.push({ label: 'Observation', text: obs });
-      if (int) out.push({ label: 'Intervention', text: int });
+      if (obs) out.push({ label: 'Observation notes:', text: obs });
+      if (int) out.push({ label: 'Intervention notes:', text: int });
       return out;
     },
   },

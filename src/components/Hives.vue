@@ -11,7 +11,7 @@
                 </svg>
                 <h5>Hives</h5>
             </div>
-            <AddApiaryInspection v-if="loginData && hives && hives.length" :hives="hives" />
+            <!-- <AddApiaryInspection v-if="loginData && hives && hives.length" :hives="hives" /> -->
         </div>
 
         <div class="hives-content">
@@ -26,7 +26,7 @@
 import { mapState } from 'vuex';
 import HiveItem from './HiveItem.vue';
 import AddHive from './AddHive.vue';
-import AddApiaryInspection from './AddApiaryInspection.vue';
+// import AddApiaryInspection from './AddApiaryInspection.vue';
 
 export default {
     name: 'Hives',

@@ -52,7 +52,7 @@ const FRAMES = [
   { key: 'pollen', label: 'Pollen' },
   { key: 'empty', label: 'Empty' },
 ];
-const POP = [{ value: 1, label: 'Weak' }, { value: 2, label: 'Medium' }, { value: 3, label: 'Good' }];
+const POP = [{ value: 1, label: 'Weak' }, { value: 2, label: 'Medium' }, { value: 3, label: 'Strong' }];
 const COND = [{ value: 1, label: '😞' }, { value: 2, label: '😐' }, { value: 3, label: '😊' }];
 
 export default {

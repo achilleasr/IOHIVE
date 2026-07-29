@@ -176,7 +176,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { createInspection } from '@/services/api/inspectionsApi';
+import { createInspection, listInspectionsForHive } from '@/services/api/inspectionsApi';
 import { saveIohiveInspection } from '@/services/api/iohiveApi';
 
 const FRAMES = [
@@ -187,7 +187,7 @@ const FRAMES = [
   { key: 'pollen', label: 'Pollen' },
 ];
 const YESNO = [{ value: true, label: 'Yes' }, { value: false, label: 'No' }];
-const POP = [{ value: 1, label: 'Weak' }, { value: 2, label: 'Medium' }, { value: 3, label: 'Good' }];
+const POP = [{ value: 1, label: 'Weak' }, { value: 2, label: 'Medium' }, { value: 3, label: 'Strong' }];
 const COND = [{ value: 1, label: '😞' }, { value: 2, label: '😐' }, { value: 3, label: '😊' }];
 
 export default {
@@ -361,16 +361,22 @@ export default {
       if (notes) payload.notes = notes;
       return payload;
     },
+    async newestBeepId() {
+      try {
+        const r = await listInspectionsForHive(this.hive.id);
+        return r?.data?.inspections?.data?.[0]?.id ?? null;
+      } catch { return null; }
+    },
     async submit() {
       if (this.overflow) { this.error = 'Frame contents cannot exceed the total number of frames.'; return; }
       this.submitting = true;
       this.error = null;
       try {
         const payload = this.beepPayload();
-        const res = await createInspection(payload);
+        await createInspection(payload);
         try {
           await saveIohiveInspection({
-            beepInspectionId: res?.data?.id ?? res?.data?.inspection?.id ?? null,
+            beepInspectionId: await this.newestBeepId(),
             hiveId: this.hive.id,
             hiveName: this.hive.name || '',
             apiaryId: this.hive.location_id || null,
