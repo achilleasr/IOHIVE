@@ -34,9 +34,7 @@
       </div>
 
       <div class="box">
-        <div class="step-head">
-          <span class="badge obs">Step 1</span><span class="step-title">Observation</span>
-        </div>
+        <div class="step-head"><span class="badge obs">Step 1</span><span class="step-title">Observation</span></div>
 
         <div class="total-row">
           <label>Total frames</label>
@@ -128,10 +126,9 @@
                   @click="pick(intervention, f.key, o.value, false)" :disabled="submitting">{{ o.label }}</button>
               </div>
             </div>
-            <div class="field">
+            <div class="field" v-if="intervention.treatmentApplied">
               <label>Treatment details</label>
-              <input v-model="intervention.treatmentDetails" type="text"
-                :disabled="submitting || !intervention.treatmentApplied" />
+              <input v-model="intervention.treatmentDetails" type="text" :disabled="submitting" />
             </div>
             <div class="field wide">
               <label>Intervention note</label>
@@ -142,10 +139,14 @@
       </div>
 
       <div class="box result">
-        <div class="step-head">
-          <span class="badge res">Result</span><span class="step-title">Resulting state</span>
+        <div class="step-head"><span class="badge res">Result</span><span class="step-title">Resulting state</span>
         </div>
-        <div class="total-line">Total frames: <strong>{{ fmtTotal(result.totalFrames) }}</strong></div>
+        <div class="total-line">
+          Total frames: <strong>{{ fmtTotal(result.totalFrames) }}</strong>
+          <span v-if="delta('totalFrames')" :class="['delta', delta('totalFrames') > 0 ? 'pos' : 'neg']">
+            {{ delta('totalFrames') > 0 ? '+' : '' }}{{ fmt1(delta('totalFrames')) }}
+          </span>
+        </div>
         <div class="frame-grid">
           <div v-for="f in allFrames" :key="f.key" class="cell">
             <span class="cell-label">{{ f.label }}</span>
@@ -176,7 +177,7 @@
 <script>
 import { mapState } from 'vuex';
 import { createInspection } from '@/services/api/inspectionsApi';
-import { saveIohiveInspection, getIohiveHistory } from '@/services/api/iohiveApi';
+import { saveIohiveInspection } from '@/services/api/iohiveApi';
 
 const FRAMES = [
   { key: 'eggs', label: 'Eggs' },
@@ -191,7 +192,10 @@ const COND = [{ value: 1, label: '😞' }, { value: 2, label: '😐' }, { value:
 
 export default {
   name: 'MinimalInspectionForm',
-  props: { hive: { type: Object, required: true } },
+  props: {
+    hive: { type: Object, required: true },
+    previous: { type: Object, default: null },
+  },
   emits: ['saved', 'cancel'],
   data() {
     const p = (n) => String(n).padStart(2, '0');
@@ -203,7 +207,6 @@ export default {
     return {
       submitting: false,
       error: null,
-      previous: null,
       hasIntervention: false,
       frames: FRAMES,
       yesNo: YESNO,
@@ -260,9 +263,15 @@ export default {
       return out;
     },
   },
-  async created() {
-    await this.$store.dispatch('loadChecklists');
-    await this.loadPrevious();
+  created() {
+    this.$store.dispatch('loadChecklists');
+    const s = this.prevState;
+    if (!this.previous) return;
+    this.observed.totalFrames = s.totalFrames != null ? s.totalFrames : 10;
+    for (const f of FRAMES) this.observed[f.key] = s[f.key] != null ? s[f.key] : 0;
+    for (const k of ['queenSeen', 'population', 'impression', 'needsAttention']) {
+      this.observed[k] = s[k] != null ? s[k] : null;
+    }
   },
   methods: {
     r1(v) { const n = Number(v); return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0; },
@@ -299,20 +308,6 @@ export default {
       if (!this.previous) return 0;
       const before = this.prevState[key] != null ? this.prevState[key] : 0;
       return this.r1((this.result[key] || 0) - before);
-    },
-    async loadPrevious() {
-      try {
-        const data = await getIohiveHistory(this.hive.id);
-        const list = data?.inspections || [];
-        if (!list.length) return;
-        this.previous = list[0];
-        const s = this.prevState;
-        this.observed.totalFrames = s.totalFrames != null ? s.totalFrames : 10;
-        for (const f of FRAMES) this.observed[f.key] = s[f.key] != null ? s[f.key] : 0;
-        for (const k of ['queenSeen', 'population', 'impression', 'needsAttention']) {
-          this.observed[k] = s[k] != null ? s[k] : null;
-        }
-      } catch { this.previous = null; }
     },
     mergedNotes() {
       const parts = [];
@@ -375,7 +370,7 @@ export default {
         const res = await createInspection(payload);
         try {
           await saveIohiveInspection({
-            beepInspectionId: res?.data?.id || null,
+            beepInspectionId: res?.data?.id ?? res?.data?.inspection?.id ?? null,
             hiveId: this.hive.id,
             hiveName: this.hive.name || '',
             apiaryId: this.hive.location_id || null,
@@ -386,7 +381,6 @@ export default {
           });
         } catch (e) { console.warn('IOHIVE save failed (BEEP save succeeded):', e); }
         this.$store.commit('clearHiveInspections', this.hive.id);
-        await this.$store.dispatch('loadHiveInspections', this.hive.id);
         this.$emit('saved');
       } catch (err) {
         const d = err?.response?.data;
