@@ -33,10 +33,10 @@
                 Devices
             </router-link>
 
-            <div v-if="loginData" class="page" @click="checklistOpen = true">
+            <!-- <div v-if="loginData" class="page" @click="checklistOpen = true">
                 <svg-icon type="mdi" :path="checklistPath"></svg-icon>
                 Checklists
-            </div>
+            </div> -->
 
             <div class="page" @click='logout()'>
                 <svg-icon type="mdi" :path="path"></svg-icon>
