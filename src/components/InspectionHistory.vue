@@ -1,97 +1,99 @@
 <template>
-  <div class="history-header">
-    <h2 class="title clickable" @click="toggleExpanded">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="imgicon"
-        :class="{ rotated180: expanded }" viewBox="0 0 16 16">
-        <path fill-rule="evenodd"
-          d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
-      </svg>
-      <span>Inspection History</span>
-      <span v-if="!expanded && list.length" class="count-badge">{{ list.length }}</span>
-    </h2>
-    <button v-if="expanded" class="refresh-btn" @click="load" :disabled="loading">↻</button>
-  </div>
+  <div class="history">
+    <div class="history-head" @click="open = !open">
+      <img src="../assets/Hives/i_arrow_down.svg" class="chev" :class="{ rotated180: open }" />
+      <span class="history-title">Inspection History</span>
+      <span v-if="items.length" class="count">{{ items.length }}</span>
+    </div>
 
-  <div v-if="expanded" class="history-content">
-    <div v-if="loading" class="state-msg">Loading…</div>
-    <div v-else-if="error" class="state-msg error">{{ error }}</div>
-    <div v-else-if="list.length === 0" class="state-msg">No inspections recorded yet.</div>
-    <div v-else class="timeline">
-      <div v-for="(item, idx) in list" :key="item._id || idx" class="timeline-entry" @click="toggleItem(idx)">
-        <div class="entry-header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" class="row-chevron"
-            :class="{ rotated180: openItems[idx] }" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
-          </svg>
-          <span class="entry-date">{{ formatDate(item.date) }}</span>
-          <div class="entry-chips">
-            <span v-if="item.observedState?.impression" class="chip"
-              :class="impressionClass(item.observedState.impression)">
-              {{ impressionLabel(item.observedState.impression) }}
+    <div v-if="open" class="history-body">
+      <div v-if="loading" class="state-msg">Loading…</div>
+      <div v-else-if="error" class="state-msg error">{{ error }}</div>
+      <div v-else-if="items.length === 0" class="state-msg">No inspections recorded yet.</div>
+
+      <div v-else class="entry-list">
+        <div v-for="(item, idx) in items" :key="item._id" class="entry">
+          <div class="entry-head" @click="toggle(idx)">
+            <span class="entry-date">{{ formatDate(item.date) }}</span>
+            <span class="entry-total">Total frames: {{ round1(stateOf(item).totalFrames) }}</span>
+            <span class="entry-badges">
+              <span v-if="item.mutation" class="mini-badge int">Intervention</span>
+              <span v-else class="mini-badge obs">Observation only</span>
             </span>
-            <span v-if="item.mutation" class="chip chip-mutation">Mutation</span>
-            <span v-else class="chip chip-obs">Observation only</span>
-            <span v-if="item.observedState?.needsAttention" class="chip chip-red">⚠ Attention</span>
+            <img src="../assets/Hives/i_arrow_down.svg" class="chev small" :class="{ rotated180: expanded[idx] }" />
           </div>
-        </div>
 
-        <div v-if="openItems[idx]" class="entry-detail" @click.stop>
-          <div class="detail-columns">
-            <div class="detail-col">
-              <div class="col-header obs-header">Observed (step 1)</div>
-              <div class="data-rows">
-                <div class="data-row" v-for="field in observedFields" :key="field.key">
-                  <span class="data-label">{{ field.label }}</span>
-                  <span class="data-val" :class="diffClass(item, field.key, idx)">
-                    {{ formatFieldVal(item.observedState?.[field.key], field.key) }}
-                  </span>
+          <div v-if="expanded[idx]" class="entry-body">
+            <div class="col prev-col" v-if="previousOf(idx)">
+              <div class="col-head">
+                <span class="col-title">Previous State</span>
+                <span class="col-date">{{ formatDate(previousOf(idx).date) }}</span>
+              </div>
+              <div class="col-total">Total frames: {{ round1(stateOf(previousOf(idx)).totalFrames) }}</div>
+              <div class="chip-grid">
+                <div v-for="f in frameTypes" :key="f.key" class="chip">
+                  <span class="chip-label">{{ f.label }}</span>
+                  <span class="chip-val">{{ round1(stateOf(previousOf(idx))[f.key]) }}</span>
                 </div>
-                <div v-if="item.observedState?.notes" class="notes-row">
-                  <span class="data-label">Notes</span>
-                  <span class="data-val">{{ item.observedState.notes }}</span>
-                </div>
+              </div>
+              <div class="meta-lines">
+                <span>Population: {{ labelFor(populationOptions, stateOf(previousOf(idx)).population) }}</span>
+                <span>Condition: {{ labelFor(impressionOptions, stateOf(previousOf(idx)).impression) }}</span>
+                <span>Queen: {{ boolLabel(stateOf(previousOf(idx)).queenSeen) }}</span>
+              </div>
+              <div v-if="tagsOf(previousOf(idx)).length" class="tag-row">
+                <span v-for="t in tagsOf(previousOf(idx))" :key="t" class="tag">{{ t }}</span>
               </div>
             </div>
 
-            <div class="detail-col" v-if="item.mutation">
-              <div class="col-header mut-header">Mutation (step 2)</div>
-              <div class="data-rows">
-                <template v-for="row in mutationFrameRows(item.mutation)" :key="row.label">
-                  <div class="data-row">
-                    <span class="data-label">{{ row.label }}</span>
-                    <span :class="['data-val', row.delta > 0 ? 'pos' : 'neg']">
-                      {{ row.delta > 0 ? '+' : '' }}{{ row.delta }}
-                    </span>
+            <div class="current-group">
+              <div class="group-label">This inspection</div>
+              <div class="group-cols">
+                <div class="col obs-col">
+                  <div class="col-head">
+                    <span class="col-title obs">Observation</span>
                   </div>
-                </template>
-                <div v-if="item.mutation.feeding" class="data-row">
-                  <span class="data-label">Feeding</span>
-                  <span class="data-val">{{ item.mutation.feeding }} {{ item.mutation.feedAmount || '' }}</span>
+                  <div class="col-total">Total frames: {{ round1(item.observedState?.totalFrames) }}</div>
+                  <div class="chip-grid">
+                    <div v-for="f in frameTypes" :key="f.key" class="chip">
+                      <span class="chip-label">{{ f.label }}</span>
+                      <span class="chip-val">{{ round1(item.observedState?.[f.key]) }}</span>
+                    </div>
+                  </div>
+                  <div class="meta-lines">
+                    <span>Population: {{ labelFor(populationOptions, item.observedState?.population) }}</span>
+                    <span>Condition: {{ labelFor(impressionOptions, item.observedState?.impression) }}</span>
+                    <span>Queen: {{ boolLabel(item.observedState?.queenSeen) }}</span>
+                    <span v-if="item.observedState?.needsAttention">Needs attention</span>
+                  </div>
+                  <div v-if="item.observedState?.notes" class="note-block">
+                    {{ item.observedState.notes }}
+                  </div>
                 </div>
-                <div v-if="item.mutation.treatmentApplied" class="data-row">
-                  <span class="data-label">Treatment</span>
-                  <span class="data-val">{{ item.mutation.treatmentDetails || 'Yes' }}</span>
-                </div>
-                <div v-if="item.mutation.queenReplaced" class="data-row">
-                  <span class="data-label">Queen</span>
-                  <span class="data-val">Replaced</span>
-                </div>
-                <div v-if="item.mutation.notes" class="notes-row">
-                  <span class="data-label">Notes</span>
-                  <span class="data-val">{{ item.mutation.notes }}</span>
-                </div>
-              </div>
-            </div>
 
-            <div class="detail-col" v-if="item.mutation">
-              <div class="col-header res-header">Result</div>
-              <div class="data-rows">
-                <div class="data-row" v-for="field in observedFields" :key="field.key">
-                  <span class="data-label">{{ field.label }}</span>
-                  <span class="data-val" :class="resultDiffClass(item, field.key)">
-                    {{ formatFieldVal(item.resultingState?.[field.key], field.key) }}
-                  </span>
+                <div class="col int-col" v-if="item.mutation">
+                  <div class="col-head">
+                    <span class="col-title int">Intervention</span>
+                  </div>
+                  <div class="col-total">Total frames: {{ round1(item.resultingState?.totalFrames) }}</div>
+                  <div class="chip-grid">
+                    <div v-for="f in frameTypes" :key="f.key" class="chip">
+                      <span class="chip-label">{{ f.label }}</span>
+                      <span class="chip-val">
+                        {{ round1(item.resultingState?.[f.key]) }}
+                        <span v-if="deltaOf(item, f.key) !== 0"
+                          :class="['chip-delta', deltaOf(item, f.key) > 0 ? 'pos' : 'neg']">
+                          {{ deltaOf(item, f.key) > 0 ? '+' : '' }}{{ round1(deltaOf(item, f.key)) }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div v-if="tagsOf(item).length" class="tag-row">
+                    <span v-for="t in tagsOf(item)" :key="t" class="tag">{{ t }}</span>
+                  </div>
+                  <div v-if="item.mutation.notes" class="note-block">
+                    {{ item.mutation.notes }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -107,343 +109,404 @@ import { getIohiveHistory } from '@/services/api/iohiveApi';
 
 export default {
   name: 'InspectionHistory',
-  props: { hive: Object },
+  props: {
+    hive: { type: Object, required: true },
+  },
   data() {
     return {
-      expanded: false,
+      open: false,
       loading: false,
       error: null,
-      list: [],
-      openItems: {},
-      observedFields: [
-        { key: 'population', label: 'Population' },
-        { key: 'totalFrames', label: 'Total frames' },
-        { key: 'broodEggs', label: 'Brood (eggs)' },
-        { key: 'broodLarvae', label: 'Brood (larvae)' },
-        { key: 'broodCapped', label: 'Brood (capped)' },
-        { key: 'honeyFrames', label: 'Honey frames' },
-        { key: 'pollenFrames', label: 'Pollen frames' },
-        { key: 'queenSeen', label: 'Queen seen' },
-        { key: 'impression', label: 'Impression' },
-        { key: 'needsAttention', label: 'Needs attention' },
+      items: [],
+      expanded: {},
+      frameTypes: [
+        { key: 'eggs', label: 'Eggs' },
+        { key: 'larvae', label: 'Larvae' },
+        { key: 'brood', label: 'Brood' },
+        { key: 'honey', label: 'Honey' },
+        { key: 'pollen', label: 'Pollen' },
+        { key: 'empty', label: 'Empty' },
+      ],
+      populationOptions: [
+        { value: 1, label: 'Weak' },
+        { value: 2, label: 'Medium' },
+        { value: 3, label: 'Good' },
+      ],
+      impressionOptions: [
+        { value: 1, label: 'Bad' },
+        { value: 2, label: 'Ok' },
+        { value: 3, label: 'Good' },
       ],
     };
   },
-  methods: {
-    async toggleExpanded() {
-      this.expanded = !this.expanded;
-      if (this.expanded && this.list.length === 0) await this.load();
+  watch: {
+    open(val) {
+      if (val && this.items.length === 0) this.load();
     },
+  },
+  methods: {
+    round1(v) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return 0;
+      return Math.round(n * 10) / 10;
+    },
+
+    labelFor(options, value) {
+      const found = options.find((o) => o.value === value);
+      return found ? found.label : '—';
+    },
+
+    boolLabel(v) {
+      if (v === true) return 'Yes';
+      if (v === false) return 'No';
+      return '—';
+    },
+
+    formatDate(v) {
+      if (!v) return '';
+      const d = new Date(String(v).replace(' ', 'T'));
+      if (Number.isNaN(d.getTime())) return String(v);
+      return d.toLocaleString('en-GB', {
+        day: 'numeric', month: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+    },
+
+    stateOf(item) {
+      if (!item) return {};
+      return item.resultingState || item.observedState || {};
+    },
+
+    previousOf(idx) {
+      return this.items[idx + 1] || null;
+    },
+
+    deltaOf(item, key) {
+      const before = item.observedState?.[key] || 0;
+      const after = item.resultingState?.[key] || 0;
+      return this.round1(after - before);
+    },
+
+    tagsOf(item) {
+      const m = item?.mutation;
+      if (!m) return [];
+      const tags = [];
+      if (m.fed) tags.push('Fed');
+      if (m.queenReplaced) tags.push('Queen changed');
+      if (m.treatmentApplied) tags.push(m.treatmentDetails ? `Treatment: ${m.treatmentDetails}` : 'Treatment');
+      return tags;
+    },
+
+    toggle(idx) {
+      this.expanded = { ...this.expanded, [idx]: !this.expanded[idx] };
+    },
+
     async load() {
-      if (!this.hive?.id) return;
       this.loading = true;
       this.error = null;
       try {
         const data = await getIohiveHistory(this.hive.id);
-        this.list = data?.inspections || [];
-      } catch (err) {
+        this.items = data?.inspections || [];
+      } catch {
         this.error = 'Could not load history. Are the Netlify Functions deployed?';
       } finally {
         this.loading = false;
       }
-    },
-    mutationFrameRows(m) {
-      const types = [
-        { label: 'Brood (eggs)', addKey: 'broodEggsAdded', removeKey: 'broodEggsRemoved' },
-        { label: 'Brood (larvae)', addKey: 'broodLarvaeAdded', removeKey: 'broodLarvaeRemoved' },
-        { label: 'Brood (capped)', addKey: 'broodCappedAdded', removeKey: 'broodCappedRemoved' },
-        { label: 'Honey frames', addKey: 'honeyFramesAdded', removeKey: 'honeyFramesRemoved' },
-        { label: 'Pollen frames', addKey: 'pollenFramesAdded', removeKey: 'pollenFramesRemoved' },
-        { label: 'Empty frames', addKey: 'emptyFramesAdded', removeKey: 'emptyFramesRemoved' },
-      ];
-      return types
-        .map(t => ({ label: t.label, delta: (m[t.addKey] || 0) - (m[t.removeKey] || 0) }))
-        .filter(r => r.delta !== 0);
-    },
-    toggleItem(idx) {
-      this.openItems = { ...this.openItems, [idx]: !this.openItems[idx] };
-    },
-    formatDate(val) {
-      if (!val) return '';
-      return new Date(val).toLocaleString('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', hour12: true,
-      });
-    },
-    formatFieldVal(val, key) {
-      if (val == null) return '—';
-      if (key === 'queenSeen') return val ? 'Yes' : 'No';
-      if (key === 'needsAttention') return val ? 'Yes' : 'No';
-      if (key === 'population') return val === 3 ? 'Strong' : val === 2 ? 'Medium' : val === 1 ? 'Weak' : '—';
-      if (key === 'impression') return val === 3 ? '😊 Good' : val === 2 ? '😐 Ok' : val === 1 ? '😞 Bad' : '—';
-      return val;
-    },
-    impressionLabel(val) {
-      return val === 3 ? '😊 Good' : val === 2 ? '😐 Ok' : '😞 Bad';
-    },
-    impressionClass(val) {
-      return val === 3 ? 'chip-green' : val === 2 ? 'chip-yellow' : 'chip-red';
-    },
-    diffClass(item, key, idx) {
-      const prev = this.list[idx + 1];
-      if (!prev) return '';
-      const prevSrc = prev.resultingState || prev.observedState;
-      if (!prevSrc) return '';
-      const cur = item.observedState?.[key];
-      const old = prevSrc[key];
-      if (cur == null || old == null) return '';
-      if (typeof cur === 'number' && cur !== old) return cur > old ? 'changed-pos' : 'changed-neg';
-      if (cur !== old) return 'changed';
-      return '';
-    },
-    resultDiffClass(item, key) {
-      const obs = item.observedState?.[key];
-      const res = item.resultingState?.[key];
-      if (obs == null || res == null) return '';
-      if (obs !== res) return 'changed-pos';
-      return '';
     },
   },
 };
 </script>
 
 <style scoped>
-.history-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.history {
+  color: #333;
 }
 
-.title {
+.history-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0;
+  gap: 10px;
+  cursor: pointer;
   user-select: none;
+  padding: 4px 0;
 }
 
-.imgicon {
-  fill: rgb(190, 190, 190);
-  stroke: rgb(190, 190, 190);
+.history-title {
+  font-size: 1.05rem;
+  color: #575EAE;
+  font-weight: bold;
+}
+
+.count {
+  background: #e0e3f8;
+  color: #575EAE;
+  border-radius: 100px;
+  padding: 1px 10px;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+.chev {
+  height: 1.4vw;
+  min-height: 14px;
   transition: transform 0.15s ease;
+}
+
+.chev.small {
+  height: 1.1vw;
+  min-height: 12px;
+  margin-left: auto;
 }
 
 .rotated180 {
   transform: rotate(180deg);
 }
 
-.count-badge {
-  background: #575EAE;
-  color: white;
-  border-radius: 100px;
-  font-size: 0.75rem;
-  padding: 1px 8px;
-  margin-left: 4px;
-}
-
-.refresh-btn {
-  background: none;
-  border: 1px solid #ddd;
-  border-radius: 100px;
-  padding: 4px 12px;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #888;
-}
-
-.refresh-btn:hover:not(:disabled) {
-  color: #575EAE;
-  border-color: #575EAE;
-}
-
-.history-content {
-  margin-top: 8px;
+.history-body {
+  margin-top: 10px;
 }
 
 .state-msg {
-  color: #bbb;
-  font-size: 0.95rem;
-  padding: 8px 0;
+  font-size: 0.9rem;
+  color: #999;
+  padding: 10px 0;
 }
 
 .state-msg.error {
   color: #c43030;
 }
 
-.timeline {
+.entry-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
-.timeline-entry {
-  background: #f8f8fe;
-  border-radius: 10px;
+.entry {
+  border: 1px solid #e3e4f3;
+  border-radius: 12px;
   overflow: hidden;
-  transition: box-shadow 0.15s;
-  cursor: pointer;
 }
 
-.timeline-entry:hover {
-  box-shadow: 0 2px 8px #575eae18;
-}
-
-.entry-header {
+.entry-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  flex-wrap: wrap;
-}
-
-.row-chevron {
-  fill: #aaa;
-  flex-shrink: 0;
-  transition: transform 0.15s ease;
+  gap: 14px;
+  padding: 10px 16px;
+  background: #f9fafe;
+  cursor: pointer;
+  user-select: none;
 }
 
 .entry-date {
+  font-size: 0.92rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.entry-total {
   font-size: 0.85rem;
   color: #777;
-  white-space: nowrap;
 }
 
-.entry-chips {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  margin-left: 4px;
-}
-
-.chip {
-  padding: 2px 10px;
+.mini-badge {
   border-radius: 100px;
-  font-size: 0.78rem;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.chip-green {
-  background: #d4f0dc;
-  color: #2a7a40;
-}
-
-.chip-yellow {
-  background: #fdf3cc;
-  color: #7a6000;
-}
-
-.chip-red {
-  background: #fde8e8;
-  color: #a32020;
-}
-
-.chip-mutation {
-  background: #fde8e8;
-  color: #a32020;
-}
-
-.chip-obs {
+.mini-badge.obs {
   background: #e0e3f8;
   color: #575EAE;
 }
 
-.entry-detail {
-  background: white;
-  border-top: 1px solid #eee;
-  padding: 14px 16px;
-  cursor: default;
-}
-
-.detail-columns {
-  display: flex;
-  gap: 16px;
-}
-
-.detail-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.col-header {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: bold;
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e3e4f3;
-}
-
-.obs-header {
-  color: #575EAE;
-}
-
-.mut-header {
+.mini-badge.int {
+  background: #fde8e8;
   color: #a32020;
 }
 
-.res-header {
+.entry-body {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  align-items: stretch;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prev-col {
+  background: #f6f7fc;
+  border: 1px solid #dcdff0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  max-width: 32%;
+}
+
+.current-group {
+  flex: 2;
+  min-width: 0;
+  border: 2px solid #cfd3ee;
+  border-radius: 12px;
+  padding: 10px 12px 12px;
+  background: white;
+}
+
+.group-label {
+  font-size: 0.72rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #575EAE;
+  margin-bottom: 8px;
+}
+
+.group-cols {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.obs-col {
+  border-right: 1px dashed #dcdff0;
+  padding-right: 10px;
+}
+
+.int-col {
+  padding-left: 2px;
+}
+
+.col-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.col-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #575EAE;
+}
+
+.col-title.obs {
+  color: #575EAE;
+}
+
+.col-title.int {
+  color: #a32020;
+}
+
+.col-date {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.col-total {
+  font-size: 0.82rem;
+  color: #666;
+}
+
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.chip {
+  background: #fbfbfe;
+  border: 1px solid #eceef8;
+  border-radius: 8px;
+  padding: 5px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.chip-label {
+  font-size: 0.65rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chip-val {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.chip-delta {
+  font-size: 0.7rem;
+  margin-left: 3px;
+}
+
+.chip-delta.pos {
   color: #2a7a40;
 }
 
-.data-rows {
+.chip-delta.neg {
+  color: #a32020;
+}
+
+.meta-lines {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  font-size: 0.8rem;
+  color: #666;
 }
 
-.data-row {
+.tag-row {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.82rem;
-  padding: 2px 0;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-.data-label {
-  color: #888;
-}
-
-.data-val {
-  color: #333;
-  font-weight: 500;
-  text-align: right;
-}
-
-.data-val.pos,
-.data-val.changed-pos {
-  color: #2a7a40;
-}
-
-.data-val.neg,
-.data-val.changed-neg {
+.tag {
+  background: #fde8e8;
   color: #a32020;
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 0.74rem;
+  font-weight: bold;
 }
 
-.data-val.changed {
-  color: #575EAE;
-}
-
-.notes-row {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.note-block {
   font-size: 0.82rem;
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px dashed #eee;
+  color: #555;
+  background: #f7f7fb;
+  border-radius: 8px;
+  padding: 7px 9px;
+  white-space: pre-wrap;
 }
 
-.notes-row .data-label {
-  font-size: 0.75rem;
-}
-
-.notes-row .data-val {
-  font-weight: normal;
-  text-align: left;
-}
-
-@media (max-width: 700px) {
-  .detail-columns {
+@media (max-width: 900px) {
+  .entry-body {
     flex-direction: column;
+  }
+
+  .prev-col {
+    max-width: none;
+  }
+
+  .group-cols {
+    flex-direction: column;
+  }
+
+  .obs-col {
+    border-right: none;
+    border-bottom: 1px dashed #dcdff0;
+    padding-right: 0;
+    padding-bottom: 10px;
   }
 }
 </style>
