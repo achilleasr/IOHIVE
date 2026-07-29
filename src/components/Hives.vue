@@ -30,7 +30,7 @@ import AddHive from './AddHive.vue';
 
 export default {
     name: 'Hives',
-    components: { HiveItem, AddHive, AddApiaryInspection },
+    components: { HiveItem, AddHive },
     props: {
         hives: Array,
         locationId: Number,
