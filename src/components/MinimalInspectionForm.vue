@@ -1,235 +1,255 @@
 <template>
   <form class="inspection-form" @submit.prevent="submit">
-    <div v-if="previous" class="prev-panel">
-      <div class="prev-head">
-        <span class="prev-title">Previous State</span>
-        <span class="prev-date">{{ formatDate(previous.date) }}</span>
-      </div>
-      <div class="prev-total">Total frames: {{ round1(prevState.totalFrames) }}</div>
-      <div class="chip-grid">
-        <div v-for="f in allFrameTypes" :key="f.key" class="chip">
-          <span class="chip-label">{{ f.label }}</span>
-          <span class="chip-val">{{ round1(prevState[f.key]) }}</span>
-        </div>
-      </div>
-      <div class="prev-meta">
-        <span>Population: {{ labelFor(populationOptions, prevState.population) }}</span>
-        <span>Condition: {{ labelFor(impressionOptions, prevState.impression) }}</span>
-        <span>Queen: {{ prevState.queenSeen === true ? 'Yes' : prevState.queenSeen === false ? 'No' : '—' }}</span>
-      </div>
-      <div v-if="prevTags.length" class="tag-row">
-        <span v-for="t in prevTags" :key="t" class="tag">{{ t }}</span>
-      </div>
-    </div>
-
-    <div class="form-row-datetime">
-      <label>Date</label>
-      <input v-model="dateOnly" type="date" :disabled="submitting" />
-      <label>Time</label>
-      <input v-model="timeOnly" type="time" :disabled="submitting" />
-    </div>
-
-    <div class="step-section">
-      <div class="step-header">
-        <span class="step-badge obs">Step 1</span>
-        <span class="step-title">Observation</span>
-      </div>
-
-      <div class="total-row">
-        <label>Total frames</label>
-        <div class="stepper wide">
-          <button type="button" @click="bump(observed, 'totalFrames', -1)" :disabled="submitting">−</button>
-          <input v-model.number="observed.totalFrames" type="number" min="0" max="60" step="1"
-            @change="normalize(observed, 'totalFrames', 0, 60)" :disabled="submitting" />
-          <button type="button" @click="bump(observed, 'totalFrames', 1)" :disabled="submitting">+</button>
-        </div>
-      </div>
-
-      <div class="frame-grid">
-        <div v-for="f in frameTypes" :key="f.key" class="frame-cell">
-          <label>{{ f.label }}</label>
-          <div class="stepper">
-            <button type="button" @click="bump(observed, f.key, -0.1)" :disabled="submitting">−</button>
-            <input v-model.number="observed[f.key]" type="number" min="0" step="0.1"
-              @change="normalize(observed, f.key, 0, observed.totalFrames)" :disabled="submitting" />
-            <button type="button" @click="bump(observed, f.key, 0.1)" :disabled="submitting">+</button>
-          </div>
+    <div class="two-col">
+      <aside v-if="previous" class="prev-col">
+        <div class="panel-head">
+          <span class="panel-title prev">Previous Inspection</span>
+          <span class="panel-date">{{ formatDate(previous.date) }}</span>
         </div>
 
-        <div class="frame-cell readonly">
-          <label>Empty</label>
-          <div class="stepper locked">
-            <span class="locked-val">{{ round1(observedEmpty) }}</span>
-          </div>
-        </div>
-      </div>
+        <div class="total-line">Total frames: <strong>{{ round1(prevState.totalFrames) }}</strong></div>
 
-      <div v-if="observedOverflow" class="warn-message">
-        Frame contents ({{ round1(observedOccupied) }}) exceed total frames ({{ round1(observed.totalFrames) }}).
-      </div>
-
-      <div class="meta-grid">
-        <div class="field">
-          <label>Population</label>
-          <div class="choice-row">
-            <button v-for="o in populationOptions" :key="o.value" type="button"
-              :class="['choice-btn', observed.population === o.value ? 'selected' : '']"
-              @click="observed.population = observed.population === o.value ? null : o.value" :disabled="submitting">{{
-              o.label }}</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Condition</label>
-          <div class="choice-row">
-            <button v-for="o in impressionOptions" :key="o.value" type="button"
-              :class="['choice-btn', observed.impression === o.value ? 'selected' : '']"
-              @click="observed.impression = observed.impression === o.value ? null : o.value" :disabled="submitting">{{
-              o.label }}</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Queen seen</label>
-          <div class="choice-row">
-            <button type="button" :class="['choice-btn', observed.queenSeen === true ? 'selected' : '']"
-              @click="observed.queenSeen = observed.queenSeen === true ? null : true"
-              :disabled="submitting">Yes</button>
-            <button type="button" :class="['choice-btn', observed.queenSeen === false ? 'selected-danger' : '']"
-              @click="observed.queenSeen = observed.queenSeen === false ? null : false"
-              :disabled="submitting">No</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Needs attention</label>
-          <div class="choice-row">
-            <button type="button" :class="['choice-btn', observed.needsAttention === true ? 'selected-danger' : '']"
-              @click="observed.needsAttention = observed.needsAttention === true ? null : true"
-              :disabled="submitting">Yes</button>
-            <button type="button" :class="['choice-btn', observed.needsAttention === false ? 'selected' : '']"
-              @click="observed.needsAttention = observed.needsAttention === false ? null : false"
-              :disabled="submitting">No</button>
-          </div>
-        </div>
-
-        <div class="field field-wide">
-          <label>Observation note</label>
-          <textarea v-model="observed.notes" rows="2" :disabled="submitting"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div class="step-section">
-      <div class="step-header">
-        <span class="step-badge int">Step 2</span>
-        <span class="step-title">Intervention</span>
-        <div class="choice-row header-choice">
-          <button type="button" :class="['choice-btn', hasIntervention ? 'selected-danger' : '']"
-            @click="hasIntervention = true" :disabled="submitting">Yes</button>
-          <button type="button" :class="['choice-btn', !hasIntervention ? 'selected' : '']"
-            @click="hasIntervention = false" :disabled="submitting">No</button>
-        </div>
-      </div>
-
-      <div v-if="hasIntervention" class="int-body">
-        <div class="total-row">
-          <label>Empty frames added</label>
-          <div class="stepper wide">
-            <button type="button" @click="bump(intervention, 'emptyAdded', -1)" :disabled="submitting">−</button>
-            <input v-model.number="intervention.emptyAdded" type="number" min="0" max="60" step="1"
-              @change="normalize(intervention, 'emptyAdded', 0, 60)" :disabled="submitting" />
-            <button type="button" @click="bump(intervention, 'emptyAdded', 1)" :disabled="submitting">+</button>
-          </div>
-        </div>
-
-        <div class="sub-label">Frames removed</div>
         <div class="frame-grid">
-          <div v-for="f in allFrameTypes" :key="f.key" class="frame-cell">
-            <label>{{ f.label }}</label>
-            <div class="stepper">
-              <button type="button" @click="bumpRemoval(f.key, -0.1)" :disabled="submitting">−</button>
-              <input v-model.number="intervention[f.key + 'Removed']" type="number" min="0" step="0.1"
-                @change="normalize(intervention, f.key + 'Removed', 0, availableFor(f.key))" :disabled="submitting" />
-              <button type="button" @click="bumpRemoval(f.key, 0.1)" :disabled="submitting">+</button>
+          <div v-for="f in allFrameTypes" :key="f.key" class="frame-cell static">
+            <span class="cell-label">{{ f.label }}</span>
+            <span class="cell-static-val">{{ round1(prevState[f.key]) }}</span>
+          </div>
+        </div>
+
+        <div class="meta-lines">
+          <span>Population: {{ labelFor(populationOptions, prevState.population) }}</span>
+          <span>Condition: {{ labelFor(impressionOptions, prevState.impression) }}</span>
+          <span>Queen seen: {{ boolLabel(prevState.queenSeen) }}</span>
+          <span>Needs attention: {{ boolLabel(prevState.needsAttention) }}</span>
+        </div>
+
+        <div v-if="prevTags.length" class="tag-row">
+          <span v-for="t in prevTags" :key="t" class="tag">{{ t }}</span>
+        </div>
+
+        <div v-if="prevObsNote" class="note-block">
+          <span class="note-label">Observation</span>
+          {{ prevObsNote }}
+        </div>
+        <div v-if="prevIntNote" class="note-block int">
+          <span class="note-label">Intervention</span>
+          {{ prevIntNote }}
+        </div>
+      </aside>
+
+      <section class="new-col">
+        <div class="panel-head">
+          <span class="panel-title new">New Inspection</span>
+          <div class="datetime">
+            <input v-model="dateOnly" type="date" :disabled="submitting" />
+            <input v-model="timeOnly" type="time" :disabled="submitting" />
+          </div>
+        </div>
+
+        <div class="step-section">
+          <div class="step-header">
+            <span class="step-badge obs">Step 1</span>
+            <span class="step-title">Observation</span>
+          </div>
+
+          <div class="total-row">
+            <label>Total frames</label>
+            <div class="stepper wide">
+              <button type="button" @click="bump(observed, 'totalFrames', -1)" :disabled="submitting">−</button>
+              <input v-model.number="observed.totalFrames" type="number" min="0" max="60" step="1"
+                @change="normalize(observed, 'totalFrames', 0, 60)" :disabled="submitting" />
+              <button type="button" @click="bump(observed, 'totalFrames', 1)" :disabled="submitting">+</button>
+            </div>
+          </div>
+
+          <div class="frame-grid">
+            <div v-for="f in frameTypes" :key="f.key" class="frame-cell">
+              <span class="cell-label">{{ f.label }}</span>
+              <div class="stepper">
+                <button type="button" @click="bump(observed, f.key, -0.1)" :disabled="submitting">−</button>
+                <input v-model.number="observed[f.key]" type="number" min="0" step="0.1"
+                  @change="normalize(observed, f.key, 0, observed.totalFrames)" :disabled="submitting" />
+                <button type="button" @click="bump(observed, f.key, 0.1)" :disabled="submitting">+</button>
+              </div>
+            </div>
+
+            <div class="frame-cell locked">
+              <span class="cell-label">Empty</span>
+              <span class="cell-static-val muted">{{ round1(observedEmpty) }}</span>
+            </div>
+          </div>
+
+          <div v-if="observedOverflow" class="warn-message">
+            Frame contents ({{ round1(observedOccupied) }}) exceed total frames ({{ round1(observed.totalFrames) }}).
+          </div>
+
+          <div class="meta-grid">
+            <div class="field">
+              <label>Population</label>
+              <div class="choice-row">
+                <button v-for="o in populationOptions" :key="o.value" type="button"
+                  :class="['choice-btn', observed.population === o.value ? 'selected' : '']"
+                  @click="observed.population = observed.population === o.value ? null : o.value"
+                  :disabled="submitting">{{ o.label }}</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Condition</label>
+              <div class="choice-row">
+                <button v-for="o in impressionOptions" :key="o.value" type="button"
+                  :class="['choice-btn emoji', observed.impression === o.value ? 'selected' : '']"
+                  @click="observed.impression = observed.impression === o.value ? null : o.value"
+                  :disabled="submitting">{{ o.label }}</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Queen seen</label>
+              <div class="choice-row">
+                <button type="button" :class="['choice-btn', observed.queenSeen === true ? 'selected' : '']"
+                  @click="observed.queenSeen = observed.queenSeen === true ? null : true"
+                  :disabled="submitting">Yes</button>
+                <button type="button" :class="['choice-btn', observed.queenSeen === false ? 'selected-danger' : '']"
+                  @click="observed.queenSeen = observed.queenSeen === false ? null : false"
+                  :disabled="submitting">No</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Needs attention</label>
+              <div class="choice-row">
+                <button type="button" :class="['choice-btn', observed.needsAttention === true ? 'selected-danger' : '']"
+                  @click="observed.needsAttention = observed.needsAttention === true ? null : true"
+                  :disabled="submitting">Yes</button>
+                <button type="button" :class="['choice-btn', observed.needsAttention === false ? 'selected' : '']"
+                  @click="observed.needsAttention = observed.needsAttention === false ? null : false"
+                  :disabled="submitting">No</button>
+              </div>
+            </div>
+
+            <div class="field field-wide">
+              <label>Observation note</label>
+              <textarea v-model="observed.notes" rows="2" :disabled="submitting"></textarea>
             </div>
           </div>
         </div>
 
-        <div class="meta-grid">
-          <div class="field">
-            <label>Fed</label>
-            <div class="choice-row">
-              <button type="button" :class="['choice-btn', intervention.fed === true ? 'selected' : '']"
-                @click="intervention.fed = true" :disabled="submitting">Yes</button>
-              <button type="button" :class="['choice-btn', intervention.fed === false ? 'selected' : '']"
-                @click="intervention.fed = false" :disabled="submitting">No</button>
+        <div class="step-section">
+          <div class="step-header">
+            <span class="step-badge int">Step 2</span>
+            <span class="step-title">Intervention</span>
+            <div class="choice-row header-choice">
+              <button type="button" :class="['choice-btn', hasIntervention ? 'selected-danger' : '']"
+                @click="hasIntervention = true" :disabled="submitting">Yes</button>
+              <button type="button" :class="['choice-btn', !hasIntervention ? 'selected' : '']"
+                @click="hasIntervention = false" :disabled="submitting">No</button>
             </div>
           </div>
 
-          <div class="field">
-            <label>New queen</label>
-            <div class="choice-row">
-              <button type="button" :class="['choice-btn', intervention.queenReplaced === true ? 'selected' : '']"
-                @click="intervention.queenReplaced = true" :disabled="submitting">Yes</button>
-              <button type="button" :class="['choice-btn', intervention.queenReplaced === false ? 'selected' : '']"
-                @click="intervention.queenReplaced = false" :disabled="submitting">No</button>
+          <div v-if="hasIntervention">
+            <div class="total-row">
+              <label>Empty frames added</label>
+              <div class="stepper wide">
+                <button type="button" @click="bump(intervention, 'emptyAdded', -1)" :disabled="submitting">−</button>
+                <input v-model.number="intervention.emptyAdded" type="number" min="0" max="60" step="1"
+                  @change="normalize(intervention, 'emptyAdded', 0, 60)" :disabled="submitting" />
+                <button type="button" @click="bump(intervention, 'emptyAdded', 1)" :disabled="submitting">+</button>
+              </div>
             </div>
-          </div>
 
-          <div class="field">
-            <label>Treatment</label>
-            <div class="choice-row">
-              <button type="button" :class="['choice-btn', intervention.treatmentApplied === true ? 'selected' : '']"
-                @click="intervention.treatmentApplied = true" :disabled="submitting">Yes</button>
-              <button type="button" :class="['choice-btn', intervention.treatmentApplied === false ? 'selected' : '']"
-                @click="intervention.treatmentApplied = false" :disabled="submitting">No</button>
+            <div class="sub-label">Frames removed</div>
+            <div class="frame-grid">
+              <div v-for="f in allFrameTypes" :key="f.key" class="frame-cell">
+                <span class="cell-label">{{ f.label }}</span>
+                <div class="stepper">
+                  <button type="button" @click="bumpRemoval(f.key, -0.1)" :disabled="submitting">−</button>
+                  <input v-model.number="intervention[f.key + 'Removed']" type="number" min="0" step="0.1"
+                    @change="normalize(intervention, f.key + 'Removed', 0, availableFor(f.key))"
+                    :disabled="submitting" />
+                  <button type="button" @click="bumpRemoval(f.key, 0.1)" :disabled="submitting">+</button>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="field">
-            <label>Treatment details</label>
-            <input v-model="intervention.treatmentDetails" type="text"
-              :disabled="submitting || !intervention.treatmentApplied" placeholder="e.g. Oxalic acid" />
-          </div>
+            <div class="meta-grid">
+              <div class="field">
+                <label>Fed</label>
+                <div class="choice-row">
+                  <button type="button" :class="['choice-btn', intervention.fed === true ? 'selected' : '']"
+                    @click="intervention.fed = true" :disabled="submitting">Yes</button>
+                  <button type="button" :class="['choice-btn', intervention.fed === false ? 'selected' : '']"
+                    @click="intervention.fed = false" :disabled="submitting">No</button>
+                </div>
+              </div>
 
-          <div class="field field-wide">
-            <label>Intervention note</label>
-            <textarea v-model="intervention.notes" rows="2" :disabled="submitting"></textarea>
+              <div class="field">
+                <label>New queen</label>
+                <div class="choice-row">
+                  <button type="button" :class="['choice-btn', intervention.queenReplaced === true ? 'selected' : '']"
+                    @click="intervention.queenReplaced = true" :disabled="submitting">Yes</button>
+                  <button type="button" :class="['choice-btn', intervention.queenReplaced === false ? 'selected' : '']"
+                    @click="intervention.queenReplaced = false" :disabled="submitting">No</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Treatment</label>
+                <div class="choice-row">
+                  <button type="button"
+                    :class="['choice-btn', intervention.treatmentApplied === true ? 'selected' : '']"
+                    @click="intervention.treatmentApplied = true" :disabled="submitting">Yes</button>
+                  <button type="button"
+                    :class="['choice-btn', intervention.treatmentApplied === false ? 'selected' : '']"
+                    @click="intervention.treatmentApplied = false" :disabled="submitting">No</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Treatment details</label>
+                <input v-model="intervention.treatmentDetails" type="text"
+                  :disabled="submitting || !intervention.treatmentApplied" />
+              </div>
+
+              <div class="field field-wide">
+                <label>Intervention note</label>
+                <textarea v-model="intervention.notes" rows="2" :disabled="submitting"></textarea>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="result-panel">
-      <div class="step-header">
-        <span class="step-badge res">Result</span>
-        <span class="step-title">Resulting state</span>
-      </div>
-      <div class="prev-total">Total frames: {{ round1(resultingState.totalFrames) }}</div>
-      <div class="chip-grid">
-        <div v-for="f in allFrameTypes" :key="f.key" class="chip">
-          <span class="chip-label">{{ f.label }}</span>
-          <span class="chip-val">
-            {{ round1(resultingState[f.key]) }}
-            <span v-if="deltaFor(f.key) !== 0" :class="['chip-delta', deltaFor(f.key) > 0 ? 'pos' : 'neg']">
-              {{ deltaFor(f.key) > 0 ? '+' : '' }}{{ round1(deltaFor(f.key)) }}
-            </span>
-          </span>
+        <div v-if="hasIntervention" class="result-panel">
+          <div class="step-header">
+            <span class="step-badge res">Result</span>
+            <span class="step-title">Resulting state</span>
+          </div>
+          <div class="total-line">Total frames: <strong>{{ round1(resultingState.totalFrames) }}</strong></div>
+          <div class="frame-grid">
+            <div v-for="f in allFrameTypes" :key="f.key" class="frame-cell static">
+              <span class="cell-label">{{ f.label }}</span>
+              <span class="cell-static-val">
+                {{ round1(resultingState[f.key]) }}
+                <span v-if="deltaFor(f.key) !== 0" :class="['delta', deltaFor(f.key) > 0 ? 'pos' : 'neg']">
+                  {{ deltaFor(f.key) > 0 ? '+' : '' }}{{ round1(deltaFor(f.key)) }}
+                </span>
+              </span>
+            </div>
+          </div>
+          <div v-if="resultTags.length" class="tag-row">
+            <span v-for="t in resultTags" :key="t" class="tag">{{ t }}</span>
+          </div>
         </div>
-      </div>
-      <div v-if="resultTags.length" class="tag-row">
-        <span v-for="t in resultTags" :key="t" class="tag">{{ t }}</span>
-      </div>
-    </div>
 
-    <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-if="error" class="error-message">{{ error }}</div>
 
-    <div class="form-actions">
-      <button type="button" class="btn-secondary" @click="$emit('cancel')" :disabled="submitting">Cancel</button>
-      <button type="submit" class="btn-primary" :disabled="submitting">
-        {{ submitting ? 'Saving…' : 'Save Inspection' }}
-      </button>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" @click="$emit('cancel')" :disabled="submitting">Cancel</button>
+          <button type="submit" class="btn-primary" :disabled="submitting">
+            {{ submitting ? 'Saving…' : 'Save Inspection' }}
+          </button>
+        </div>
+      </section>
     </div>
   </form>
 </template>
@@ -258,7 +278,7 @@ export default {
       frameTypes: [
         { key: 'eggs', label: 'Eggs' },
         { key: 'larvae', label: 'Larvae' },
-        { key: 'brood', label: 'Brood' },
+        { key: 'brood', label: 'Capped brood' },
         { key: 'honey', label: 'Honey' },
         { key: 'pollen', label: 'Pollen' },
       ],
@@ -268,9 +288,9 @@ export default {
         { value: 3, label: 'Good' },
       ],
       impressionOptions: [
-        { value: 1, label: 'Bad' },
-        { value: 2, label: 'Ok' },
-        { value: 3, label: 'Good' },
+        { value: 1, label: '😞' },
+        { value: 2, label: '😐' },
+        { value: 3, label: '😊' },
       ],
       observed: {
         totalFrames: 10,
@@ -324,6 +344,14 @@ export default {
       const p = this.previous;
       if (!p) return {};
       return p.resultingState || p.observedState || {};
+    },
+
+    prevObsNote() {
+      return this.previous?.observedState?.notes || '';
+    },
+
+    prevIntNote() {
+      return this.previous?.mutation?.notes || '';
     },
 
     prevTags() {
@@ -392,6 +420,12 @@ export default {
       return found ? found.label : '—';
     },
 
+    boolLabel(v) {
+      if (v === true) return 'Yes';
+      if (v === false) return 'No';
+      return '—';
+    },
+
     formatDate(v) {
       if (!v) return '';
       const d = new Date(String(v).replace(' ', 'T'));
@@ -444,6 +478,9 @@ export default {
           this.observed[f.key] = src[f.key] != null ? src[f.key] : 0;
         }
         this.observed.queenSeen = src.queenSeen != null ? src.queenSeen : null;
+        this.observed.population = src.population != null ? src.population : null;
+        this.observed.impression = src.impression != null ? src.impression : null;
+        this.observed.needsAttention = src.needsAttention != null ? src.needsAttention : null;
       } catch {
         this.previous = null;
       }
@@ -568,129 +605,177 @@ export default {
 </script>
 
 <style scoped>
-.inspection-form {
+.two-col {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.prev-col {
+  flex: 0 0 290px;
+  position: sticky;
+  top: 0;
+  background: #f4f5fb;
+  border: 2px solid #cfd3ee;
+  border-radius: 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
-.prev-panel {
-  background: #f6f7fc;
-  border: 1px solid #dcdff0;
-  border-radius: 14px;
-  padding: 14px 18px;
-}
-
-.prev-head {
+.new-col {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.prev-title {
-  font-size: 0.95rem;
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.panel-title {
+  font-size: 1rem;
   font-weight: bold;
+}
+
+.panel-title.prev {
+  color: #6b6f8f;
+}
+
+.panel-title.new {
   color: #575EAE;
 }
 
-.prev-date {
-  font-size: 0.8rem;
+.panel-date {
+  font-size: 0.78rem;
   color: #999;
 }
 
-.prev-total {
-  font-size: 0.9rem;
-  color: #444;
-  margin-bottom: 10px;
+.datetime {
+  display: flex;
+  gap: 6px;
 }
 
-.chip-grid {
+.datetime input {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-family: TwCen, sans-serif;
+  font-size: 0.88rem;
+  background: #F9FAFE;
+  color: #333;
+}
+
+.total-line {
+  font-size: 0.88rem;
+  color: #555;
+}
+
+.frame-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.chip {
+.frame-cell {
   background: white;
   border: 1px solid #e3e4f3;
   border-radius: 10px;
-  padding: 7px 10px;
+  padding: 7px 8px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  min-width: 0;
 }
 
-.chip-label {
-  font-size: 0.72rem;
+.frame-cell.locked {
+  background: #f0f0f0;
+}
+
+.cell-label {
+  font-size: 0.66rem;
   color: #999;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.chip-val {
-  font-size: 1.05rem;
-  color: #333;
+.cell-static-val {
+  font-size: 1rem;
   font-weight: bold;
+  color: #333;
 }
 
-.chip-delta {
-  font-size: 0.75rem;
-  margin-left: 4px;
+.cell-static-val.muted {
+  color: #888;
 }
 
-.chip-delta.pos {
+.delta {
+  font-size: 0.72rem;
+  margin-left: 3px;
+}
+
+.delta.pos {
   color: #2a7a40;
 }
 
-.chip-delta.neg {
+.delta.neg {
   color: #a32020;
 }
 
-.prev-meta {
+.meta-lines {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 10px;
-  font-size: 0.85rem;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.82rem;
   color: #666;
 }
 
 .tag-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
+  gap: 5px;
 }
 
 .tag {
-  background: #e0e3f8;
-  color: #575EAE;
+  background: #fde8e8;
+  color: #a32020;
   border-radius: 100px;
-  padding: 3px 12px;
-  font-size: 0.78rem;
+  padding: 2px 10px;
+  font-size: 0.74rem;
   font-weight: bold;
 }
 
-.form-row-datetime {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.form-row-datetime label {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.form-row-datetime input {
-  border: 1px solid #ddd;
+.note-block {
+  font-size: 0.8rem;
+  color: #555;
+  background: white;
   border-radius: 8px;
-  padding: 7px 10px;
-  font-family: TwCen, sans-serif;
-  font-size: 0.95rem;
-  background: #F9FAFE;
-  color: #333;
+  padding: 7px 9px;
+  white-space: pre-wrap;
+  border-left: 3px solid #cfd3ee;
+}
+
+.note-block.int {
+  border-left-color: #e9b7b7;
+}
+
+.note-label {
+  display: block;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999;
+  margin-bottom: 2px;
 }
 
 .step-section {
@@ -735,7 +820,7 @@ export default {
 }
 
 .step-title {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: bold;
   color: #333;
 }
@@ -748,35 +833,18 @@ export default {
 }
 
 .total-row label {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #555;
   min-width: 140px;
 }
 
 .sub-label {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #a32020;
   margin: 4px 0 10px;
-}
-
-.frame-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.frame-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.frame-cell label {
-  font-size: 0.8rem;
-  color: #666;
 }
 
 .stepper {
@@ -796,8 +864,9 @@ export default {
   border: none;
   background: #eceef8;
   color: #575EAE;
-  width: 30px;
-  font-size: 1.1rem;
+  width: 26px;
+  flex-shrink: 0;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -817,29 +886,22 @@ export default {
   text-align: center;
   width: 100%;
   min-width: 0;
-  padding: 7px 2px;
+  padding: 6px 2px;
   font-family: TwCen, sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: #333;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .stepper input:focus {
   outline: none;
-}
-
-.stepper.locked {
-  background: #eeeeee;
-  justify-content: center;
-}
-
-.locked-val {
-  padding: 7px 2px;
-  font-size: 0.95rem;
-  color: #777;
-}
-
-.readonly label {
-  color: #999;
 }
 
 .meta-grid {
@@ -902,6 +964,11 @@ export default {
   transition: all 0.15s;
 }
 
+.choice-btn.emoji {
+  font-size: 1.05rem;
+  padding: 3px 14px;
+}
+
 .choice-btn.selected {
   border-color: #575EAE;
   background: #575EAE;
@@ -921,9 +988,12 @@ export default {
 
 .result-panel {
   background: #f0faf3;
-  border: 1px solid #b8e0c4;
+  border: 2px solid #b8e0c4;
   border-radius: 14px;
   padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .warn-message {
@@ -985,11 +1055,16 @@ export default {
   background: #e0e0e0;
 }
 
-@media (max-width: 620px) {
+@media (max-width: 900px) {
+  .two-col {
+    flex-direction: column;
+  }
 
-  .frame-grid,
-  .chip-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .prev-col {
+    position: static;
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .meta-grid {

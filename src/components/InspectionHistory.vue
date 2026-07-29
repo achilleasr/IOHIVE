@@ -39,7 +39,7 @@
               <div class="meta-lines">
                 <span>Population: {{ labelFor(populationOptions, stateOf(previousOf(idx)).population) }}</span>
                 <span>Condition: {{ labelFor(impressionOptions, stateOf(previousOf(idx)).impression) }}</span>
-                <span>Queen: {{ boolLabel(stateOf(previousOf(idx)).queenSeen) }}</span>
+                <span>Queen seen: {{ boolLabel(stateOf(previousOf(idx)).queenSeen) }}</span>
               </div>
               <div v-if="tagsOf(previousOf(idx)).length" class="tag-row">
                 <span v-for="t in tagsOf(previousOf(idx))" :key="t" class="tag">{{ t }}</span>
@@ -63,7 +63,7 @@
                   <div class="meta-lines">
                     <span>Population: {{ labelFor(populationOptions, item.observedState?.population) }}</span>
                     <span>Condition: {{ labelFor(impressionOptions, item.observedState?.impression) }}</span>
-                    <span>Queen: {{ boolLabel(item.observedState?.queenSeen) }}</span>
+                    <span>Queen seen: {{ boolLabel(item.observedState?.queenSeen) }}</span>
                     <span v-if="item.observedState?.needsAttention">Needs attention</span>
                   </div>
                   <div v-if="item.observedState?.notes" class="note-block">
@@ -122,7 +122,7 @@ export default {
       frameTypes: [
         { key: 'eggs', label: 'Eggs' },
         { key: 'larvae', label: 'Larvae' },
-        { key: 'brood', label: 'Brood' },
+        { key: 'brood', label: 'Capped brood' },
         { key: 'honey', label: 'Honey' },
         { key: 'pollen', label: 'Pollen' },
         { key: 'empty', label: 'Empty' },
@@ -133,9 +133,9 @@ export default {
         { value: 3, label: 'Good' },
       ],
       impressionOptions: [
-        { value: 1, label: 'Bad' },
-        { value: 2, label: 'Ok' },
-        { value: 3, label: 'Good' },
+        { value: 1, label: '😞' },
+        { value: 2, label: '😐' },
+        { value: 3, label: '😊' },
       ],
     };
   },
