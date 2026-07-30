@@ -18,6 +18,21 @@ async function getDb() {
   return client.db("iohive");
 }
 
+const FRAME_KEYS = ["eggs", "larvae", "brood", "honey", "pollen", "empty"];
+
+function r1(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0;
+}
+
+// per-frame difference between two states
+function diffStates(from, to) {
+  if (!from || !to) return null;
+  const frames = {};
+  for (const k of FRAME_KEYS) frames[k] = r1(r1(to[k]) - r1(from[k]));
+  return { frames, totalFrames: r1(r1(to.totalFrames) - r1(from.totalFrames)) };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 204, headers: corsHeaders(), body: "" };
@@ -44,6 +59,32 @@ exports.handler = async (event) => {
       return respond(400, { error: "Missing resultingState" });
     }
 
+    const db = await getDb();
+    const col = db.collection("inspections");
+
+    // latest inspection of this hive before the new one (dates sort lexicographically)
+    const previous = await col.findOne(
+      { hiveId, date: { $lt: body.date } },
+      { sort: { date: -1 } },
+    );
+    const previousFinal = previous
+      ? previous.resultingState || previous.observedState
+      : null;
+
+    const deltas = {};
+    if (previousFinal) {
+      deltas.fromPrevious = {
+        previousInspectionId: previous._id.toString(),
+        ...diffStates(previousFinal, body.observedState),
+      };
+    }
+    if (body.mutation) {
+      deltas.fromObservation = diffStates(
+        body.observedState,
+        body.resultingState,
+      );
+    }
+
     const doc = {
       beepInspectionId: body.beepInspectionId || null,
       hiveId,
@@ -53,11 +94,11 @@ exports.handler = async (event) => {
       observedState: body.observedState,
       mutation: body.mutation || null,
       resultingState: body.resultingState,
+      deltas,
       createdAt: new Date().toISOString(),
     };
 
-    const db = await getDb();
-    const result = await db.collection("inspections").insertOne(doc);
+    const result = await col.insertOne(doc);
 
     return respond(201, { id: result.insertedId.toString(), ok: true });
   } catch (err) {

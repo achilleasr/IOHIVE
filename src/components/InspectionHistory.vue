@@ -12,26 +12,41 @@
             <span class="tag obs">Observation</span>
             <span v-if="item.mutation" class="tag int">Intervention</span>
           </span>
-          <span class="total">Total frames: {{ fmtTotal(stateOf(item).totalFrames) }}</span>
+          <span class="total">Total frames: {{ fmt1(stateOf(item).totalFrames) }}</span>
           <img src="../assets/Hives/i_arrow_down.svg" class="chev" :class="{ rotated: open[i] }" />
         </div>
 
         <div v-if="open[i]" class="entry-body">
-          <div v-for="p in panelsFor(item)" :key="p.title" class="panel">
+          <div v-for="p in panelsFor(item, inspections[i + 1])" :key="p.title" class="panel">
             <span class="panel-title" :class="p.cls">{{ p.title }}</span>
-            <div class="total-line">Total frames: <strong>{{ fmtTotal(p.state.totalFrames) }}</strong></div>
+
+            <div class="total-line">
+              Total frames: <strong>{{ fmt1(p.state.totalFrames) }}</strong>
+              <span v-if="p.delta && signed(p.delta.totalFrames)" class="delta"
+                :class="p.delta.totalFrames > 0 ? 'pos' : 'neg'">{{ signed(p.delta.totalFrames) }}</span>
+            </div>
+
             <div class="frame-grid">
               <div v-for="f in frames" :key="f.key" class="cell">
                 <span class="cell-label">{{ f.label }}</span>
                 <span class="cell-val">{{ fmt1(p.state[f.key]) }}</span>
+                <span v-if="p.delta && signed(p.delta.frames[f.key])" class="delta"
+                  :class="p.delta.frames[f.key] > 0 ? 'pos' : 'neg'">{{ signed(p.delta.frames[f.key]) }}</span>
               </div>
             </div>
-            <div class="meta">
+
+            <div v-if="p.lines" class="lines">
+              <div v-for="l in p.lines" :key="l.kind" class="line" :class="l.kind">{{ l.text }}</div>
+              <div v-if="!p.lines.length" class="line none">No frames added or removed.</div>
+            </div>
+
+            <div v-if="p.showMeta" class="meta">
               <span>Population: {{ label(POP, p.state.population) }}</span>
               <span>Condition: {{ label(COND, p.state.impression) }}</span>
               <span>Queen seen: {{ bool(p.state.queenSeen) }}</span>
               <span>Needs attention: {{ bool(p.state.needsAttention) }}</span>
             </div>
+
             <div v-if="p.tags && p.tags.length" class="tag-row">
               <span v-for="t in p.tags" :key="t" class="tag int">{{ t }}</span>
             </div>
@@ -44,32 +59,27 @@
 </template>
 
 <script>
-const FRAMES = [
-  { key: 'eggs', label: 'Eggs' },
-  { key: 'larvae', label: 'Larvae' },
-  { key: 'brood', label: 'Capped brood' },
-  { key: 'honey', label: 'Honey' },
-  { key: 'pollen', label: 'Pollen' },
-  { key: 'empty', label: 'Empty' },
-];
+import {
+  FRAMES, fmt1, signed, finalStateOf, observationDelta, interventionDelta, frameDeltaLines,
+} from './InspectionDeltas.js';
+
 const POP = [{ value: 1, label: 'Weak' }, { value: 2, label: 'Medium' }, { value: 3, label: 'Strong' }];
 const COND = [{ value: 1, label: '😞' }, { value: 2, label: '😐' }, { value: 3, label: '😊' }];
 
 export default {
   name: 'InspectionHistory',
   props: {
+    // newest first, as returned by getHistory
     inspections: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
     error: { type: String, default: null },
   },
   data() { return { open: {}, frames: FRAMES, POP, COND }; },
   methods: {
-    r1(v) { const n = Number(v); return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0; },
-    fmt1(v) { return this.r1(v).toFixed(1); },
-    fmtTotal(v) { const n = this.r1(v); return Number.isInteger(n) ? String(n) : n.toFixed(1); },
+    fmt1, signed,
     label(opts, v) { const f = opts.find((o) => o.value === v); return f ? f.label : '—'; },
     bool(v) { return v === true ? 'Yes' : v === false ? 'No' : '—'; },
-    stateOf(item) { return item.resultingState || item.observedState || {}; },
+    stateOf(item) { return finalStateOf(item) || {}; },
     toggle(i) { this.open = { ...this.open, [i]: !this.open[i] }; },
     formatDate(v) {
       const d = new Date(String(v || '').replace(' ', 'T'));
@@ -84,16 +94,20 @@ export default {
       if (m.treatmentApplied) t.push(m.treatmentDetails ? `Treatment: ${m.treatmentDetails}` : 'Treatment');
       return t;
     },
-    panelsFor(item) {
+    panelsFor(item, previous) {
+      // observation: deltas against the state the previous inspection left behind
       const obs = {
         title: 'Observation', cls: 'obs',
         state: item.observedState || {}, note: item.observedState?.notes || '',
+        delta: observationDelta(item, previous), showMeta: true,
       };
       if (!item.mutation) return [obs];
+      // intervention: only what changed during the visit, no observation judgements
+      const d = interventionDelta(item);
       return [obs, {
         title: 'After intervention', cls: 'int',
         state: item.resultingState || {}, note: item.mutation?.notes || '',
-        tags: this.tagsOf(item.mutation),
+        delta: d, lines: frameDeltaLines(d), tags: this.tagsOf(item.mutation),
       }];
     },
   },
@@ -214,6 +228,39 @@ export default {
 .total-line {
   font-size: .82rem;
   color: #666;
+}
+
+.delta {
+  font-size: .72rem;
+  font-weight: bold;
+  margin-left: 3px;
+}
+
+.delta.pos {
+  color: #2a7a40;
+}
+
+.delta.neg {
+  color: #a32020;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: .8rem;
+}
+
+.line.added {
+  color: #2a7a40;
+}
+
+.line.removed {
+  color: #a32020;
+}
+
+.line.none {
+  color: #999;
 }
 
 .frame-grid {

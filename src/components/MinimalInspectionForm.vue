@@ -5,22 +5,33 @@
         <span class="panel-title prev">Previous Inspection</span>
         <span class="panel-date">{{ formatDate(previous.date) }}</span>
       </div>
-      <div class="box prev-box">
-        <div class="total-line">Total frames: <strong>{{ fmtTotal(prevState.totalFrames) }}</strong></div>
+      <div v-for="p in prevPanels" :key="p.title" class="box prev-box">
+        <span class="panel-sub" :class="p.cls">{{ p.title }}</span>
+        <div class="total-line">
+          Total frames: <strong>{{ fmt1(p.state.totalFrames) }}</strong>
+          <span v-if="p.delta && signed(p.delta.totalFrames)" class="delta"
+            :class="p.delta.totalFrames > 0 ? 'pos' : 'neg'">{{ signed(p.delta.totalFrames) }}</span>
+        </div>
         <div class="frame-grid">
           <div v-for="f in allFrames" :key="f.key" class="cell">
             <span class="cell-label">{{ f.label }}</span>
-            <span class="cell-val">{{ fmt1(prevState[f.key]) }}</span>
+            <span class="cell-val">
+              {{ fmt1(p.state[f.key]) }}
+              <span v-if="p.delta && signed(p.delta.frames[f.key])" class="delta"
+                :class="p.delta.frames[f.key] > 0 ? 'pos' : 'neg'">{{ signed(p.delta.frames[f.key]) }}</span>
+            </span>
           </div>
         </div>
-        <div class="meta-lines">
-          <span v-for="f in obsFields" :key="f.key">{{ f.label }}: {{ labelFor(f.options, prevState[f.key]) }}</span>
+        <div v-if="p.lines" class="lines">
+          <div v-for="l in p.lines" :key="l.kind" class="line" :class="l.kind">{{ l.text }}</div>
         </div>
-        <div v-if="prevTags.length" class="tag-row">
-          <span v-for="t in prevTags" :key="t" class="tag">{{ t }}</span>
+        <div v-if="p.showMeta" class="meta-lines">
+          <span v-for="f in obsFields" :key="f.key">{{ f.label }}: {{ labelFor(f.options, p.state[f.key]) }}</span>
         </div>
-        <div v-if="prevObsNote" class="note"><span class="note-label">Observation</span>{{ prevObsNote }}</div>
-        <div v-if="prevIntNote" class="note int"><span class="note-label">Intervention</span>{{ prevIntNote }}</div>
+        <div v-if="p.tags && p.tags.length" class="tag-row">
+          <span v-for="t in p.tags" :key="t" class="tag">{{ t }}</span>
+        </div>
+        <div v-if="p.note" class="note" :class="p.cls === 'int' ? 'int' : ''">{{ p.note }}</div>
       </div>
     </aside>
 
@@ -63,7 +74,7 @@
         </div>
 
         <div v-if="overflow" class="warn">
-          Frame contents ({{ fmt1(observedOccupied) }}) exceed total frames ({{ fmtTotal(observed.totalFrames) }}).
+          Frame contents ({{ fmt1(observedOccupied) }}) exceed total frames ({{ fmt1(observed.totalFrames) }}).
         </div>
 
         <div class="meta-grid">
@@ -142,9 +153,9 @@
         <div class="step-head"><span class="badge res">Result</span><span class="step-title">Resulting state</span>
         </div>
         <div class="total-line">
-          Total frames: <strong>{{ fmtTotal(result.totalFrames) }}</strong>
+          Total frames: <strong>{{ fmt1(result.totalFrames) }}</strong>
           <span v-if="delta('totalFrames')" :class="['delta', delta('totalFrames') > 0 ? 'pos' : 'neg']">
-            {{ delta('totalFrames') > 0 ? '+' : '' }}{{ fmt1(delta('totalFrames')) }}
+            {{ signed(delta('totalFrames')) }}
           </span>
         </div>
         <div class="frame-grid">
@@ -153,7 +164,7 @@
             <span class="cell-val">
               {{ fmt1(result[f.key]) }}
               <span v-if="delta(f.key)" :class="['delta', delta(f.key) > 0 ? 'pos' : 'neg']">
-                {{ delta(f.key) > 0 ? '+' : '' }}{{ fmt1(delta(f.key)) }}
+                {{ signed(delta(f.key)) }}
               </span>
             </span>
           </div>
@@ -178,6 +189,9 @@
 import { mapState } from 'vuex';
 import { createInspection, listInspectionsForHive } from '@/services/api/inspectionsApi';
 import { saveIohiveInspection } from '@/services/api/iohiveApi';
+import {
+  fmt1, signed, r1, frameDeltaLines, interventionDelta,
+} from './InspectionDeltas.js';
 
 const FRAMES = [
   { key: 'eggs', label: 'Eggs' },
@@ -240,9 +254,24 @@ export default {
     observedEmpty() { return Math.max(0, (this.observed.totalFrames || 0) - this.observedOccupied); },
     overflow() { return this.observedOccupied > (this.observed.totalFrames || 0) + 0.001; },
     prevState() { return this.previous ? (this.previous.resultingState || this.previous.observedState || {}) : {}; },
-    prevObsNote() { return this.previous?.observedState?.notes || ''; },
-    prevIntNote() { return this.previous?.mutation?.notes || ''; },
-    prevTags() { return this.tagsOf(this.previous?.mutation); },
+    prevPanels() {
+      const p = this.previous;
+      if (!p) return [];
+      // observation of the previous visit, delta against the visit before it (stored in Mongo)
+      const obs = {
+        title: p.mutation ? 'Observed' : 'Recorded state', cls: 'obs',
+        state: p.observedState || {}, delta: p.deltas?.fromPrevious || null,
+        showMeta: true, note: p.observedState?.notes || '',
+      };
+      if (!p.mutation) return [obs];
+      // state left behind, delta against that same observation
+      const d = interventionDelta(p);
+      return [obs, {
+        title: 'After intervention', cls: 'int',
+        state: p.resultingState || {}, delta: d, lines: frameDeltaLines(d),
+        tags: this.tagsOf(p.mutation), note: p.mutation?.notes || '',
+      }];
+    },
     resultTags() { return this.hasIntervention ? this.tagsOf(this.intervention) : []; },
     result() {
       const o = this.observed;
@@ -255,11 +284,11 @@ export default {
       let removed = on ? (i.emptyRemoved || 0) : 0;
       for (const f of FRAMES) {
         const r = on ? (i[f.key + 'Removed'] || 0) : 0;
-        out[f.key] = Math.max(0, this.r1((o[f.key] || 0) - r));
+        out[f.key] = Math.max(0, r1((o[f.key] || 0) - r));
         removed += r;
       }
-      out.totalFrames = Math.max(0, this.r1((o.totalFrames || 0) + (on ? i.emptyAdded || 0 : 0) - removed));
-      out.empty = Math.max(0, this.r1(out.totalFrames - FRAMES.reduce((s, f) => s + out[f.key], 0)));
+      out.totalFrames = Math.max(0, r1((o.totalFrames || 0) + (on ? i.emptyAdded || 0 : 0) - removed));
+      out.empty = Math.max(0, r1(out.totalFrames - FRAMES.reduce((s, f) => s + out[f.key], 0)));
       return out;
     },
   },
@@ -274,9 +303,7 @@ export default {
     }
   },
   methods: {
-    r1(v) { const n = Number(v); return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0; },
-    fmt1(v) { return this.r1(v).toFixed(1); },
-    fmtTotal(v) { const n = this.r1(v); return Number.isInteger(n) ? String(n) : n.toFixed(1); },
+    r1, fmt1, signed,
     labelFor(options, value) { const f = options.find((o) => o.value === value); return f ? f.label : '—'; },
     formatDate(v) {
       const d = new Date(String(v || '').replace(' ', 'T'));
@@ -293,21 +320,21 @@ export default {
     },
     pick(obj, key, value, nullable) { obj[key] = nullable && obj[key] === value ? null : value; },
     availableFor(key) { return key === 'empty' ? this.observedEmpty : this.observed[key] || 0; },
-    bump(obj, field, d) { obj[field] = Math.max(0, this.r1((obj[field] || 0) + d)); },
+    bump(obj, field, d) { obj[field] = Math.max(0, r1((obj[field] || 0) + d)); },
     bumpRemoval(key, d) {
       const f = key + 'Removed';
-      this.intervention[f] = Math.min(Math.max(0, this.r1((this.intervention[f] || 0) + d)), this.r1(this.availableFor(key)));
+      this.intervention[f] = Math.min(Math.max(0, r1((this.intervention[f] || 0) + d)), r1(this.availableFor(key)));
     },
     clamp(obj, field, max) {
-      let v = this.r1(obj[field]);
+      let v = r1(obj[field]);
       if (v < 0) v = 0;
-      if (max != null && v > max) v = this.r1(max);
+      if (max != null && v > max) v = r1(max);
       obj[field] = v;
     },
     delta(key) {
       if (!this.previous) return 0;
       const before = this.prevState[key] != null ? this.prevState[key] : 0;
-      return this.r1((this.result[key] || 0) - before);
+      return r1((this.result[key] || 0) - before);
     },
     mergedNotes() {
       const parts = [];
@@ -341,9 +368,9 @@ export default {
         494: rs.honey || 0,
         900: rs.pollen || 0,
         80: rs.empty || 0,
-        774: this.r1((rs.totalFrames || 0) - (rs.empty || 0)),
+        774: r1((rs.totalFrames || 0) - (rs.empty || 0)),
       };
-      const brood = this.r1(rs.eggs + rs.larvae + rs.brood);
+      const brood = r1(rs.eggs + rs.larvae + rs.brood);
       if (brood > 0) items[264] = brood;
       if (rs.eggs > 0) items[870] = rs.eggs;
       if (rs.larvae > 0) items[871] = rs.larvae;
@@ -381,7 +408,7 @@ export default {
             hiveName: this.hive.name || '',
             apiaryId: this.hive.location_id || null,
             date: payload.date,
-            observedState: { ...this.observed, empty: this.r1(this.observedEmpty) },
+            observedState: { ...this.observed, empty: r1(this.observedEmpty) },
             mutation: this.hasIntervention ? { ...this.intervention } : null,
             resultingState: { ...this.result },
           });
@@ -406,6 +433,9 @@ export default {
 
 .prev-col {
   flex: 0 0 290px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   position: sticky;
   top: 0;
 }
@@ -580,7 +610,36 @@ export default {
 
 .delta {
   font-size: .72rem;
+  font-weight: bold;
   margin-left: 3px;
+}
+
+.panel-sub {
+  font-size: .85rem;
+  font-weight: bold;
+}
+
+.panel-sub.obs {
+  color: #575EAE;
+}
+
+.panel-sub.int {
+  color: #a32020;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: .8rem;
+}
+
+.line.added {
+  color: #2a7a40;
+}
+
+.line.removed {
+  color: #a32020;
 }
 
 .delta.pos {
