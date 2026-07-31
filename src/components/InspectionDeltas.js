@@ -1,8 +1,3 @@
-// Delta helpers for the two-step inspection model.
-// fromPrevious = observedState - final state of the previous inspection
-// fromObservation = resultingState - observedState
-// Both are stored on the Mongo document by saveInspection.js.
-
 export const FRAMES = [
   { key: "eggs", label: "Eggs", noun: "Egg" },
   { key: "larvae", label: "Larvae", noun: "Larvae" },
@@ -21,7 +16,7 @@ export function fmt1(v) {
   return r1(v).toFixed(1);
 }
 
-// "+2.0", "-3.5", or null when there is nothing to show
+// "+2.0", "-3.5", or null
 export function signed(v) {
   const n = r1(v);
   return n === 0 ? null : (n > 0 ? "+" : "-") + Math.abs(n).toFixed(1);
@@ -61,14 +56,14 @@ export function frameDeltaLines(delta) {
   return lines;
 }
 
-// Observation of an inspection compared with the previous inspection.
+// Observation of an inspection  compared with the previous inspectio
 export function observationDelta(item, previous) {
   if (item && item.deltas && item.deltas.fromPrevious)
     return item.deltas.fromPrevious;
   return diffStates(finalStateOf(previous), item && item.observedState);
 }
 
-// Intervention compared with the observation of the same inspection.
+// Intervention compared with the observation of the same inspection
 export function interventionDelta(item) {
   if (!item || !item.mutation) return null;
   if (item.deltas && item.deltas.fromObservation)

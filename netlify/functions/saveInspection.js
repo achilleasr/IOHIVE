@@ -62,7 +62,6 @@ exports.handler = async (event) => {
     const db = await getDb();
     const col = db.collection("inspections");
 
-    // latest inspection of this hive before the new one (dates sort lexicographically)
     const previous = await col.findOne(
       { hiveId, date: { $lt: body.date } },
       { sort: { date: -1 } },

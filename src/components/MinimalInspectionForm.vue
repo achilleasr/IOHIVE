@@ -179,7 +179,7 @@
       <div class="actions">
         <button type="button" class="btn-sec" @click="$emit('cancel')" :disabled="submitting">Cancel</button>
         <button type="submit" class="btn-pri" :disabled="submitting">{{ submitting ? 'Saving…' : 'Save Inspection'
-        }}</button>
+          }}</button>
       </div>
     </section>
   </form>
@@ -257,14 +257,12 @@ export default {
     prevPanels() {
       const p = this.previous;
       if (!p) return [];
-      // observation of the previous visit, delta against the visit before it (stored in Mongo)
       const obs = {
         title: p.mutation ? 'Observed' : 'Recorded state', cls: 'obs',
         state: p.observedState || {}, delta: p.deltas?.fromPrevious || null,
         showMeta: true, note: p.observedState?.notes || '',
       };
       if (!p.mutation) return [obs];
-      // state left behind, delta against that same observation
       const d = interventionDelta(p);
       return [obs, {
         title: 'After intervention', cls: 'int',

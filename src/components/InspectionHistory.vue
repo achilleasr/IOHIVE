@@ -69,7 +69,6 @@ const COND = [{ value: 1, label: '😞' }, { value: 2, label: '😐' }, { value:
 export default {
   name: 'InspectionHistory',
   props: {
-    // newest first, as returned by getHistory
     inspections: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
     error: { type: String, default: null },
@@ -95,14 +94,12 @@ export default {
       return t;
     },
     panelsFor(item, previous) {
-      // observation: deltas against the state the previous inspection left behind
       const obs = {
         title: 'Observation', cls: 'obs',
         state: item.observedState || {}, note: item.observedState?.notes || '',
         delta: observationDelta(item, previous), showMeta: true,
       };
       if (!item.mutation) return [obs];
-      // intervention: only what changed during the visit, no observation judgements
       const d = interventionDelta(item);
       return [obs, {
         title: 'After intervention', cls: 'int',
