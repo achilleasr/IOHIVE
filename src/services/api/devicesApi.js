@@ -5,5 +5,10 @@ import beepConnection from "@/services/beepConnection";
  * List the user's BEEP devices (sensor stations attached to hives).
  */
 export function listDevices() {
-  return beepConnection.get("/devices");
+  return beepConnection.get("/devices").catch((error) => {
+      if (error.response?.status === 404) {
+        return { data: [] };
+      }
+      throw error;
+    });
 }

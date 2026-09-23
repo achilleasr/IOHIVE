@@ -21,6 +21,8 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+*.bat
 
 *.code-workspace
 localKeys.env.local
+cloc-2.10.exe
