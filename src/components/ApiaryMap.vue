@@ -77,7 +77,7 @@ export default {
         return {
             path: mdiMapOutline,
             url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            zoom: 11,
+            zoom: 16,
             center: [37.4385, 24.9139],
             leafletMap: null,
             blankIconUrl: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>'),
@@ -151,9 +151,9 @@ export default {
                 this.leafletMap.fitBounds([
                     [Math.min(...lats) - pad, Math.min(...lngs) - pad],
                     [Math.max(...lats) + pad, Math.max(...lngs) + pad],
-                ], { maxZoom: 16, animate: true });
+                ], { maxZoom: 17, animate: true });
             } else if (entry.centroid) {
-                this.leafletMap.setView(entry.centroid, 14, { animate: true });
+                this.leafletMap.setView(entry.centroid, 16, { animate: true });
             }
         },
         apiaryLabelStyle(apiary) {
