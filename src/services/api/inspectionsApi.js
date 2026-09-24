@@ -21,5 +21,5 @@ export function createInspection(payload) {
 }
 
 export function deleteInspection(id) {
-  return beepConnection.delete(`/inspections/${id}`);
+  return Promise.resolve({ data: { message: "Delete is temporarily disabled." } });//beepConnection.delete(`/inspections/${id}`);
 }

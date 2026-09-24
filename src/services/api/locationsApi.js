@@ -45,5 +45,5 @@ export function updateLocation(id, payload) {
 
 /** DELETE /api/locations/{id} */
 export function deleteLocation(id) {
-  return beepConnection.delete(`/locations/${id}`);
+  return Promise.resolve({ data: { message: "Delete is temporarily disabled." } });//beepConnection.delete(`/locations/${id}`);
 }

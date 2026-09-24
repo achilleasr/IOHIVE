@@ -13,5 +13,5 @@ export function updateHive(id, payload) {
 }
 
 export function deleteHive(id) {
-  return beepConnection.delete(`/hives/${id}`);
+  return Promise.resolve({ data: { message: "Delete is temporarily disabled." } }); //beepConnection.delete(`/hives/${id}`);
 }

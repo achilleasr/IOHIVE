@@ -5,5 +5,5 @@ export function getMe() {
 }
 
 export function updateUser(id, payload) {
-  return beepConnection.put(`/users/${id}`, payload);
+  return Promise.resolve({ data: { message: "Delete is temporarily disabled." } });//beepConnection.put(`/users/${id}`, payload);
 }
