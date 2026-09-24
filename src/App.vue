@@ -1,38 +1,25 @@
 <template>
-  <span v-if="isAuthenticated">
+  <div v-if="isAuthenticated" class="app-layout">
     <SideBar />
-    <!-- <HeaderCustom /> -->
-    <div class="flex-container">
-      <div class="empty"></div>
-      <div class="main-content">
-        <router-view></router-view>
-      </div>
-    </div>
-  </span>
+    <main class="main-content">
+      <router-view />
+    </main>
+  </div>
   <Login v-else />
-  <span id="overview"></span>
 </template>
 
 <script>
-// import HeaderCustom from "./components/HeaderCustom.vue";
-import SideBar from "./components/SideBar.vue";
-import Login from "./components/Login.vue";
-import { mapGetters } from 'vuex'
+import SideBar from './components/SideBar.vue';
+import Login from './components/Login.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'App',
-  components: {
-    SideBar, Login,//HeaderCustom, 
-  },
+  components: { SideBar, Login },
   computed: {
-    ...mapGetters(['isAuthenticated'])
+    ...mapGetters(['isAuthenticated']),
   },
-  methods: {
-    logout() {
-      this.$store.dispatch('logout')
-    }
-  }
-}
+};
 </script>
 
 <style>
@@ -45,11 +32,11 @@ export default {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F9FAFE;
+  background: #f9fafe;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #575EAE;
+  background: #575eae;
   border-radius: 20px;
 }
 
@@ -58,13 +45,22 @@ export default {
 }
 
 @font-face {
-  font-family: "TwCen";
+  font-family: 'TwCen';
   src: url(./assets/fonts/TwCenMTStd.otf);
 }
 
 @font-face {
-  font-family: "TwCenLight";
+  font-family: 'TwCenLight';
   src: url(./assets/fonts/TwCenMTStd-Light.otf);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
 }
 
 #app {
@@ -74,36 +70,20 @@ export default {
   color: var(--stroke-color);
 }
 
-body {
-  margin: 0px;
-  border: 0px;
-}
-
 a {
   text-decoration: none;
   color: var(--stroke-color);
 }
 
-.flex-container {
+.app-layout {
   display: flex;
-  flex-direction: row;
-  height: 100vh;
-  margin: 0px;
-  gap: 1vw;
-}
-
-.empty {
-  flex: 1;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .main-content {
-  width: 76vw;
-  border-radius: 10px;
-  padding: 0px 5vw 0px 1vw;
-  /* margin-top: 5.5vw; */
-  display: flex;
-  gap: 1vh;
-  flex-direction: column;
+  flex: 1;
+  padding: 0.5rem 5%;
 }
 
 .rotated180 {

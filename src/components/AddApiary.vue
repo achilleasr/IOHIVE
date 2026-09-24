@@ -324,60 +324,63 @@ export default {
 
 <style scoped>
 .block {
-    display: inline-block;
-    margin-right: 2vw;
+  display: inline-block;
+  margin-right: 16px;
+  flex-shrink: 0;
 }
 
 .block:last-child {
-    margin-right: 0;
+  margin-right: 0;
 }
 
 .apiary-item.add-tile {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background-color: #ffffff;
-    border: dashed rgb(160, 160, 200) 2px;
-    color: #575EAE;
-    font-size: 1.1vw;
-    width: 6vw;
-    height: 6vw;
-    border-radius: 0.8vw;
-    padding: 0.6vw;
-    gap: 0.4vw;
-    box-shadow: 1px 2px 2px #575eae29;
-    transition: all 0.2s ease 0s;
-    cursor: pointer;
-    font-family: TwCen, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: #ffffff;
+  border: dashed rgb(160, 160, 200) 2px;
+  color: #575eae;
+  font-size: 14px;
+  word-wrap: wrap;
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  padding: 8px;
+  gap: 4px;
+  box-shadow: 1px 2px 2px #575eae29;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-family: TwCen, sans-serif;
+  box-sizing: border-box;
 }
 
 .apiary-item.add-tile:hover {
-    box-shadow: 0px 15px 20px #575eae29;
-    transform: translateY(-4px);
-    background-color: #f5f6ff;
-    border-color: #575EAE;
+  box-shadow: 0px 15px 20px #575eae29;
+  transform: translateY(-4px);
+  background-color: #f5f6ff;
+  border-color: #575eae;
 }
 
 .apiary-item.add-tile:active {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .apiary-item.add-tile:focus-visible {
-    outline: 2px solid #575EAE;
-    outline-offset: 2px;
+  outline: 2px solid #575eae;
+  outline-offset: 2px;
 }
 
 .plus-icon {
-    width: 2vw;
-    height: 2vw;
-    fill: #575EAE;
+  width: 20px;
+  height: 20px;
+  fill: #575eae;
 }
 
 .add-label {
-    font-size: 0.9vw;
-    line-height: 1;
+  font-size: 11px;
+  line-height: 1;
 }
 
 .overlay {
