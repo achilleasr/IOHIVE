@@ -1,16 +1,16 @@
 <template>
     <h2 class="clickable title" @click="expandContentButton">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="clickable imgicon"
+         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="clickable imgicon"
             :class="{ rotated180: expanded }" viewBox="0 0 16 16">
             <path fill-rule="evenodd"
                 d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
-        </svg>
-        <svg-icon type="mdi" :path="path" />
+                </svg>
+        <!-- <svg-icon type="mdi" :path="path" /> -->
         <span>Measurements</span>
     </h2>
-
-    <div v-if="expanded" class="measurements-content">
+     <div v-if="expanded" class="measurements-content">
         <DeviceCharts :rawData="rawData" :loading="chartLoading" :error="chartError" @refresh="refresh" />
+
     </div>
 </template>
 

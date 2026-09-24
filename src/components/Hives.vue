@@ -11,7 +11,6 @@
                 </svg>
                 <h5>Hives</h5>
             </div>
-            <!-- <AddApiaryInspection v-if="loginData && hives && hives.length" :hives="hives" /> -->
         </div>
 
         <div class="hives-content">
@@ -26,7 +25,6 @@
 import { mapState } from 'vuex';
 import HiveItem from './HiveItem.vue';
 import AddHive from './AddHive.vue';
-// import AddApiaryInspection from './AddApiaryInspection.vue';
 
 export default {
     name: 'Hives',
@@ -45,9 +43,9 @@ export default {
 <style scoped>
 .hives-container {
     background-color: #F9FAFE;
-    border-radius: 30px;
-    padding: 20px 40px;
-    margin-top: 1em;
+    border-radius: 20px;
+    padding: 1rem;
+    margin-top: 0.5rem;
 }
 
 .hives-container svg {
@@ -73,12 +71,30 @@ export default {
 .hives-icon {
     height: 20px;
     width: 20px;
+    flex-shrink: 0;
 }
 
 .hives-content {
-    margin-top: 20px;
+    margin-top: 8px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+}
+
+@media (max-width: 600px) {
+    .hives-container {
+        border-radius: 16px;
+        padding: 16px 20px;
+    }
+
+    .hives-title {
+        /*height: auto;*/
+        font-size: 22px;
+    }
+
+    .hives-content {
+        /*margin-top: 14px;*/
+        gap: 10px;
+    }
 }
 </style>

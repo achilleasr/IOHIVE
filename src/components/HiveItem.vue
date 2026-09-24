@@ -57,7 +57,7 @@ export default {
     color: #fff;
     position: relative;
     display: flex;
-    gap: .5vw;
+    gap: 0.5vw;
     flex-direction: column;
 }
 
@@ -81,5 +81,25 @@ export default {
     color: rgb(190, 190, 190);
     padding: 10px 30px;
     border-radius: 0 0 20px 20px;
+}
+
+@media (max-width: 600px) {
+    .hive-item {
+        gap: 0;
+    }
+
+    .green {
+        padding: 10px 16px;
+        border-radius: 14px;
+    }
+
+    .green.expanded {
+        border-radius: 14px 14px 0 0;
+    }
+
+    .white {
+        padding: 10px 16px;
+        border-radius: 0 0 14px 14px;
+    }
 }
 </style>

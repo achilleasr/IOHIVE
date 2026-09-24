@@ -131,14 +131,14 @@ export default {
                             return `${p.axisValue}<br/><b>${p.value}</b>`;
                         },
                     },
-                    toolbox: {
-                        right: 8,
-                        top: 4,
-                        feature: {
-                            restore: { title: 'Reset zoom' },
-                        },
-                        iconStyle: { borderColor: '#999' },
-                    },
+                    // toolbox: {
+                    //     right: 8,
+                    //     top: 4,
+                    //     feature: {
+                    //         restore: { title: 'Reset zoom' },
+                    //     },
+                    //     iconStyle: { borderColor: '#999' },
+                    // },
                     grid: { left: 12, right: 12, bottom: 24, top: 48, containLabel: true },
                     xAxis: {
                         type: 'category',

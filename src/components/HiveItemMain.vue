@@ -42,7 +42,7 @@
     <div v-if="inspectionOpen" class="backdrop" @click.self="inspectionOpen = false">
       <div class="modal">
         <div class="modal-head">
-          <span class="modal-title">New Inspection — {{ hive.name }}</span>
+          <span class="modal-title">New Inspection: {{ hive.name }}</span>
           <button class="close" @click="inspectionOpen = false">✕</button>
         </div>
         <MinimalInspectionForm :hive="hive" :previous="latest" @saved="onSaved" @cancel="inspectionOpen = false" />
@@ -147,7 +147,7 @@ export default {
 
 .info {
   flex: 1;
-  margin: 14px 0;
+  /*margin: 14px 0;*/
   display: flex;
   gap: 2.4vw;
   font-size: 1.2vw;
@@ -278,5 +278,61 @@ export default {
 
 .close:hover {
   color: #555;
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 6vw;
+    margin: 6px 0;
+  }
+
+  .title img {
+    height: 4.5vw;
+  }
+
+  .btn {
+    font-size: 3.2vw;
+    padding: 6px 12px;
+  }
+
+  .info {
+    gap: 12px;
+    font-size: 3.2vw;
+  }
+
+  .icon img {
+    height: 14vw;
+  }
+
+  .location img {
+    height: 3.5vw;
+  }
+
+  .note {
+    font-size: 3vw;
+  }
+
+  .status img {
+    height: 10vw;
+  }
+
+  .device {
+    font-size: 2.6vw;
+  }
+
+  .expander {
+    font-size: 3.5vw;
+    gap: 8px;
+  }
+
+  .expander img {
+    height: 5vw;
+  }
+
+  .modal {
+    width: 92vw;
+    padding: 20px 18px;
+    border-radius: 14px;
+  }
 }
 </style>

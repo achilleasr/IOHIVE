@@ -476,6 +476,7 @@ export default {
 .datetime {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .box {
@@ -501,6 +502,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .step-title {
@@ -546,6 +548,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .total-row label {
@@ -907,6 +910,64 @@ export default {
 
   .meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .field.wide {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .box {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .frame-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .total-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .total-row label {
+    min-width: unset;
+  }
+
+  .stepper.wide {
+    max-width: 100%;
+  }
+
+  .step-head {
+    gap: 8px;
+  }
+
+  .push {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .datetime {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .datetime input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-pri,
+  .btn-sec {
+    width: 100%;
+    text-align: center;
   }
 }
 </style>
